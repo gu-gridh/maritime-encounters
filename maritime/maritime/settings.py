@@ -124,7 +124,7 @@ SILENCED_SYSTEM_CHECKS = ["security.W019"]
 # Database
 # https://docs.djangoproject.com/en/5.0/ref/settings/#databases
 
-# DATABASE_ROUTERS = ['diana.routers.DjangoRouter', 'diana.routers.AppRouter']
+DATABASE_ROUTERS = ['maritime.routers.DjangoRouter', 'maritime.routers.AppRouter']
 
 
 DATABASES = {name: read_json(os.path.join(str(BASE_DIR), 'configs', name, 'db.json')) for name in APPS+NON_MANAGED_APPS}
@@ -198,7 +198,7 @@ REST_FRAMEWORK = {
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
     # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    # 'DEFAULT_SCHEMA_CLASS': 'diana.abstract.schemas.DianaSchema',
+    # 'DEFAULT_SCHEMA_CLASS': 'maritime.abstract.schemas.MaritimeSchema',
     'DEFAULT_PARSER_CLASSES': ['rest_framework_xml.parsers.XMLParser',],
     'DEFAULT_RENDERER_CLASSES': ['rest_framework_xml.renderers.XMLRenderer',],
 
