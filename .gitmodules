@@ -1,0 +1,3 @@
+[submodule "Maritime-Backend/resources"]
+	path = Maritime-Backend/resources
+	url = https://github.com/gu-gridh/resources.git

@@ -7,7 +7,7 @@ on server number 3
 
 then on server 2
 /etc/systemd/system/app.service 
-sudo systemctl start saintsophia
+sudo systemctl start maritime
 
 on server 3
 sudo systemctl restart httpd
