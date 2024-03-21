@@ -238,9 +238,9 @@ class Site(abstract.AbstractBaseModel):
     # coordinates  = models.PointField(null=True, blank=True, verbose_name=_("Coordinates"), help_text=_("Mid-point coordinates of the site."))
     # Location
     coordinates  = models.PointField(null=True, blank=True, verbose_name=_("Coordinates"), help_text=_("Mid-point coordinates of the site."))
-    ADM1     = models.ForeignKey(geography.Province, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("Province"), help_text=_("Swedish traditional subdivision of territory where the site is located."))
-    ADM2 = models.ForeignKey(geography.LocalAdministrativeUnit, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("Municipality"), help_text=_("Municipality, or international local administrative unit where the site is located."))
-    ADM3       = models.ForeignKey(geography.Parish, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("Parish"), help_text=_("Swedish ecclesiastical administrative unit where the site is located."))
+    ADM1     = models.ForeignKey(geography.Province, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD1"), help_text=_("Swedish traditional subdivision of territory where the site is located."))
+    ADM2 = models.ForeignKey(geography.LocalAdministrativeUnit, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD2"), help_text=_("Municipality, or international local administrative unit where the site is located."))
+    ADM3       = models.ForeignKey(geography.Parish, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD3"), help_text=_("Swedish ecclesiastical administrative unit where the site is located."))
 
     # Placename is particularly used outside of Sweden
     placename       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Placename"), help_text=_("Free-form, non-indexed placename of the site."))
