@@ -7,6 +7,10 @@ from admin_auto_filters.filters import AutocompleteFilter
 from django.contrib.admin import EmptyFieldListFilter
 from django.conf import settings
 
+class SiteFilter(AutocompleteFilter):
+    title = _('Site') # display title
+    field_name = 'site' # name of the foreign key field
+    
 
 @admin.register(Location)
 class LocationAdmin(admin.GISModelAdmin):
