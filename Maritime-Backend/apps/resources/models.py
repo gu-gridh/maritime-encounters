@@ -1,7 +1,7 @@
 import maritime.abstract.models as abstract
 from django.utils.translation import gettext_lazy as _
 from django.contrib.gis.db import models
-
+import apps.geography.models as geography
 
 class Location(abstract.AbstractBaseModel):
     # Represents the location of the site
@@ -231,17 +231,30 @@ class Site(abstract.AbstractBaseModel):
     # Site name is a field that includes the name of the site and it can be used to search for the site
     # This feld can leave empty if the site name is not known
     site_name       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("sitename"), help_text=_("Free-form, non-indexed site name of the site."))
-    ADM0       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM0"), help_text=_("The country in which the site is located."))
-    ADM1       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM1"), help_text=_("The first administrative division in which the site is located."))
-    ADM2       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM2"), help_text=_("The second administrative division in which the site is located."))
-    ADM3       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM3"), help_text=_("The third administrative division in which the site is located."))
+    # ADM0       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM0"), help_text=_("The country in which the site is located."))
+    # ADM1       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM1"), help_text=_("The first administrative division in which the site is located."))
+    # ADM2       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM2"), help_text=_("The second administrative division in which the site is located."))
+    # ADM3       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM3"), help_text=_("The third administrative division in which the site is located."))
+    # coordinates  = models.PointField(null=True, blank=True, verbose_name=_("Coordinates"), help_text=_("Mid-point coordinates of the site."))
+    # Location
     coordinates  = models.PointField(null=True, blank=True, verbose_name=_("Coordinates"), help_text=_("Mid-point coordinates of the site."))
+    AMD2 = models.ForeignKey(geography.LocalAdministrativeUnit, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("Municipality"), help_text=_("Municipality, or international local administrative unit where the site is located."))
+    AMD3       = models.ForeignKey(geography.Parish, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("Parish"), help_text=_("Swedish ecclesiastical administrative unit where the site is located."))
+    AMD1     = models.ForeignKey(geography.Province, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("Province"), help_text=_("Swedish traditional subdivision of territory where the site is located."))
+
+    # Placename is particularly used outside of Sweden
+    placename       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Placename"), help_text=_("Free-form, non-indexed placename of the site."))
 
 
     def __str__(self) -> str:
 
-        name_str = f"Sitename {self.site_name}"
-    
+        if self.site_name:
+            name_str = f"{self.site_name}"
+        elif self.placename:
+            name_str = f"Placename {self.placename}"
+        else:
+            name_str = ''
+        return name_str
     class Meta:
         verbose_name = _("Site")
         verbose_name_plural = _("Sites")
