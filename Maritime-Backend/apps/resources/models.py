@@ -176,14 +176,14 @@ class Material(abstract.AbstractTagModel):
 
 class LeadIsotopeRation(abstract.AbstractBaseModel):
         lead_isotop = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("lead_isotop"), help_text=_("The lead isotop of the sample."))
-        isotop_ratio = models.FloatField(null=True, blank=True, verbose_name=_("isotop ratio"), help_text=_("The lead isotop ratio."))
+        isotop_ratio = models.FloatField(null=True, blank=True, verbose_name=_("lead206_204"), help_text=_("The lead206_204 of the sample."))
 
         def __str__(self) -> str:            
             return self.lead_isotop
         
         class Meta:
-            verbose_name = _("Lead Isotope Ratio")
-            verbose_name_plural = _("Lead Isotope Ratios")
+            verbose_name = _("Lead Isotope Ration")
+            verbose_name_plural = _("Lead Isotope Rations")
 
 class Carbon_Nitrogen_Ratio(abstract.AbstractBaseModel):
     carbon_to_nitrogen_ratio = models.FloatField(null=True, blank=True, verbose_name=_("carbon_to_nitrogen_ratio"), help_text=_("The carbon to nitrogen ratio of the sample."))
