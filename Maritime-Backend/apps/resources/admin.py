@@ -78,17 +78,25 @@ class CleatAdmin(admin.ModelAdmin):
 
 @admin.register(Element)
 class ElementAdmin(admin.ModelAdmin):
-    list_display = ['elemant_name', 'element_symbol', 'element_number']
-    search_fields = ['elemant_name', 'element_symbol']
-    list_filter = ['elemant_name', 'element_symbol']
-    ordering = ['elemant_name']
+    list_display = ['element_name', 'element_symbol', 'element_number']
+    search_fields = ['element_name', 'element_symbol']
+    list_filter = ['element_name', 'element_symbol']
+    ordering = ['element_name']
 
-@admin.register(LeadIsotopeRation)
+class RelMetalElementAdmin(admin.TabularInline):
+    model = RelMetalElement
+    extra = 1
+
+@admin.register(LeadIsotope)
 class LeadIsotopeRationAdmin(admin.ModelAdmin):
-    list_display = ['lead_isotop', 'isotop_ratio']
-    search_fields = ['lead_isotop', 'isotop_ratio']
-    list_filter = ['lead_isotop', 'isotop_ratio']
-    ordering = ['lead_isotop']
+    list_display = ['text']
+    search_fields = ['text']
+    list_filter = ['text']
+    ordering = ['text']
+
+class RelMetalIsotopAdmin(admin.TabularInline):
+    model = RelMetalIsotop
+    extra = 1
 
 @admin.register(Carbon_Nitrogen_Ratio)
 class Carbon_Nitrogen_RatioAdmin(admin.ModelAdmin):
@@ -164,6 +172,10 @@ class MetalAnalysisAdmin(admin.GISModelAdmin):
     search_fields = ['metal_id', 'site']
     list_filter = ['metal_id', 'site']
     ordering = ['metal_id']
+    inlines = [
+            RelMetalElementAdmin,
+            RelMetalIsotopAdmin
+        ]
 
 @admin.register(aDNA)
 class aDNAAdmin(admin.GISModelAdmin):
