@@ -117,7 +117,6 @@ class Shape(abstract.AbstractTagModel):
         verbose_name = _("Shape")
         verbose_name_plural = _("Shapes")
 
-
 class Feature(abstract.AbstractTagModel):
     # Represents the feature of the sample
 
@@ -147,16 +146,27 @@ class Cleat(abstract.AbstractBaseModel):
 
 
 class Element(abstract.AbstractBaseModel):
-    elemant_name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("elemant_name"), help_text=_("The elemant name of the sample."))
+    element_name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("elemant_name"), help_text=_("The elemant name of the sample."))
     element_symbol = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("element_symbol"), help_text=_("The element symbol of the sample."))
     element_number = models.IntegerField(null=True, blank=True, verbose_name=_("element_number"), help_text=_("The element number of the sample."))
+
+    def __str__(self) -> str:
+        return self.element_name    
+
+    class Meta:     
+        verbose_name = _("Elemnt")
+        verbose_name_plural = _("Elemnts")
+
+class ElementRatio(abstract.AbstractBaseModel):
+    elemant_name = models.ForeignKey(Element, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_("elemant_name"), help_text=_("The elemant name of the sample."))
+    element_ratio = models.FloatField(null=True, blank=True, verbose_name=_("element_ratio"), help_text=_("The element ratio of the sample."))
 
     def __str__(self) -> str:
         return self.elemant_name    
 
     class Meta:     
-        verbose_name = _("Elemnt")
-        verbose_name_plural = _("Elemnts")
+        verbose_name = _("Elemnt Ratio")
+        verbose_name_plural = _("Elemnts Ratio")
 
 
 class Material(abstract.AbstractTagModel):
@@ -174,16 +184,14 @@ class Material(abstract.AbstractTagModel):
         verbose_name_plural = _("Materials")
 
 
-class LeadIsotopeRation(abstract.AbstractBaseModel):
-        lead_isotop = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("lead_isotop"), help_text=_("The lead isotop of the sample."))
-        isotop_ratio = models.FloatField(null=True, blank=True, verbose_name=_("lead206_204"), help_text=_("The lead206_204 of the sample."))
+class LeadIsotope(abstract.AbstractTagModel):
 
         def __str__(self) -> str:            
-            return self.lead_isotop
+            return self.text
         
         class Meta:
-            verbose_name = _("Lead Isotope Ration")
-            verbose_name_plural = _("Lead Isotope Rations")
+            verbose_name = _("Lead Isotope")
+            verbose_name_plural = _("Lead Isotope")
 
 class Carbon_Nitrogen_Ratio(abstract.AbstractBaseModel):
     carbon_to_nitrogen_ratio = models.FloatField(null=True, blank=True, verbose_name=_("carbon_to_nitrogen_ratio"), help_text=_("The carbon to nitrogen ratio of the sample."))
@@ -451,8 +459,6 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     general_typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("general_typology"), help_text=_("The general typology of the metal."))
     typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("typology"), help_text=_("The typology of the metal."))
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("period"), help_text=_("The period of the metal."))
-    isotope_ratio = models.ManyToManyField(LeadIsotopeRation, blank=True, verbose_name=_("isotope_ratio"), help_text=_("The isotope ratio of the metal."))
-    elements = models.ManyToManyField(Element, blank=True, verbose_name=_("elements"), help_text=_("The elements of the metal."))
 
     def __str__(self) -> str:   
         name_str = f"Metal {self.metal_id}"
@@ -461,6 +467,17 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     class Meta:        
         verbose_name = _("Metal Analysis")
         verbose_name_plural = _("Metal Analyses")
+
+class RelMetalElement(models.Model):
+    metal = models.ForeignKey(MetalAnalysis, on_delete=models.CASCADE, null=True, blank=True)
+    elemnt = models.ForeignKey(Element, on_delete=models.CASCADE, null=True, blank=True)
+    element_ratio = models.FloatField(null=True, blank=True, verbose_name=_("element_ratio"), help_text=_("The element ratio of the sample."))
+
+
+class RelMetalIsotop(models.Model):
+    metal = models.ForeignKey(MetalAnalysis, on_delete=models.CASCADE, null=True, blank=True)
+    lead_isotope = models.ForeignKey(LeadIsotope, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Lead_isotope"))
+    lead_isotope_ratio = models.FloatField(null=True, blank=True, help_text=_("The isotope ratio of the metal."))
 
 class aDNA(abstract.AbstractBaseModel):
     aDNA_id     = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("aDNA ID"), help_text=_("Unique identifier for the aDNA."))
