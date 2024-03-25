@@ -133,7 +133,7 @@ class AbstractBaseModel(models.Model):
 class AbstractTagModel(AbstractBaseModel):
     """Abstract model which creates a simple tag with a case-insensitive text field.
     """
-    text = models.CharField(max_length=256, unique=True, verbose_name=_("general.text"))
+    text = models.CharField(max_length=256, unique=True, verbose_name=_("text"))
 
     class Meta:
         abstract = True
