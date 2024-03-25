@@ -76,11 +76,9 @@ class Period(abstract.AbstractTagModel):
 
 
 class PeroidActivity(abstract.AbstractTagModel):
-    # Represents the period of the site
-    presence_of_activity = models.BooleanField(null=True, blank=True, verbose_name=_("presence_of_activity"), help_text=_("The presence of activity of the period."))
 
     def __str__(self) -> str:
-        return self.name
+        return self.text
     
     def __repr__(self) -> str:
         return str(self)
@@ -239,12 +237,7 @@ class Site(abstract.AbstractBaseModel):
     # Site name is a field that includes the name of the site and it can be used to search for the site
     # This feld can leave empty if the site name is not known
     site_name       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("sitename"), help_text=_("Free-form, non-indexed site name of the site."))
-    # ADM0       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM0"), help_text=_("The country in which the site is located."))
-    # ADM1       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM1"), help_text=_("The first administrative division in which the site is located."))
-    # ADM2       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM2"), help_text=_("The second administrative division in which the site is located."))
-    # ADM3       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("ADM3"), help_text=_("The third administrative division in which the site is located."))
-    # coordinates  = models.PointField(null=True, blank=True, verbose_name=_("Coordinates"), help_text=_("Mid-point coordinates of the site."))
-    # Location
+     # Location
     coordinates  = models.PointField(null=True, blank=True, verbose_name=_("Coordinates"), help_text=_("Mid-point coordinates of the site."))
     country = models.ForeignKey(geography.Country, null=True, blank=True, related_name='sites',on_delete=models.SET_NULL)
     ADM1     = models.ForeignKey(geography.Province, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD1"), help_text=_("Swedish traditional subdivision of territory where the site is located."))
@@ -375,7 +368,6 @@ class LandingPoints(abstract.AbstractBaseModel):
     site      = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the landing is located."))
     
     period       = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("period"), help_text=_("The period of the landing."))
-    bp_activity       = models.ForeignKey(PeroidActivity, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("bp_activity"), help_text=_("The bp activity of the landing."))
 
     materials       = models.ForeignKey(Material, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("materials"), help_text=_("The materials of the landing."))
     reason       = models.TextField(null=True, blank=True, verbose_name=_("reason"), help_text=_("The reason of the landing."))
@@ -389,6 +381,11 @@ class LandingPoints(abstract.AbstractBaseModel):
     class Meta:                
         verbose_name = _("Landing Point")
         verbose_name_plural = _("Landing Points")
+
+class RelPresentActivityLandingPoints(models.Model):
+    landing_point = models.ForeignKey(LandingPoints, on_delete=models.CASCADE, null=True, blank=True)
+    period_activity = models.ForeignKey(PeroidActivity, on_delete=models.CASCADE, null=True, blank=True)
+    present_activity = models.BooleanField(null=True, blank=True)
 
 class NewSamples(abstract.AbstractBaseModel):
 

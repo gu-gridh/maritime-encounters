@@ -7,13 +7,17 @@ router = routers.DefaultRouter()
 endpoint = utils.build_app_endpoint("resources")
 documentation = utils.build_app_api_documentation("resources", endpoint)
 
+router.register(rf'{endpoint}/site', views.SiteViewSet, basename='site')
+router.register(rf'{endpoint}/geojson/site', views.SiteGeoViewSet, basename='site as geojson')
+router.register(rf'{endpoint}/metal_analysis', views.MetalAnalysisViewSet, basename='metal analsyis')
+
 urlpatterns = [
     path('', include(router.urls)),
 
     # Automatically generated views
     *utils.get_model_urls('resources', endpoint, 
-        exclude=[]),
+        exclude=['site', 'metal_analysis']),
 
-    *utils.get_model_urls('resources', f'{endpoint}', exclude=[]),
+    *utils.get_model_urls('resources', f'{endpoint}', exclude=['site', 'metal_analysis']),
     *documentation
 ]

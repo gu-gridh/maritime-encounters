@@ -19,7 +19,6 @@ class LocationAdmin(admin.GISModelAdmin):
     list_filter = ['location_name', 'site']
     ordering = ['location_name']
 
-
 @admin.register(SiteType)
 class SiteTypeAdmin(admin.GISModelAdmin):
     list_display = ['text']
@@ -98,6 +97,10 @@ class RelMetalIsotopAdmin(admin.TabularInline):
     model = RelMetalIsotop
     extra = 1
 
+class RelPeriodActivityLandingPoints(admin.TabularInline):
+    model = RelPresentActivityLandingPoints
+    extra = 1
+
 @admin.register(Carbon_Nitrogen_Ratio)
 class Carbon_Nitrogen_RatioAdmin(admin.ModelAdmin):
     list_display = ['carbon_to_nitrogen_ratio']
@@ -151,6 +154,9 @@ class LandingPointsAdmin(admin.GISModelAdmin):
     search_fields = ['landing_id', 'site', 'period']
     list_filter = ['landing_id', 'site']
     ordering = ['landing_id']
+    inlines = [
+        RelPeriodActivityLandingPoints,
+    ]
 
 @admin.register(NewSamples)
 class NewSamplesAdmin(admin.GISModelAdmin):
