@@ -77,7 +77,7 @@ class CleatAdmin(admin.ModelAdmin):
 
 @admin.register(Element)
 class ElementAdmin(admin.ModelAdmin):
-    list_display = ['element_name', 'element_symbol', 'element_number']
+    list_display = ['element_name', 'element_symbol', 'atomic_number']
     search_fields = ['element_name', 'element_symbol']
     list_filter = ['element_name', 'element_symbol']
     ordering = ['element_name']
