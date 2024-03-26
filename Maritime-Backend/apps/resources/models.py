@@ -104,7 +104,7 @@ class Species(abstract.AbstractTagModel):
     # Represents the species of the sample
 
     def __str__(self) -> str:
-        return self.name
+        return self.text
     
     def __repr__(self) -> str:
         return str(self)
@@ -131,7 +131,7 @@ class Feature(abstract.AbstractTagModel):
     # Represents the feature of the sample
 
     def __str__(self) -> str:
-        return self.name
+        return self.text
     
     def __repr__(self) -> str:
         return str(self)
@@ -184,8 +184,7 @@ class Material(abstract.AbstractTagModel):
     type = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("type"), help_text=_("The type of the sample."))
 
     def __str__(self) -> str:
-        return self.name
-    
+        return self.text
     def __repr__(self) -> str:
         return str(self)
     
