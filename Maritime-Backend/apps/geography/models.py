@@ -5,9 +5,11 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.gis.db import models
 
 
-##### Nomenclature of Territorial Units for Statistics #####
-# LAU2 -> LAU1 -> NUTS3 -> NUTS2 -> NUTS1
-class Region(abstract.AbstractBaseModel):
+#####  Administrative geoBoundaries #####
+# ADM0 -> ADM1 -> ADM2 -> ADM3 -> ADM4 -> ADM5 -> ADM6 
+
+# ADM0: Country
+class Base(abstract.AbstractBaseModel):
 
     geometry = models.MultiPolygonField(verbose_name=_("geometry"), blank=True, null=True)
     name = models.CharField(max_length=256, verbose_name=_("name"), blank=True, null=True)
@@ -20,64 +22,105 @@ class Region(abstract.AbstractBaseModel):
     class Meta:
         abstract = True
 
-class Country(Region):
+class Country(Base):
 
     class Meta:
-        verbose_name = _("Country")
-        verbose_name_plural = _("Countries")
-
-
-class NUTS1(Region):
-
-    superregion = models.ForeignKey(Country, related_name='subregions', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("country"))
-
-    class Meta:
-        verbose_name = _("nuts1")
-        verbose_name_plural = _("nuts1")
-
-class NUTS2(Region):
-
-    superregion = models.ForeignKey(NUTS1, related_name="subregions", blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("nuts1"))
+        verbose_name = _("Country (ADM0)")
+        verbose_name_plural = _("Countries (ADM0)")
     
+    def __str__(self) -> str:
+        return str(self.name)
+    
+
+# ADM1: Region
+class Region(Base):
+
+    country = models.ForeignKey(Country, related_name='region', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("country"))
+
     class Meta:
-        verbose_name = _("nuts2")
-        verbose_name_plural = _("nuts2")
+        verbose_name = _("Region (ADM1)")
+        verbose_name_plural = _("Regions (ADM1)")
+    
+    def __str__(self) -> str:
+        return f"{self.name} - {self.country.name}"
 
-class NUTS3(Region):
 
-    superregion = models.ForeignKey(NUTS2, related_name="subregions", blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("nuts2"))
+# ADM2: Counties
+class Counties(Base):
+
+    country = models.ForeignKey(Country, related_name='counties', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("country"))
+    region = models.ForeignKey(Region, related_name='counties', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("region"))
+    class Meta:
+        verbose_name = _("Counties (ADM2)")
+        verbose_name_plural = _("Counties (ADM2)")
+    
+    def __str__(self) -> str:
+        return f"{self.name} - {self.region.name} - {self.country.name}"
+
+# ADM3: Municipality
+class Municipality(Base):
+
+    country = models.ForeignKey(Country, related_name='municipalities', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("country"))
+    region = models.ForeignKey(Region, related_name='municipalities', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("region"))
+    counties = models.ForeignKey(Counties, related_name='municipalities', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("county"))
+    class Meta:
+        verbose_name = _("Municipality (ADM3)")
+        verbose_name_plural = _("Municipalities (ADM3)")
+    
+    def __str__(self) -> str:
+        return f"{self.name} - {self.counties.name} - {self.region.name} - {self.country.name}"
+    
+
+# ADM4: Local Administrative Units
+class LAU(Base):
+
+    country = models.ForeignKey(Country, related_name='laus', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("country"))
+    region = models.ForeignKey(Region, related_name='laus', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("region"))
+    counties = models.ForeignKey(Counties, related_name='laus', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("county"))
+    municipality = models.ForeignKey(Municipality, related_name='laus', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("municipality"))
 
     class Meta:
-        verbose_name = _("nuts3")
-        verbose_name_plural = _("nuts3")
+        verbose_name = _("Local Administrative Units (ADM4)")
+        verbose_name_plural = _("Local Administrative Units (ADM4)")
+    
+    def __str__(self) -> str:
+        return f"{self.name} - {self.municipality.name} - {self.counties.name} - {self.region.name} - {self.country.name}"
+    
 
+# ADM5: Communes
+class Commune(Base):
 
+    country = models.ForeignKey(Country, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("country"))
+    region = models.ForeignKey(Region, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("region"))
+    counties = models.ForeignKey(Counties, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("county"))
+    municipality = models.ForeignKey(Municipality, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("municipality"))
+    lau = models.ForeignKey(LAU, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("lau"))
+    class Meta:
+        verbose_name = _("Commune (ADM5)")
+        verbose_name_plural = _("Communes (ADM5)")
+    
+    def __str__(self) -> str:
+        return f"{self.name} - {self.lau.name} - {self.municipality.name} - {self.counties.name} - {self.region.name} - {self.country.name}"
+    
 
-class Province(Region):
+class Province(Base):
 
     country = models.ForeignKey(Country, related_name='provinces', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("country"))
 
     class Meta:
-        verbose_name = _("Province(AMD1)")
-        verbose_name_plural = _("Provinces(AMD1)")
+        verbose_name = _("Province")
+        verbose_name_plural = _("Provinces")
 
-
-class LocalAdministrativeUnit(Region):
-
-    superregion    = models.ForeignKey(NUTS3, related_name="laus", blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("nuts3")) 
-
-    class Meta:
-        verbose_name = _("Local Administrative Unit(AMD3)")
-        verbose_name_plural = _("Local Administrative Units(AMD3)")
-
-
-class Parish(Region):
+class Parish(Base):
     
     country = models.ForeignKey(Country, related_name='parishes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("country"))
-    
+    province = models.ForeignKey(Province, related_name='parishes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("province"))
     class Meta:
-        verbose_name = _("Parish(AMD3)")
-        verbose_name_plural = _("Parishes(AMD3)")
+        verbose_name = _("Parish")
+        verbose_name_plural = _("Parishes")
+    
+    def __str__(self) -> str:
+        return f"{self.name} - {self.province.name} - {self.country.name}"
 
 
     

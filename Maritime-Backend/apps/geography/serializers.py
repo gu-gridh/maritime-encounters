@@ -13,8 +13,8 @@ class CountrySerializer(GeoFeatureModelSerializer):
 class LAUSerializer(GeoFeatureModelSerializer):
 
     class Meta:
-        model = LocalAdministrativeUnit
-        fields = get_fields(LocalAdministrativeUnit, exclude=DEFAULT_FIELDS)
+        model = LAU
+        fields = get_fields(LAU, exclude=DEFAULT_FIELDS)
         geo_field = 'geometry'
 
 
@@ -32,26 +32,3 @@ class ParishSerializer(GeoFeatureModelSerializer):
         fields = get_fields(Parish, exclude=DEFAULT_FIELDS)
         geo_field = 'geometry'
 
-
-class NUTS1Serializer(GeoFeatureModelSerializer):
-
-    class Meta:
-        model = NUTS1
-        fields = get_fields(NUTS1, exclude=DEFAULT_FIELDS)
-        geo_field = 'geometry'
-
-
-class NUTS2Serializer(GeoFeatureModelSerializer):
-
-    class Meta:
-        model = NUTS2
-        fields = get_fields(NUTS2, exclude=DEFAULT_FIELDS)
-        geo_field = 'geometry'
-
-
-class NUTS3Serializer(GeoFeatureModelSerializer):
-
-    class Meta:
-        model = NUTS3
-        fields = get_fields(NUTS3, exclude=DEFAULT_FIELDS)
-        geo_field = 'geometry'

@@ -31,25 +31,8 @@ class CountryViewSet(GeoViewSet):
 
 class LAUViewSet(GeoViewSet):
 
-    queryset = models.LocalAdministrativeUnit.objects.all()
+    queryset = models.LAU.objects.all()
     serializer_class = serializers.LAUSerializer
-    filterset_fields = get_fields(models.LocalAdministrativeUnit, exclude=['geometry'])
+    filterset_fields = get_fields(models.LAU, exclude=['geometry'])
 
     
-class NUTS1ViewSet(GeoViewSet):
-
-    queryset = models.NUTS1.objects.all()
-    serializer_class = serializers.NUTS1Serializer
-    filterset_fields = get_fields(models.NUTS1, exclude=['geometry'])
-    
-class NUTS2ViewSet(GeoViewSet):
-
-    queryset = models.NUTS2.objects.all()
-    serializer_class = serializers.NUTS2Serializer
-    filterset_fields = get_fields(models.NUTS2, exclude=['geometry'])
-
-class NUTS3ViewSet(GeoViewSet):
-
-    queryset = models.NUTS3.objects.all()
-    serializer_class = serializers.NUTS3Serializer
-    filterset_fields = get_fields(models.NUTS3, exclude=['geometry'])

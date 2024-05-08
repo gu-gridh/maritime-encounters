@@ -12,72 +12,65 @@ class CountryAdmin(admin.GISModelAdmin):
     list_filter = ['name', 'code']
     search_fields = ['name', 'code']
 
+
+@admin.register(Region)
+class RegionAdmin(admin.GISModelAdmin):
+    fields = get_fields(Region, exclude=DEFAULT_EXCLUDE+["id"])
+    readonly_fields = [*DEFAULT_FIELDS]
+    list_display = ['name', 'country']
+    list_filter = ['name', 'country']
+    search_fields = ['name', 'country']
+    autocomplete_fields = ['country']
+
+
+@admin.register(Counties)
+class CountiesAdmin(admin.GISModelAdmin):
+    fields = get_fields(Counties, exclude=DEFAULT_EXCLUDE+["id"])
+    readonly_fields = [*DEFAULT_FIELDS]
+    list_display = ['name', 'region', 'country']
+    list_filter = ['name', 'region', 'country']
+    search_fields = ['name', 'region', 'country']
+    autocomplete_fields = ['region', 'country']
+
+
+@admin.register(Municipality)
+class MunicipalityAdmin(admin.GISModelAdmin):
+    fields = get_fields(Municipality, exclude=DEFAULT_EXCLUDE+["id"])
+    readonly_fields = [*DEFAULT_FIELDS]
+    list_display = ['name', 'counties', 'region', 'country']
+    list_filter = ['name', 'counties', 'region', 'country']
+    search_fields = ['name', 'counties', 'region', 'country']
+    autocomplete_fields = ['counties', 'region', 'country']
+
+
+@admin.register(LAU)
+class LAUAdmin(admin.GISModelAdmin):
+    fields = get_fields(LAU, exclude=DEFAULT_EXCLUDE+["id"])
+    readonly_fields = [*DEFAULT_FIELDS]
+    list_display = ['name', 'municipality', 'counties', 'region', 'country']
+    list_filter = ['name', 'municipality', 'counties', 'region', 'country']
+    search_fields = ['name', 'municipality', 'counties', 'region', 'country']
+    autocomplete_fields = ['municipality', 'counties', 'region', 'country']
+
+
+@admin.register(Commune)
+class CommuneAdmin(admin.GISModelAdmin):
+    fields = get_fields(Commune, exclude=DEFAULT_EXCLUDE+["id"])
+    readonly_fields = [*DEFAULT_FIELDS]
+    list_display = ['name', 'lau', 'municipality', 'counties', 'region', 'country']
+    list_filter = ['name', 'lau', 'municipality', 'counties', 'region', 'country']
+    search_fields = ['name', 'lau', 'municipality', 'counties', 'region', 'country']
+    autocomplete_fields = ['lau', 'municipality', 'counties', 'region', 'country']
+
+
 @admin.register(Province)
-class PlaceAdmin(admin.GISModelAdmin):
+class ProvinceAdmin(admin.GISModelAdmin):
     fields = get_fields(Province, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'country']
     list_filter = ['name', 'country']
     search_fields = ['name', 'country']
-    # autocomplete_fields = ['name', 'country']
-
-@admin.register(LocalAdministrativeUnit)
-class LocalAdministrativeUnitAdmin(admin.GISModelAdmin):
-    fields = get_fields(LocalAdministrativeUnit, exclude=DEFAULT_EXCLUDE+["id"])
-    readonly_fields = [*DEFAULT_FIELDS]
-    list_display =  ['name', 'code', 'superregion', 'get_nuts2', 'get_nuts1', 'get_country']
-    list_filter = ['name', 'superregion', 'superregion__superregion', 'superregion__superregion__superregion', 'superregion__superregion__superregion__superregion']
-    search_fields = ['name', ]
-
-    @admin.display(ordering='superregion__superregion__superregion__superregion', description='Country')
-    def get_country(self, obj):
-        return obj.superregion.superregion.superregion.superregion
-
-    @admin.display(ordering='superregion__superregion__superregion', description='NUTS1')
-    def get_nuts1(self, obj):
-        return obj.superregion.superregion.superregion
-
-    @admin.display(ordering='superregion__superregion', description='NUTS2')
-    def get_nuts2(self, obj):
-        return obj.superregion.superregion
-
-@admin.register(NUTS3)
-class NUTS3Admin(admin.GISModelAdmin):
-    fields = get_fields(NUTS3, exclude=DEFAULT_EXCLUDE+["id"])
-    readonly_fields = [*DEFAULT_FIELDS]
-    list_display =   ['name', 'code','superregion', 'get_nuts1', 'get_country']
-    list_filter = ['name', 'superregion', 'superregion__superregion', 'superregion__superregion__superregion']
-    search_fields = ['name', ]
-
-    @admin.display(ordering='superregion__superregion__superregion', description='Country')
-    def get_country(self, obj):
-        return obj.superregion.superregion.superregion
-
-    @admin.display(ordering='superregion__superregion', description='NUTS1')
-    def get_nuts1(self, obj):
-        return obj.superregion.superregion
-
-@admin.register(NUTS2)
-class NUTS2Admin(admin.GISModelAdmin):
-    fields = get_fields(NUTS2, exclude=DEFAULT_EXCLUDE+["id"])
-    readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name', 'code','superregion', 'get_country']
-    list_filter = ['name', 'superregion', 'superregion__superregion']
-    search_fields = ['name', ]
-
-    @admin.display(ordering='superregion__superregion__superregion', description='Country')
-    def get_country(self, obj):
-        return obj.superregion.superregion
-
-
-@admin.register(NUTS1)
-class NUTS1Admin(admin.GISModelAdmin):
-    fields = get_fields(NUTS1, exclude=DEFAULT_EXCLUDE+["id"])
-    readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name', 'code', 'superregion']
-    list_filter = ['name', 'superregion']
-    search_fields = ['name', ]
-
+    autocomplete_fields = ['country']
 
 @admin.register(Parish)
 class ParishAdmin(admin.GISModelAdmin):
@@ -86,3 +79,4 @@ class ParishAdmin(admin.GISModelAdmin):
     list_display = ['name', 'code', 'country']
     list_filter = ['name', 'country']
     search_fields = ['name', ]
+    autocomplete_fields = ['country']
