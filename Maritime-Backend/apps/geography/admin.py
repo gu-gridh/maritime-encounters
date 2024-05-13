@@ -4,63 +4,63 @@ from django.utils.html import format_html
 from django.contrib.gis import admin
 from maritime.utils import get_fields, DEFAULT_EXCLUDE, DEFAULT_FIELDS
 
-@admin.register(Country)
-class CountryAdmin(admin.GISModelAdmin):
-    fields = get_fields(Country, exclude=DEFAULT_EXCLUDE+["id"])
+@admin.register(ADM0)
+class ADM0Admin(admin.GISModelAdmin):
+    fields = get_fields(ADM0, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'code']
     list_filter = ['name', 'code']
     search_fields = ['name', 'code']
 
 
-@admin.register(Region)
-class RegionAdmin(admin.GISModelAdmin):
-    fields = get_fields(Region, exclude=DEFAULT_EXCLUDE+["id"])
+@admin.register(ADM1)
+class ADM1Admin(admin.GISModelAdmin):
+    fields = get_fields(ADM1, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name', 'country']
-    list_filter = ['name', 'country']
-    search_fields = ['name', 'country']
-    autocomplete_fields = ['country']
+    list_display = ['name', 'ADM0']
+    list_filter = ['name', 'ADM0']
+    search_fields = ['name', 'ADM0']
+    autocomplete_fields = ['ADM0']
 
 
-@admin.register(Counties)
-class CountiesAdmin(admin.GISModelAdmin):
-    fields = get_fields(Counties, exclude=DEFAULT_EXCLUDE+["id"])
+@admin.register(ADM2)
+class ADM2Admin(admin.GISModelAdmin):
+    fields = get_fields(ADM2, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name', 'region', 'country']
-    list_filter = ['name', 'region', 'country']
-    search_fields = ['name', 'region', 'country']
-    autocomplete_fields = ['region', 'country']
+    list_display = ['name', 'ADM1', 'ADM0']
+    list_filter = ['name', 'ADM1', 'ADM0']
+    search_fields = ['name', 'ADM1', 'ADM0']
+    autocomplete_fields = ['ADM1', 'ADM0']
 
 
-@admin.register(Municipality)
-class MunicipalityAdmin(admin.GISModelAdmin):
-    fields = get_fields(Municipality, exclude=DEFAULT_EXCLUDE+["id"])
+@admin.register(ADM3)
+class ADM3Admin(admin.GISModelAdmin):
+    fields = get_fields(ADM3, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name', 'counties', 'region', 'country']
-    list_filter = ['name', 'counties', 'region', 'country']
-    search_fields = ['name', 'counties', 'region', 'country']
-    autocomplete_fields = ['counties', 'region', 'country']
+    list_display = ['name', 'ADM2', 'ADM1', 'ADM0']
+    list_filter = ['name', 'ADM2', 'ADM1', 'ADM0']
+    search_fields = ['name', 'ADM2', 'ADM1', 'ADM0']
+    autocomplete_fields = ['ADM2', 'ADM1', 'ADM0']
 
 
-@admin.register(LAU)
-class LAUAdmin(admin.GISModelAdmin):
-    fields = get_fields(LAU, exclude=DEFAULT_EXCLUDE+["id"])
+@admin.register(ADM4)
+class ADM4dmin(admin.GISModelAdmin):
+    fields = get_fields(ADM4, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name', 'municipality', 'counties', 'region', 'country']
-    list_filter = ['name', 'municipality', 'counties', 'region', 'country']
-    search_fields = ['name', 'municipality', 'counties', 'region', 'country']
-    autocomplete_fields = ['municipality', 'counties', 'region', 'country']
+    list_display = ['name', 'ADM3', 'ADM2', 'ADM1', 'ADM0']
+    list_filter = ['name', 'ADM3', 'ADM2', 'ADM1', 'ADM0']
+    search_fields = ['name', 'ADM3', 'ADM2', 'ADM1', 'ADM0']
+    autocomplete_fields = ['ADM3', 'ADM2', 'ADM1', 'ADM0']
 
 
 @admin.register(Commune)
 class CommuneAdmin(admin.GISModelAdmin):
     fields = get_fields(Commune, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name', 'lau', 'municipality', 'counties', 'region', 'country']
-    list_filter = ['name', 'lau', 'municipality', 'counties', 'region', 'country']
-    search_fields = ['name', 'lau', 'municipality', 'counties', 'region', 'country']
-    autocomplete_fields = ['lau', 'municipality', 'counties', 'region', 'country']
+    list_display = ['name', 'ADM4', 'ADM3', 'ADM2', 'ADM1', 'ADM0']
+    list_filter = ['name', 'ADM4', 'ADM3', 'ADM2', 'ADM1', 'ADM0']
+    search_fields = ['name', 'ADM4', 'ADM3', 'ADM2', 'ADM1', 'ADM0']
+    autocomplete_fields = ['ADM4', 'ADM3', 'ADM2', 'ADM1', 'ADM0']
 
 
 @admin.register(Province)

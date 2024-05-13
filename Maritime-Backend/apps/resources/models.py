@@ -250,10 +250,10 @@ class Site(abstract.AbstractBaseModel):
     site_name       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("sitename"), help_text=_("Free-form, non-indexed site name of the site."))
      # Location
     coordinates  = models.PointField(null=True, blank=True, verbose_name=_("Coordinates"), help_text=_("Mid-point coordinates of the site."))
-    country = models.ForeignKey(geography.Country, null=True, blank=True, related_name='sites',on_delete=models.SET_NULL)
-    ADM1     = models.ForeignKey(geography.Region, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD1"), help_text=_("Swedish traditional subdivision of territory where the site is located."))
-    ADM2 = models.ForeignKey(geography.Counties, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD2"), help_text=_("Municipality, or international local administrative unit where the site is located."))
-    ADM3       = models.ForeignKey(geography.Municipality, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD3"), help_text=_("Swedish ecclesiastical administrative unit where the site is located."))
+    ADM0 = models.ForeignKey(geography.ADM0, null=True, blank=True, related_name='sites',on_delete=models.SET_NULL)
+    ADM1     = models.ForeignKey(geography.ADM1, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD1"), help_text=_("Swedish traditional subdivision of territory where the site is located."))
+    ADM2 = models.ForeignKey(geography.ADM2, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD2"), help_text=_("Municipality, or international local administrative unit where the site is located."))
+    ADM3       = models.ForeignKey(geography.ADM3, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("AMD3"), help_text=_("Swedish ecclesiastical administrative unit where the site is located."))
 
     # Placename is particularly used outside of Sweden
     placename       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Placename"), help_text=_("Free-form, non-indexed placename of the site."))

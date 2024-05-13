@@ -22,17 +22,17 @@ class ParishViewSet(GeoViewSet):
     filterset_fields = get_fields(models.Parish, exclude=['geometry'])
 
 
-class CountryViewSet(GeoViewSet):
+class ADM0ViewSet(GeoViewSet):
 
-    queryset = models.Country.objects.all()
-    serializer_class = serializers.CountrySerializer
-    filterset_fields = get_fields(models.Country, exclude=['geometry'])
+    queryset = models.ADM0.objects.all()
+    serializer_class = serializers.ADM0Serializer
+    filterset_fields = get_fields(models.ADM0, exclude=['geometry'])
 
 
-class LAUViewSet(GeoViewSet):
+class ADM4ViewSet(GeoViewSet):
 
-    queryset = models.LAU.objects.all()
-    serializer_class = serializers.LAUSerializer
-    filterset_fields = get_fields(models.LAU, exclude=['geometry'])
+    queryset = models.ADM4.objects.all()
+    serializer_class = serializers.ADM4Serializer
+    filterset_fields = get_fields(models.ADM4, exclude=['geometry'])
 
     

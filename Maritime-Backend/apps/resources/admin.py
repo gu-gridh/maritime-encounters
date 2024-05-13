@@ -132,7 +132,7 @@ class DatingMethodAdmin(admin.ModelAdmin):
 class SiteAdmin(admin.GISModelAdmin):
     list_display = ['site_name']
     search_fields = ['site_name', 'ADM1', 'ADM2', 'ADM3']
-    autocomplete_fields = ['country', 'ADM1', 'ADM2', 'ADM3']
+    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3']
     list_filter = ['site_name', 'ADM1', 'ADM2', 'ADM3']
     # fieldsets = (
     #     (None, {

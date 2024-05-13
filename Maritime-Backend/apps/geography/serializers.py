@@ -2,19 +2,19 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from maritime.utils import get_fields, DEFAULT_FIELDS
 from .models import *
 
-class CountrySerializer(GeoFeatureModelSerializer):
+class ADM0Serializer(GeoFeatureModelSerializer):
 
     class Meta:
-        model = Country
-        fields = get_fields(Country, exclude=DEFAULT_FIELDS)
+        model = ADM0
+        fields = get_fields(ADM0, exclude=DEFAULT_FIELDS)
         geo_field = 'geometry'
 
 
-class LAUSerializer(GeoFeatureModelSerializer):
+class ADM4Serializer(GeoFeatureModelSerializer):
 
     class Meta:
-        model = LAU
-        fields = get_fields(LAU, exclude=DEFAULT_FIELDS)
+        model = ADM4
+        fields = get_fields(ADM4, exclude=DEFAULT_FIELDS)
         geo_field = 'geometry'
 
 
