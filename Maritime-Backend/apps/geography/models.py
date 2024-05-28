@@ -11,7 +11,7 @@ from django.contrib.gis.db import models
 # ADM0: Country
 class Base(abstract.AbstractBaseModel):
 
-    geometry = models.PolygonField(verbose_name=_("geometry"), blank=True, null=True)
+    geometry = models.MultiPolygonField(verbose_name=_("geometry"), blank=True, null=True)
     name = models.CharField(max_length=256, verbose_name=_("name"), blank=True, null=True)
     code = models.CharField(max_length=24, verbose_name=_("code"), blank=True, null=True, help_text=_('Countries abbreviation'))
     name_translation = models.CharField(max_length=256, verbose_name=_("name_translation"), blank=True, null=True)
