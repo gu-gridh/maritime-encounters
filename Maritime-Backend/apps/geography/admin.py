@@ -53,7 +53,7 @@ class ADM3Admin(admin.GISModelAdmin):
 class ADM4dmin(admin.GISModelAdmin):
     fields = get_fields(ADM4, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name' 'ADM1', 'ADM0']
+    list_display = ['name', 'ADM1', 'ADM0']
     list_filter = ['name', 'ADM1', 'ADM0']
     search_fields = ['name','ADM1', 'ADM0']
     autocomplete_fields = ['ADM3', 'ADM2', 'ADM1', 'ADM0']
