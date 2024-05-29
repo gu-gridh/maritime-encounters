@@ -77,8 +77,8 @@ class Phase(abstract.AbstractTagModel):
     def __str__(self) -> str:
         return self.text
     
-    # def __repr__(self) -> str:
-    #     return str(self)
+    def __repr__(self) -> str:
+        return str(self)
     
     class Meta:
         verbose_name = _("Phase")
@@ -93,6 +93,9 @@ class Period(abstract.AbstractBaseModel):
 
     def __str__(self) -> str:
         return self.name
+
+    def __repr__(self) -> str:
+        return str(self.name)
     
     class Meta:
         verbose_name = _("Period")
