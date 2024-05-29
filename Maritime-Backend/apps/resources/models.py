@@ -243,8 +243,6 @@ class DatingMethod(abstract.AbstractTagModel):
 class Site(abstract.AbstractBaseModel):
     # Represents the archaeological sites of interests
 
-    site_id      = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("Site ID"), help_text=_("Unique identifier for the site.")) 
-
     # Site name is a field that includes the name of the site and it can be used to search for the site
     # This feld can leave empty if the site name is not known
     site_name       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("sitename"), help_text=_("Free-form, non-indexed site name of the site."))
@@ -275,7 +273,6 @@ class Site(abstract.AbstractBaseModel):
 class PlankBoats(abstract.AbstractBaseModel):
     # Represents the archaeological  boats information
 
-    boat_id      = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("Boat ID"), help_text=_("Unique identifier for the boat.")) 
     name       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("boatname"), help_text=_("Free-form, non-indexed boat name of the boat."))
     site      = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the boat is located."))
     location       = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("location"), help_text=_("The location of the boat."))
@@ -326,7 +323,6 @@ class PlankBoats(abstract.AbstractBaseModel):
 class LogBoats(abstract.AbstractBaseModel):
     # Represents the archaeological log boats information
 
-    logboat_id      = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("LogBoat ID"), help_text=_("Unique identifier for the logboat.")) 
     name       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("logboatname"), help_text=_("Free-form, non-indexed logboat name of the logboat."))
     site      = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the logboat is located."))
     context = models.ForeignKey(SiteType, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("context"), help_text=_("The context of the logboat."))
@@ -375,9 +371,7 @@ class LogBoats(abstract.AbstractBaseModel):
 
 class LandingPoints(abstract.AbstractBaseModel):
 
-    landing_id      = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("Landing ID"), help_text=_("Unique identifier for the landing."))
     site      = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the landing is located."))
-    
     period       = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("period"), help_text=_("The period of the landing."))
 
     materials       = models.ForeignKey(Material, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("materials"), help_text=_("The materials of the landing."))
@@ -400,7 +394,6 @@ class RelPresentActivityLandingPoints(models.Model):
 
 class NewSamples(abstract.AbstractBaseModel):
 
-    sample_id     = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("Sample ID"), help_text=_("Unique identifier for the sample."))
     site      = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the sample is located."))
     elements = models.ManyToManyField(Element, blank=True, verbose_name=_("elements"), help_text=_("The elements of the sample."))
     aDNA = models.ForeignKey("aDNA", on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("aDNA"), help_text=_("The aDNA of the sample."))
@@ -419,7 +412,6 @@ class NewSamples(abstract.AbstractBaseModel):
 
 class Radiocarbon(abstract.AbstractBaseModel):
 
-    date_id     = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("Date ID"), help_text=_("Unique identifier for the Radiocarbon."))
     site      = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the date is located."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("sample"), help_text=_("The sample of the Radiocarbon."))
     site_type = models.ForeignKey(SiteType, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site_type"), help_text=_("The site type."))
@@ -457,11 +449,10 @@ class Radiocarbon(abstract.AbstractBaseModel):
 
 
 class MetalAnalysis(abstract.AbstractBaseModel):
-    metal_id     = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("Metal ID"), help_text=_("Unique identifier for the metal."))
     site     = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the metal is located."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("sample"), help_text=_("The sample of the metal."))
     
-    AMA = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("AMA"), help_text=_("The AMA of the metal."))
+    museum_entry = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("AMA"), help_text=_("The AMA of the metal."))
     context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("context"), help_text=_("The context of the metal."))
     object_description = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("object_description"), help_text=_("The object description of the metal."))
     general_typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("general_typology"), help_text=_("The general typology of the metal."))
@@ -488,7 +479,6 @@ class RelMetalIsotop(models.Model):
     lead_isotope_ratio = models.FloatField(null=True, blank=True, help_text=_("The isotope ratio of the metal."))
 
 class aDNA(abstract.AbstractBaseModel):
-    aDNA_id     = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("aDNA ID"), help_text=_("Unique identifier for the aDNA."))
     site     = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the aDNA is located."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("sample"), help_text=_("The sample of the aDNA."))
     genetic_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("genetic_id"), help_text=_("The genetic id of the aDNA."))
@@ -514,7 +504,6 @@ class aDNA(abstract.AbstractBaseModel):
         verbose_name_plural = _("aDNAs")
 
 class IsotopesBio(abstract.AbstractBaseModel):
-    bio_id     = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("Isotopes Bio ID"), help_text=_("Unique identifier for the Isotopes Bio."))
     site     = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the Isotopes Bio is located."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("sample"), help_text=_("The sample of the Isotopes Bio."))
     individual_id = models.IntegerField(null=True, blank=True, verbose_name=_("individual_id"), help_text=_("The individual id of the Isotopes Bio."))
@@ -551,7 +540,6 @@ class IsotopesBio(abstract.AbstractBaseModel):
 
 
 class LNHouses(abstract.AbstractBaseModel):
-    house_id     = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("House ID"), help_text=_("Unique identifier for the House."))
     site     = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the House is located."))
     number_houses = models.IntegerField(null=True, blank=True, verbose_name=_("number_houses"), help_text=_("The number of houses of the House."))
     number_BA_houses = models.IntegerField(null=True, blank=True, verbose_name=_("number_BA_houses"), help_text=_("The number of BA houses of the House."))
@@ -586,7 +574,6 @@ class LNHouses(abstract.AbstractBaseModel):
         verbose_name_plural = _("Late Neolithic Houses")
 
 class NorwayDaggers(abstract.AbstractBaseModel):
-    dagger_id    = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("Dagger ID"), help_text=_("Unique identifier for the Dagger."))
     site     = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the Dagger is located."))
     type = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("type"), help_text=_("The type of the Dagger."))
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("period"), help_text=_("The period of the Dagger."))
@@ -604,7 +591,6 @@ class NorwayDaggers(abstract.AbstractBaseModel):
         verbose_name_plural = _("Norway Daggers")
 
 class NorwayShaftHoleAxes(abstract.AbstractBaseModel):
-    shaft_hole_axe_id    = models.IntegerField(unique=True, null=True, blank=True, verbose_name=_("Shaft Hole Axe ID"), help_text=_("Unique identifier for the Shaft Hole Axe."))
     site     = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the Shaft Hole Axe is located."))
     museum = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("museum"), help_text=_("The museum of the Shaft Hole Axe."))
     museum_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("museum_number"), help_text=_("The museum number of the Shaft Hole Axe."))

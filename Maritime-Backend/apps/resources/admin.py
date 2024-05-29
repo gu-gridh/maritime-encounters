@@ -157,34 +157,30 @@ class LogBoatAdmin(admin.GISModelAdmin):
 
 @admin.register(LandingPoints)
 class LandingPointsAdmin(admin.GISModelAdmin):
-    list_display = ['landing_id', 'site', 'period']
-    search_fields = ['landing_id', 'site', 'period']
-    list_filter = ['landing_id', 'site']
-    ordering = ['landing_id']
+    list_display = ['site', 'period']
+    search_fields = ['site', 'period']
+    list_filter = ['site']
     inlines = [
         RelPeriodActivityLandingPoints,
     ]
 
 @admin.register(NewSamples)
 class NewSamplesAdmin(admin.GISModelAdmin):
-    list_display = ['sample_id', 'site']
-    search_fields = ['sample_id', 'site']
-    list_filter = ['sample_id', 'site']
-    ordering = ['sample_id']
+    list_display = ['site']
+    search_fields = ['site']
+    list_filter = ['site']
 
 @admin.register(Radiocarbon)
 class RadiocarbonAdmin(admin.GISModelAdmin):
-    list_display = ['date_id', 'site', 'period']
-    search_fields = ['date_id', 'site', 'period']
-    list_filter = ['date_id', 'site', 'period']
-    ordering = ['date_id']
+    list_display = ['site', 'period']
+    search_fields = ['site', 'period']
+    list_filter = ['site', 'period']
 
 @admin.register(MetalAnalysis)
 class MetalAnalysisAdmin(admin.GISModelAdmin):
-    list_display = ['metal_id', 'site']
-    search_fields = ['metal_id', 'site']
-    list_filter = ['metal_id', 'site']
-    ordering = ['metal_id']
+    list_display = ['site']
+    search_fields = ['site']
+    list_filter = ['site']
     inlines = [
             RelMetalElementAdmin,
             RelMetalIsotopAdmin
@@ -192,35 +188,30 @@ class MetalAnalysisAdmin(admin.GISModelAdmin):
 
 @admin.register(aDNA)
 class aDNAAdmin(admin.GISModelAdmin):
-    list_display = ['aDNA_id', 'site']
-    search_fields = ['aDNA_id', 'site']
-    list_filter = ['aDNA_id', 'site']
-    ordering = ['aDNA_id']
+    list_display = ['site']
+    search_fields = ['site']
+    list_filter = ['site']
 
 @admin.register(IsotopesBio)
 class IsotopesBioAdmin(admin.GISModelAdmin):
-    list_display = ['bio_id', 'site']
-    search_fields = ['bio_id', 'site']
-    list_filter = ['bio_id', 'site']
-    ordering = ['bio_id']
+    list_display = ['site']
+    search_fields = ['site']
+    list_filter = ['site']
 
 @admin.register(LNHouses)
 class LNHousesAdmin(admin.GISModelAdmin):
-    list_display = ['house_id', 'site']
-    search_fields = ['house_id', 'site']
-    list_filter = ['house_id', 'site']
-    ordering = ['house_id']
+    list_display = ['site']
+    search_fields = ['site']
+    list_filter = ['site']
 
 @admin.register(NorwayDaggers)
 class NorwayDaggersAdmin(admin.GISModelAdmin):
-    list_display = ['dagger_id', 'site']
-    search_fields = ['dagger_id', 'site']
-    list_filter = ['dagger_id', 'site']
-    ordering = ['dagger_id']
+    list_display = ['site']
+    search_fields = ['site']
+    list_filter = ['site']
 
 @admin.register(NorwayShaftHoleAxes)
 class NorwayShaftHoleAxesAdmin(admin.GISModelAdmin):
-    list_display = ['shaft_hole_axe_id', 'site', 'museum']
-    search_fields = ['shaft_hole_axe_id', 'site', 'museum']
-    list_filter = ['shaft_hole_axe_id', 'site', 'museum']
-    ordering = ['shaft_hole_axe_id']
+    list_display = ['site', 'museum']
+    search_fields = ['site', 'museum']
+    list_filter = ['site', 'museum']
