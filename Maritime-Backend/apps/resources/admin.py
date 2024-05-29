@@ -33,12 +33,19 @@ class SampleTypeAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
+@admin.register(Phase)
+class PhaseAdmin(admin.ModelAdmin):
+    list_display = ['text']
+    search_fields = ['text']
+    list_filter = ['text']
+    ordering = ['text']
 @admin.register(Period)
 class PeriodAdmin(admin.ModelAdmin):
-    list_display = ['text', 'start_date', 'end_date']
-    search_fields = ['text', 'start_date', 'end_date']
-    list_filter = ['text', 'start_date', 'end_date']
-    ordering = ['start_date', 'end_date', 'text']
+    list_display = ['name', 'start_date', 'end_date']
+    search_fields = ['name', 'start_date', 'end_date']
+    list_filter = ['name', 'start_date', 'end_date']
+    ordering = ['start_date', 'end_date', 'name']
+    autocomplete_fields = ['phase']
 
 @admin.register(PeroidActivity)
 class PeroidActivityAdmin(admin.ModelAdmin):

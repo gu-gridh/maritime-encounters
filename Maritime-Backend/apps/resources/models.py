@@ -71,8 +71,23 @@ class Fastening(abstract.AbstractTagModel):
         verbose_name_plural = _("Fastenings")
 
 
-class Period(abstract.AbstractTagModel):
+class Phase(abstract.AbstractTagModel):
+    # Represents the phase of the site
+
+    def __str__(self) -> str:
+        return self.text
+    
+    def __repr__(self) -> str:
+        return str(self)
+    
+    class Meta:
+        verbose_name = _("Phase")
+        verbose_name_plural = _("Phases")
+
+class Period(abstract.AbstractBaseModel):
     # Represents the period of the site
+    name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("name"), help_text=_("The name of the period."))
+    phase = models.ManyToManyField(Phase, blank=True, verbose_name=_("phase"), help_text=_("The phase of the period."))
     start_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("start_date"), help_text=_("The start date of the period."))
     end_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("end_date"), help_text=_("The end date of the period."))
 
@@ -452,7 +467,7 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     site     = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the metal is located."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("sample"), help_text=_("The sample of the metal."))
     
-    museum_entry = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("AMA"), help_text=_("The AMA of the metal."))
+    museum_entry = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("museum entries"), help_text=_("The AMA of the metal."))
     context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("context"), help_text=_("The context of the metal."))
     object_description = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("object_description"), help_text=_("The object description of the metal."))
     general_typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("general_typology"), help_text=_("The general typology of the metal."))
