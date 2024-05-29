@@ -90,7 +90,7 @@ class ADM4(Base):
     
 
 # ADM5: Communes
-class Commune(Base):
+class ADM5(Base):
 
     ADM0 = models.ForeignKey(ADM0, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM0"))
     ADM1 = models.ForeignKey(ADM1, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM1"))

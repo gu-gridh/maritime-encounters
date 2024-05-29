@@ -53,9 +53,9 @@ class ADM4dmin(admin.GISModelAdmin):
     autocomplete_fields = ['ADM3', 'ADM2', 'ADM1', 'ADM0']
 
 
-@admin.register(Commune)
+@admin.register(ADM5)
 class CommuneAdmin(admin.GISModelAdmin):
-    fields = get_fields(Commune, exclude=DEFAULT_EXCLUDE+["id"])
+    fields = get_fields(ADM5, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'ADM4', 'ADM3', 'ADM2', 'ADM1', 'ADM0']
     list_filter = ['name', 'ADM4', 'ADM3', 'ADM2', 'ADM1', 'ADM0']
