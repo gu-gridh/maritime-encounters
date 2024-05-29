@@ -91,11 +91,11 @@ class Period(abstract.AbstractBaseModel):
     start_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("start_date"), help_text=_("The start date of the period."))
     end_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("end_date"), help_text=_("The end date of the period."))
 
-    def __str__(self) -> str:
-        return self.name
+    # def __str__(self) -> str:
+    #     return self.name
 
-    def __repr__(self) -> str:
-        return str(self.name)
+    # def __repr__(self) -> str:
+    #     return str(self.name)
     
     class Meta:
         verbose_name = _("Period")
