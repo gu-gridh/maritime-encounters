@@ -56,7 +56,7 @@ class ADM2(Base):
         verbose_name_plural = _("ADM2")
     
     def __str__(self) -> str:
-        return f"{self.name} - {self.ADM1.name} - {self.ADM1.ADM0.name}"
+        return f"{self.name} - {self.ADM1.name} "
 
 # ADM3: Municipality
 class ADM3(Base):
@@ -67,7 +67,7 @@ class ADM3(Base):
         verbose_name_plural = _("ADM3")
     
     def __str__(self) -> str:
-        return f"{self.name} - {self.ADM2.name} "
+        return f"{self.name} - {self.ADM2.name}"
     
 
 # ADM4: Local Administrative Units
@@ -104,7 +104,7 @@ class Province(Base):
         verbose_name_plural = _("Provinces")
 
     def __str__(self) -> str:
-        return f"{self.name} - {self.ADM0.name}"
+        return f"{self.name} - {self.country.name}"
 class Parish(Base):
     
     country = models.ForeignKey(ADM0, related_name='parishes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("Country"))
