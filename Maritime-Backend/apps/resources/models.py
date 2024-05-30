@@ -31,6 +31,19 @@ class SiteType(abstract.AbstractTagModel):
         verbose_name_plural = _("Site Types")
 
 
+class Sampler(abstract.AbstractBaseModel):
+    # Represents the sampler of the sample
+    name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("name"), help_text=_("The name of the sampler."))
+    affiliation = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("affiliation"), help_text=_("The affiliation of the sampler."))
+
+    def __str__(self) -> str:
+        return self.name
+    
+    class Meta:
+        verbose_name = _("Sampler")
+        verbose_name_plural = _("Samplers")
+
+
 class Context(abstract.AbstractTagModel):
 
     def __str__(self) -> str:
@@ -42,6 +55,18 @@ class Context(abstract.AbstractTagModel):
     class Meta:
         verbose_name = _("Context")
         verbose_name_plural = _("Contexts")
+
+
+class DrilledLocation(abstract.AbstractTagModel):    
+    def __str__(self) -> str:
+        return self.text
+    
+    def __repr__(self) -> str:
+        return str(self)
+    
+    class Meta:
+        verbose_name = _("Drilled Location")
+        verbose_name_plural = _("Drilled Locations")
 
 class ObjectDescription(abstract.AbstractTagModel):
     
@@ -272,7 +297,7 @@ class Site(abstract.AbstractBaseModel):
 
     # Site name is a field that includes the name of the site and it can be used to search for the site
     # This feld can leave empty if the site name is not known
-    site_name       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("sitename"), help_text=_("Free-form, non-indexed site name of the site."))
+    name       = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("sitename"), help_text=_("Free-form, non-indexed site name of the site."))
      # Location
     coordinates  = models.PointField(null=True, blank=True, verbose_name=_("Coordinates"), help_text=_("Mid-point coordinates of the site."))
     ADM0 = models.ForeignKey(geography.ADM0, null=True, blank=True, related_name='sites',on_delete=models.SET_NULL)
@@ -287,9 +312,9 @@ class Site(abstract.AbstractBaseModel):
     def __str__(self) -> str:
 
         if self.site_name:
-            name_str = f"{self.site_name}"
+            name_str = f"{self.name}"
         elif self.placename:
-            name_str = f"Placename {self.placename}"
+            name_str = f"{self.placename}"
         else:
             name_str = ''
         return name_str
@@ -339,7 +364,7 @@ class PlankBoats(abstract.AbstractBaseModel):
 
     def __str__(self) -> str:
 
-        name_str = f"Boatname {self.name}"
+        name_str = f"{self.name}"
         return name_str
     
     class Meta:
@@ -388,7 +413,7 @@ class LogBoats(abstract.AbstractBaseModel):
 
     def __str__(self) -> str:
 
-        name_str = f"Logboatname {self.logboat_name}"
+        name_str = f" {self.name}"
         return name_str
     
     class Meta:        
@@ -407,7 +432,7 @@ class LandingPoints(abstract.AbstractBaseModel):
 
     def __str__(self) -> str:
 
-        name_str = f"Landingname {self.landing_id}"
+        name_str = f" {self.site.name} - {self.materials.text}"
         return name_str
     
     class Meta:                
@@ -422,14 +447,19 @@ class RelPresentActivityLandingPoints(models.Model):
 class NewSamples(abstract.AbstractBaseModel):
 
     site      = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the sample is located."))
-    elements = models.ManyToManyField(Element, blank=True, verbose_name=_("elements"), help_text=_("The elements of the sample."))
     aDNA = models.ForeignKey("aDNA", on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("aDNA"), help_text=_("The aDNA of the sample."))
     Carbon_to_nitrogen_ratio = models.ForeignKey(Carbon_Nitrogen_Ratio, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("C/N"), help_text=_("The presence of C/N."))
-
+    metal = models.ForeignKey(Element, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("metal"), help_text=_("The metal element"))
+    drilled_location = models.ForeignKey(DrilledLocation, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("drilled_location"), help_text=_("The drilled location of the metal."))
+    weight = models.FloatField(null=True, blank=True, verbose_name=_("weight"), help_text=_("The weight of the metal."))
+    Pictures = models.CharField(max_length=512, null=True, blank=True, verbose_name=_("Pictures"), help_text=_("The pictures of the metal."))
+    sampler = models.ForeignKey(Sampler, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("sampler"), help_text=_("The sampler of the metal."))
+    date = models.DateField(null=True, blank=True, verbose_name=_("date"), help_text=_("The date of the metal."))
+    note = models.TextField(null=True, blank=True, verbose_name=_("note"), help_text=_("The note of the metal."))
 
     def __str__(self) -> str:
 
-        name_str = f"Samplename {self.sample_id}"
+        name_str = f" {self.metal.element_name} - {self.sampler.name}"
         return name_str
     
     class Meta:                
@@ -467,7 +497,7 @@ class Radiocarbon(abstract.AbstractBaseModel):
 
     def __str__(self) -> str:
 
-        name_str = f"Date {self.date_id}"
+        name_str = f"{self.site.name} - {self.site_type.text}"
         return name_str
 
     class Meta:
@@ -487,20 +517,20 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("period"), help_text=_("The period of the metal."))
 
     def __str__(self) -> str:   
-        name_str = f"Metal {self.metal_id}"
+        name_str = f"{self.museum_entry}-{self.context}"
         return name_str
     
     class Meta:        
         verbose_name = _("Metal Analysis")
         verbose_name_plural = _("Metal Analyses")
 
-class RelMetalElement(models.Model):
+class MetalElement(models.Model):
     metal = models.ForeignKey(MetalAnalysis, on_delete=models.CASCADE, null=True, blank=True)
     elemnt = models.ForeignKey(Element, on_delete=models.CASCADE, null=True, blank=True)
     element_ratio = models.FloatField(null=True, blank=True, verbose_name=_("element_ratio"), help_text=_("The element ratio of the sample."))
 
 
-class RelMetalIsotop(models.Model):
+class MetalIsotop(models.Model):
     metal = models.ForeignKey(MetalAnalysis, on_delete=models.CASCADE, null=True, blank=True)
     lead_isotope = models.ForeignKey(LeadIsotope, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Lead_isotope"))
     lead_isotope_ratio = models.FloatField(null=True, blank=True, help_text=_("The isotope ratio of the metal."))
@@ -523,7 +553,7 @@ class aDNA(abstract.AbstractBaseModel):
     reference = models.TextField(null=True, blank=True, verbose_name=_("reference"), help_text=_("The reference of the aDNA."))
 
     def __str__(self) -> str:
-        name_str = f"aDNA {self.aDNA_id}"
+        name_str = f"{self.genetic_id}"
         return name_str
     
     class Meta:
@@ -558,7 +588,7 @@ class IsotopesBio(abstract.AbstractBaseModel):
     reference = models.TextField(null=True, blank=True, verbose_name=_("reference"), help_text=_("The reference of the Isotopes Bio."))
 
     def __str__(self) -> str:
-        name_str = f"IsotopesBio {self.bio_id}"
+        name_str = f"{self.individual_id}"
         return name_str
     
     class Meta:
@@ -593,7 +623,7 @@ class LNHouses(abstract.AbstractBaseModel):
     url = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("url"), help_text=_("The url of the House."))
 
     def __str__(self) -> str:
-        name_str = f"House {self.house_id}"
+        name_str = f" {self.number_houses}-{self.site.name}"
         return name_str
     
     class Meta:
@@ -610,7 +640,7 @@ class NorwayDaggers(abstract.AbstractBaseModel):
     references = models.TextField(null=True, blank=True, verbose_name=_("references"), help_text=_("The references of the Dagger."))
 
     def __str__(self) -> str:
-        name_str = f"Dagger {self.dagger_id}"
+        name_str = f"{self.type} - {self.context} {self.site.name}"
         return name_str
     
     class Meta:
@@ -628,7 +658,7 @@ class NorwayShaftHoleAxes(abstract.AbstractBaseModel):
     material = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("material"), help_text=_("The material of the Shaft Hole Axe."))
 
     def __str__(self) -> str:
-        name_str = f"ShaftHoleAxe {self.shaft_hole_axe_id}"
+        name_str = f"{self.museum}"
         return name_str
     
     class Meta:

@@ -10,7 +10,6 @@ from django.conf import settings
 class SiteFilter(AutocompleteFilter):
     title = _('Site') # display title
     field_name = 'site' # name of the foreign key field
-    
 
 @admin.register(Location)
 class LocationAdmin(admin.GISModelAdmin):
@@ -96,8 +95,13 @@ class ElementAdmin(admin.ModelAdmin):
     list_filter = ['element_name', 'element_symbol']
     ordering = ['element_name']
 
+
 class RelMetalElementAdmin(admin.TabularInline):
-    model = RelMetalElement
+    model = MetalElement
+    extra = 1
+
+class RelMetalIsotopAdmin(admin.TabularInline):
+    model = MetalIsotop
     extra = 1
 
 @admin.register(LeadIsotope)
@@ -106,10 +110,6 @@ class LeadIsotopeRationAdmin(admin.ModelAdmin):
     search_fields = ['text']
     list_filter = ['text']
     ordering = ['text']
-
-class RelMetalIsotopAdmin(admin.TabularInline):
-    model = RelMetalIsotop
-    extra = 1
 
 class RelPeriodActivityLandingPoints(admin.TabularInline):
     model = RelPresentActivityLandingPoints
@@ -137,16 +137,16 @@ class DatingMethodAdmin(admin.ModelAdmin):
     ordering = ['text']
 @admin.register(Site)
 class SiteAdmin(admin.GISModelAdmin):
-    list_display = ['site_name']
-    search_fields = ['site_name', 'ADM1', 'ADM2', 'ADM3']
+    list_display = ['name']
+    search_fields = ['name', 'ADM1', 'ADM2', 'ADM3']
     autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3']
-    list_filter = ['site_name', 'ADM1', 'ADM2', 'ADM3']
+    list_filter = ['name', 'ADM1', 'ADM2', 'ADM3']
     # fieldsets = (
     #     (None, {
     #         'fields': ('site_name')
     #     }),
     # )
-    ordering = ['site_name']
+    ordering = ['name']
 
 @admin.register(PlankBoats)
 class PlankBoatAdmin(admin.GISModelAdmin):
@@ -189,9 +189,9 @@ class MetalAnalysisAdmin(admin.GISModelAdmin):
     search_fields = ['site']
     list_filter = ['site']
     inlines = [
-            RelMetalElementAdmin,
-            RelMetalIsotopAdmin
-        ]
+        RelMetalElementAdmin,
+        RelMetalIsotopAdmin,
+    ]
 
 @admin.register(aDNA)
 class aDNAAdmin(admin.GISModelAdmin):
