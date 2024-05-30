@@ -50,35 +50,29 @@ class ADM1(Base):
 # ADM2: Counties
 class ADM2(Base):
 
-    ADM0 = models.ForeignKey(ADM0, related_name='counties', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM0"))
     ADM1 = models.ForeignKey(ADM1, related_name='counties', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM1"))
     class Meta:
         verbose_name = _("ADM2")
         verbose_name_plural = _("ADM2")
     
     def __str__(self) -> str:
-        return f"{self.name} - {self.ADM1.name} - {self.ADM0.name}"
+        return f"{self.name} - {self.ADM1.name} - {self.ADM1.ADM0.name}"
 
 # ADM3: Municipality
 class ADM3(Base):
 
-    ADM0 = models.ForeignKey(ADM0, related_name='municipalities', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM0"))
-    ADM1 = models.ForeignKey(ADM1, related_name='municipalities', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM1"))
     ADM2 = models.ForeignKey(ADM2, related_name='municipalities', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM2"))
     class Meta:
         verbose_name = _("ADM3")
         verbose_name_plural = _("ADM3")
     
     def __str__(self) -> str:
-        return f"{self.name} - {self.ADM2.name} - {self.ADM1.name} - {self.ADM0.name}"
+        return f"{self.name} - {self.ADM2.name} "
     
 
 # ADM4: Local Administrative Units
 class ADM4(Base):
 
-    ADM0 = models.ForeignKey(ADM0, related_name='laus', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM0"))
-    ADM1 = models.ForeignKey(ADM1, related_name='laus', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM1"))
-    ADM2 = models.ForeignKey(ADM2, related_name='laus', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM2"))
     ADM3 = models.ForeignKey(ADM3, related_name='laus', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM3"))
 
     class Meta:
@@ -86,23 +80,19 @@ class ADM4(Base):
         verbose_name_plural = _("ADM4")
     
     def __str__(self) -> str:
-        return f"{self.name} - {self.ADM3.name} - {self.ADM2.name} - {self.ADM1.name} - {self.ADM0.name}"
+        return f"{self.name} - {self.ADM3.name}  "
     
 
 # ADM5: Communes
 class ADM5(Base):
 
-    ADM0 = models.ForeignKey(ADM0, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM0"))
-    ADM1 = models.ForeignKey(ADM1, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM1"))
-    ADM2 = models.ForeignKey(ADM2, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM2"))
-    ADM3 = models.ForeignKey(ADM3, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM3"))
     ADM4 = models.ForeignKey(ADM4, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM4"))
     class Meta:
         verbose_name = _("ADM5")
         verbose_name_plural = _("ADM5")
     
     def __str__(self) -> str:
-        return f"{self.name} - {self.ADM4.name} - {self.ADM3.name} - {self.ADM2.name} - {self.ADM1.name} - {self.ADM0.name}"
+        return f"{self.name} - {self.ADM4.name} "
     
 
 class Province(Base):
