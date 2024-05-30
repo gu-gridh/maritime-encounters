@@ -45,7 +45,7 @@ class ADM3Admin(admin.GISModelAdmin):
     list_filter = ['name', 'ADM2']
     search_fields = ['name', 'ADM2']
     autocomplete_fields = ['ADM2']
-    list_per_page = 30  # Adjust the number to your needs
+    list_per_page = 20  # Adjust the number to your needs
 
 
 
@@ -57,7 +57,7 @@ class ADM4dmin(admin.GISModelAdmin):
     list_filter = ['name', 'ADM3']
     search_fields = ['name','ADM3']
     autocomplete_fields = ['ADM3']
-    list_per_page = 30  # Adjust the number to your needs
+    list_per_page = 20  # Adjust the number to your needs
 
 
 
@@ -69,7 +69,7 @@ class ADM5Admin(admin.GISModelAdmin):
     list_filter = ['name', 'ADM4']
     search_fields = ['name', 'ADM4']
     autocomplete_fields = ['ADM4']
-    list_per_page = 30
+    list_per_page = 20  # Adjust the number to your needs
 
 
 @admin.register(Province)
