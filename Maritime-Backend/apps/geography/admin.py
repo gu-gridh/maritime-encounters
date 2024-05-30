@@ -18,7 +18,7 @@ class ADM1Admin(admin.GISModelAdmin):
     fields = get_fields(ADM1, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'ADM0']
-    list_filter = ['name', 'ADM0']
+    # list_filter = ['name', 'ADM0']
     search_fields = ['name', 'ADM0']
     autocomplete_fields = ['ADM0']
     list_per_page = 30  # Adjust the number to your needs
