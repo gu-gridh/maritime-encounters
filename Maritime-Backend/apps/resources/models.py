@@ -311,7 +311,7 @@ class Site(abstract.AbstractBaseModel):
 
     def __str__(self) -> str:
 
-        if self.site_name:
+        if self.name:
             name_str = f"{self.name}"
         elif self.placename:
             name_str = f"{self.placename}"
