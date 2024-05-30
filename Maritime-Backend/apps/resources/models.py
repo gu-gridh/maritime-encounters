@@ -43,6 +43,18 @@ class Context(abstract.AbstractTagModel):
         verbose_name = _("Context")
         verbose_name_plural = _("Contexts")
 
+class ObjectDescription(abstract.AbstractTagModel):
+    
+        def __str__(self) -> str:
+            return self.text
+        
+        def __repr__(self) -> str:
+            return str(self)
+        
+        class Meta:
+            verbose_name = _("Object Description")
+            verbose_name_plural = _("Object Descriptions")
+
 class SampleType(abstract.AbstractTagModel):
     # Represents the type of the sample
 
@@ -469,7 +481,7 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     
     museum_entry = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("museum entries"), help_text=_("The AMA of the metal."))
     context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("context"), help_text=_("The context of the metal."))
-    object_description = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("object_description"), help_text=_("The object description of the metal."))
+    object_description = models.ForeignKey(ObjectDescription, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("object_description"), help_text=_("The object description of the metal."))
     general_typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("general_typology"), help_text=_("The general typology of the metal."))
     typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("typology"), help_text=_("The typology of the metal."))
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("period"), help_text=_("The period of the metal."))
