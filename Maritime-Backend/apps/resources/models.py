@@ -56,18 +56,6 @@ class Context(abstract.AbstractTagModel):
         verbose_name = _("Context")
         verbose_name_plural = _("Contexts")
 
-
-class DrilledLocation(abstract.AbstractTagModel):    
-    def __str__(self) -> str:
-        return self.text
-    
-    def __repr__(self) -> str:
-        return str(self)
-    
-    class Meta:
-        verbose_name = _("Drilled Location")
-        verbose_name_plural = _("Drilled Locations")
-
 class ObjectDescription(abstract.AbstractTagModel):
     
         def __str__(self) -> str:
@@ -450,7 +438,7 @@ class NewSamples(abstract.AbstractBaseModel):
     aDNA = models.ForeignKey("aDNA", on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("aDNA"), help_text=_("The aDNA of the sample."))
     Carbon_to_nitrogen_ratio = models.ForeignKey(Carbon_Nitrogen_Ratio, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("C/N"), help_text=_("The presence of C/N."))
     metal = models.ForeignKey(Element, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("metal"), help_text=_("The metal element"))
-    drilled_location = models.ForeignKey(DrilledLocation, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("drilled_location"), help_text=_("The drilled location of the metal."))
+    drilled_location = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("drilled_location"), help_text=_("The drilled location of the sample."))
     weight = models.FloatField(null=True, blank=True, verbose_name=_("weight"), help_text=_("The weight of the metal."))
     Pictures = models.CharField(max_length=512, null=True, blank=True, verbose_name=_("Pictures"), help_text=_("The pictures of the metal."))
     sampler = models.ForeignKey(Sampler, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("sampler"), help_text=_("The sampler of the metal."))

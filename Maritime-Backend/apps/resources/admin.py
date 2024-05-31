@@ -81,13 +81,6 @@ class ContextAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
-@admin.register(DrilledLocation)
-class DrilledLocationAdmin(admin.ModelAdmin):
-    list_display = ['text']
-    search_fields = ['text']
-    list_filter = ['text']
-    ordering = ['text']
-
 @admin.register(Sampler)
 class SamplerAdmin(admin.ModelAdmin):
     list_display = ['name']
