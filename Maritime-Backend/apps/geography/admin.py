@@ -19,7 +19,7 @@ class ADM1Admin(admin.GISModelAdmin):
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'ADM0']
     # list_filter = ['name', 'ADM0']
-    search_fields = ['name', 'ADM0']
+    search_fields = ['name', 'ADM0__name']
     autocomplete_fields = ['ADM0']
     list_per_page = 30  # Adjust the number to your needs
 
@@ -31,7 +31,7 @@ class ADM2Admin(admin.GISModelAdmin):
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'ADM1']
     # list_filter = ['name', 'ADM1']
-    search_fields = ['name', 'ADM1']
+    search_fields = ['name', 'ADM1__name', 'ADM1__ADM0__name']
     autocomplete_fields = ['ADM1']
     list_per_page = 30  # Adjust the number to your needs
 
@@ -43,7 +43,7 @@ class ADM3Admin(admin.GISModelAdmin):
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'ADM2']
     # list_filter = ['name', 'ADM2']
-    search_fields = ['name']
+    search_fields = ['name', 'ADM2__name', 'ADM2__ADM1__name', 'ADM2__ADM1__ADM0__name']
     autocomplete_fields = ['ADM2']
     list_per_page = 30  # Adjust the number to your needs
 
@@ -55,7 +55,7 @@ class ADM4dmin(admin.GISModelAdmin):
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'ADM3']
     # list_filter = ['name', 'ADM3']
-    search_fields = ['name','ADM3']
+    search_fields = ['name','ADM3__name', 'ADM3__ADM2__name', 'ADM3__ADM2__ADM1__name', 'ADM3__ADM2__ADM1__ADM0__name']
     autocomplete_fields = ['ADM3']
     list_per_page = 30  # Adjust the number to your needs
 
@@ -67,7 +67,7 @@ class ADM5Admin(admin.GISModelAdmin):
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'ADM4']
     # list_filter = ['name', 'ADM4']
-    search_fields = ['name']
+    search_fields = ['name', 'ADM4__name', 'ADM4__ADM3__ADM2__name', 'ADM4__ADM3__ADM2__ADM1__name', 'ADM4__ADM3__ADM2__ADM1__ADM0__name']
     autocomplete_fields = ['ADM4']
     list_per_page = 30  # Adjust the number to your needs
 
