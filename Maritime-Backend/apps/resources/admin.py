@@ -88,6 +88,13 @@ class DrilledLocationAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
+@admin.register(Sampler)
+class SamplerAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    list_filter = ['name']
+    ordering = ['name']
+
 @admin.register(ObjectDescription)
 class ObjectDescriptionAdmin(admin.ModelAdmin):
     list_display = ['text']
