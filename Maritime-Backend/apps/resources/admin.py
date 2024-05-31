@@ -153,8 +153,8 @@ class DatingMethodAdmin(admin.ModelAdmin):
 class SiteAdmin(admin.GISModelAdmin):
     list_display = ['name', 'ADM0',]
     search_fields = ['name', 'ADM0', 'ADM1',]
-    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3']
-    list_filter = ['name', 'ADM1']
+    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4']
+    # list_filter = ['name', 'ADM1']
     ordering = ['name']
 
 @admin.register(PlankBoats)
