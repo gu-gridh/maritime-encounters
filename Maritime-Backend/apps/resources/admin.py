@@ -81,6 +81,14 @@ class ContextAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
+
+@admin.register(ObjectDescription)
+class ObjectDescriptionAdmin(admin.ModelAdmin):
+    list_display = ['text']
+    search_fields = ['text']
+    list_filter = ['text']
+    ordering = ['text']
+
 @admin.register(Cleat)
 class CleatAdmin(admin.ModelAdmin):
     list_display = ['cleat_number', 'cleat_length', 'cleat_width', 'cleat_heigth']
