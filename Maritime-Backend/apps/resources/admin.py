@@ -40,7 +40,7 @@ class PhaseAdmin(admin.ModelAdmin):
     ordering = ['text']
 @admin.register(Period)
 class PeriodAdmin(admin.ModelAdmin):
-    list_display = ['name', 'start_date', 'end_date']
+    list_display = ['name', 'phase', 'start_date', 'end_date']
     search_fields = ['name', 'start_date', 'end_date']
     list_filter = ['name', 'start_date', 'end_date']
     ordering = ['start_date', 'end_date', 'name']
