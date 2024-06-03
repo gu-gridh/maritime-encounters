@@ -112,7 +112,7 @@ class Phase(abstract.AbstractTagModel):
 class Period(abstract.AbstractBaseModel):
     # Represents the period of the site
     name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("name"), help_text=_("The name of the period."))
-    phase = models.ForeignKey(Phase, on_delete=models.CASCADE, null=True, blank=True, related_name='period_phase', blank=True, verbose_name=_("phase"), help_text=_("The phase of the period."))
+    phase = models.ForeignKey(Phase, on_delete=models.CASCADE, null=True, related_name='period_phase', blank=True, verbose_name=_("phase"), help_text=_("The phase of the period."))
     start_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("start_date"), help_text=_("The start date of the period."))
     end_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("end_date"), help_text=_("The end date of the period."))
 
