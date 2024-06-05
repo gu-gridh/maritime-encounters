@@ -14,7 +14,7 @@ class SiteFilter(AutocompleteFilter):
 @admin.register(Location)
 class LocationAdmin(admin.GISModelAdmin):
     list_display = ['location_name', 'site']
-    search_fields = ['location_name', 'site']
+    search_fields = ['location_name', 'site__name']
     list_filter = ['location_name', 'site']
     ordering = ['location_name']
 
@@ -41,7 +41,7 @@ class PhaseAdmin(admin.ModelAdmin):
 @admin.register(Period)
 class PeriodAdmin(admin.ModelAdmin):
     list_display = ['name', 'phase', 'start_date', 'end_date']
-    search_fields = ['name', 'start_date', 'end_date']
+    search_fields = ['name', 'phase', 'start_date', 'end_date']
     list_filter = ['name', 'start_date', 'end_date']
     ordering = ['start_date', 'end_date', 'name']
     autocomplete_fields = ['phase']
@@ -152,7 +152,7 @@ class DatingMethodAdmin(admin.ModelAdmin):
 @admin.register(Site)
 class SiteAdmin(admin.GISModelAdmin):
     list_display = ['name', 'ADM0',]
-    search_fields = ['name', 'ADM0', 'ADM1',]
+    search_fields = ['name', 'ADM0__name', 'ADM1__name',]
     autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4']
     # list_filter = ['name', 'ADM1']
     ordering = ['name']
@@ -160,21 +160,21 @@ class SiteAdmin(admin.GISModelAdmin):
 @admin.register(PlankBoats)
 class PlankBoatAdmin(admin.GISModelAdmin):
     list_display = ['name', 'location', 'period', 'location']
-    search_fields = ['name', 'location', 'period']
+    search_fields = ['name', 'location__location_name', 'period__name']
     list_filter = ['name', 'location']
     ordering = ['name']
 
 @admin.register(LogBoats)
 class LogBoatAdmin(admin.GISModelAdmin):
     list_display = ['name', 'site', 'period']
-    search_fields = ['name', 'period']
+    search_fields = ['name', 'period__name', 'site__name']
     list_filter = ['name']
     ordering = ['name']
 
 @admin.register(LandingPoints)
 class LandingPointsAdmin(admin.GISModelAdmin):
     list_display = ['site', 'period']
-    search_fields = ['site', 'period']
+    search_fields = ['site__name', 'period__name']
     list_filter = ['site']
     inlines = [
         RelPeriodActivityLandingPoints,
@@ -183,19 +183,19 @@ class LandingPointsAdmin(admin.GISModelAdmin):
 @admin.register(NewSamples)
 class NewSamplesAdmin(admin.GISModelAdmin):
     list_display = ['site']
-    search_fields = ['site']
+    search_fields = ['site__name']
     list_filter = ['site']
 
 @admin.register(Radiocarbon)
 class RadiocarbonAdmin(admin.GISModelAdmin):
     list_display = ['site', 'period']
-    search_fields = ['site', 'period']
+    search_fields = ['site__name', 'period__name']
     list_filter = ['site', 'period']
 
 @admin.register(MetalAnalysis)
 class MetalAnalysisAdmin(admin.GISModelAdmin):
     list_display = ['site']
-    search_fields = ['site']
+    search_fields = ['site__name']
     list_filter = ['site']
     inlines = [
         RelMetalElementAdmin,
@@ -205,29 +205,29 @@ class MetalAnalysisAdmin(admin.GISModelAdmin):
 @admin.register(aDNA)
 class aDNAAdmin(admin.GISModelAdmin):
     list_display = ['site']
-    search_fields = ['site']
+    search_fields = ['site__name']
     list_filter = ['site']
 
 @admin.register(IsotopesBio)
 class IsotopesBioAdmin(admin.GISModelAdmin):
     list_display = ['site']
-    search_fields = ['site']
+    search_fields = ['site__name']
     list_filter = ['site']
 
 @admin.register(LNHouses)
 class LNHousesAdmin(admin.GISModelAdmin):
     list_display = ['site']
-    search_fields = ['site']
+    search_fields = ['site__name']
     list_filter = ['site']
 
 @admin.register(NorwayDaggers)
 class NorwayDaggersAdmin(admin.GISModelAdmin):
     list_display = ['site']
-    search_fields = ['site']
+    search_fields = ['site__name']
     list_filter = ['site']
 
 @admin.register(NorwayShaftHoleAxes)
 class NorwayShaftHoleAxesAdmin(admin.GISModelAdmin):
     list_display = ['site', 'museum']
-    search_fields = ['site', 'museum']
+    search_fields = ['site__name', 'museum']
     list_filter = ['site', 'museum']
