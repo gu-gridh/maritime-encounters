@@ -199,8 +199,8 @@ class Cleat(abstract.AbstractBaseModel):
 
 
 class Element(abstract.AbstractBaseModel):
-    element_name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("elemant_name"), help_text=_("The elemant name of the sample."))
-    element_symbol = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("element_symbol"), help_text=_("The element symbol of the sample."))
+    name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("elemant_name"), help_text=_("The elemant name of the sample."))
+    symbol = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("element_symbol"), help_text=_("The element symbol of the sample."))
     atomic_number = models.IntegerField(null=True, blank=True, verbose_name=_("element_number"), help_text=_("The atomic number of the sample."))
 
     def __str__(self) -> str:
