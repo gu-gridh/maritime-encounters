@@ -204,7 +204,7 @@ class Element(abstract.AbstractBaseModel):
     atomic_number = models.IntegerField(null=True, blank=True, verbose_name=_("element_number"), help_text=_("The atomic number of the sample."))
 
     def __str__(self) -> str:
-        return self.element_name    
+        return self.name    
 
     class Meta:     
         verbose_name = _("Elemnt")
