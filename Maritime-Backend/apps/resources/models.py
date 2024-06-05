@@ -450,7 +450,7 @@ class NewSamples(abstract.AbstractBaseModel):
 
     def __str__(self) -> str:
 
-        name_str = f" {self.metal.element_name} - {self.sampler.name}"
+        name_str = f" {self.metal.name} - {self.sampler.name}"
         return name_str
     
     class Meta:                
