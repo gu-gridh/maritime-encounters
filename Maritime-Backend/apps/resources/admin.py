@@ -182,7 +182,7 @@ class LandingPointsAdmin(admin.GISModelAdmin):
 
 @admin.register(NewSamples)
 class NewSamplesAdmin(admin.GISModelAdmin):
-    list_display = ['site', 'museum_entry', 'context']
+    list_display = ['site', 'sampler', 'metal']
     search_fields = ['site__name']
     list_filter = ['site']
 
@@ -194,7 +194,7 @@ class RadiocarbonAdmin(admin.GISModelAdmin):
 
 @admin.register(MetalAnalysis)
 class MetalAnalysisAdmin(admin.GISModelAdmin):
-    list_display = ['site']
+    list_display = ['site', 'museum_entry', 'context']
     search_fields = ['site__name']
     list_filter = ['site']
     inlines = [

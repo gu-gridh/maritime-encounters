@@ -449,8 +449,12 @@ class NewSamples(abstract.AbstractBaseModel):
     note = models.TextField(null=True, blank=True, verbose_name=_("note"), help_text=_("The note of the metal."))
 
     def __str__(self) -> str:
-
-        name_str = f" {self.metal.name} - {self.sampler.name}"
+        if self.metal and self.sampler:
+            name_str = f" {self.metal.name} - {self.sampler.name}"
+        if self.metal:
+            name_str = f" {self.metal.name}"
+        if self.sampler:
+            name_str = f" {self.sampler.name}"
         return name_str
     
     class Meta:                
