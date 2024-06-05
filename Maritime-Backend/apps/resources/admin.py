@@ -182,7 +182,7 @@ class LandingPointsAdmin(admin.GISModelAdmin):
 
 @admin.register(NewSamples)
 class NewSamplesAdmin(admin.GISModelAdmin):
-    list_display = ['site']
+    list_display = ['site', 'museum_entry', 'context']
     search_fields = ['site__name']
     list_filter = ['site']
 
