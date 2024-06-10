@@ -23,7 +23,7 @@ class SiteGeoViewSet(GeoViewSet):
     queryset = models.Site.objects.all()
 
     filterset_fields = get_fields(models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
-    search_fields = ['placename']
+    search_fields = ['placename', 'name']
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
 
@@ -31,4 +31,7 @@ class SiteGeoViewSet(GeoViewSet):
 class MetalAnalysisViewSet(DynamicDepthViewSet):
     serializer_class = serializers.MetalAnalysisSerializer
     queryset = models.MetalAnalysis.objects.all()
+    filterset_fields = get_fields(models.MetalAnalysis, exclude=DEFAULT_FIELDS)
+    search_fields = ['site__name']
+
 
