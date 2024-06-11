@@ -79,7 +79,7 @@ class ProvinceAdmin(admin.GISModelAdmin):
     list_display = ['name', 'country']
     # list_filter = ['name', 'country']
     search_fields = ['name', 'country']
-    autocomplete_fields = ['country']
+    autocomplete_fields = ['country', 'ADM1', 'ADM2']
 
 @admin.register(Parish)
 class ParishAdmin(admin.GISModelAdmin):
@@ -88,4 +88,4 @@ class ParishAdmin(admin.GISModelAdmin):
     list_display = ['name', 'code', 'country']
     # list_filter = ['name', 'country']
     search_fields = ['name', ]
-    autocomplete_fields = ['country']
+    autocomplete_fields = ['country', 'county', 'municipality', 'province']

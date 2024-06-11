@@ -98,7 +98,8 @@ class ADM5(Base):
 class Province(Base):
 
     country = models.ForeignKey(ADM0, related_name='provinces', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("Country"))
-
+    ADM1 = models.ForeignKey(ADM1, related_name='provinces', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("Region"))
+    ADM2 = models.ForeignKey(ADM2, related_name='provinces', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("County"))
     class Meta:
         verbose_name = _("Province")
         verbose_name_plural = _("Provinces")
