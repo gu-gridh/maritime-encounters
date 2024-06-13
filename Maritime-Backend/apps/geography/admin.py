@@ -76,9 +76,9 @@ class ADM5Admin(admin.GISModelAdmin):
 class ProvinceAdmin(admin.GISModelAdmin):
     fields = get_fields(Province, exclude=DEFAULT_EXCLUDE+["id"])
     readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name', 'country']
+    list_display = ['name', 'code', 'country']
     # list_filter = ['name', 'country']
-    search_fields = ['name', 'country']
+    search_fields = ['name']
     autocomplete_fields = ['country']
 
 @admin.register(Parish)
@@ -87,5 +87,5 @@ class ParishAdmin(admin.GISModelAdmin):
     readonly_fields = [*DEFAULT_FIELDS]
     list_display = ['name', 'code', 'country']
     # list_filter = ['name', 'country']
-    search_fields = ['name', ]
+    search_fields = ['name']
     autocomplete_fields = ['country', 'county', 'municipality', 'province']
