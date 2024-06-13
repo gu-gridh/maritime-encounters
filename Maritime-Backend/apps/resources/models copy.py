@@ -440,6 +440,28 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     isotope_ratio = models.ManyToManyField(LeadIsotopeRation, blank=True, verbose_name=_("isotope_ratio"), help_text=_("The isotope ratio of the metal."))
     elements = models.ManyToManyField(Element, blank=True, verbose_name=_("elements"), help_text=_("The elements of the metal."))
 
+    # Lead Isotope ratios
+    r_208Pb_206Pb = models.FloatField(null=True, blank=True, verbose_name=_("208Pb/204Pb"), help_text=_("The 208Pb/204Pb of the metal."))
+    r_207Pb_206Pb = models.FloatField(null=True, blank=True, verbose_name=_("207Pb/206Pb"), help_text=_("The 207Pb/206Pb of the metal."))
+    r_206Pb_204Pb = models.FloatField(null=True, blank=True, verbose_name=_("206Pb/204Pb"), help_text=_("The 206Pb/204Pb of the metal."))
+    r_208Pb_204Pb = models.FloatField(null=True, blank=True, verbose_name=_("208Pb/204Pb"), help_text=_("The 208Pb/204Pb of the metal."))
+
+    # elements
+    # S = models.FloatField(null=True, blank=True, verbose_name=_("S"), help_text=_("The S of the metal."))
+    # Fe = models.FloatField(null=True, blank=True, verbose_name=_("Fe"), help_text=_("The Fe of the metal."))
+    # Co = models.FloatField(null=True, blank=True, verbose_name=_("Co"), help_text=_("The Co of the metal."))
+    # Ni = models.FloatField(null=True, blank=True, verbose_name=_("Ni"), help_text=_("The Ni of the metal."))
+    # Cu = models.FloatField(null=True, blank=True, verbose_name=_("Cu"), help_text=_("The Cu of the metal."))
+    # Zn = models.FloatField(null=True, blank=True, verbose_name=_("Zn"), help_text=_("The Zn of the metal."))
+    # As = models.FloatField(null=True, blank=True, verbose_name=_("As"), help_text=_("The As of the metal."))
+    # Ag = models.FloatField(null=True, blank=True, verbose_name=_("Ag"), help_text=_("The Ag of the metal."))
+    # Sn = models.FloatField(null=True, blank=True, verbose_name=_("Sn"), help_text=_("The Sn of the metal."))
+    # Sb = models.FloatField(null=True, blank=True, verbose_name=_("Sb"), help_text=_("The Sb of the metal."))
+    # Au = models.FloatField(null=True, blank=True, verbose_name=_("Au"), help_text=_("The Au of the metal."))
+    # Pb = models.FloatField(null=True, blank=True, verbose_name=_("Pb"), help_text=_("The Pb of the metal."))
+    # Bi = models.FloatField(null=True, blank=True, verbose_name=_("Bi"), help_text=_("The Bi of the metal."))
+    # Li = models.FloatField(null=True, blank=True, verbose_name=_("Li"), help_text=_("The Li of the metal."))
+
     def __str__(self) -> str:   
         name_str = f"Metal {self.metal_id}"
         return name_str
