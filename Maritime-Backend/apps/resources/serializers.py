@@ -45,6 +45,7 @@ class SiteSerializer(DynamicDepthSerializer):
     class Meta:
         model = Site
         fields = ['id']+get_fields(Site, exclude=DEFAULT_FIELDS)
+
 class SiteGeoSerializer(GeoFeatureModelSerializer):
 
     class Meta:
@@ -52,6 +53,12 @@ class SiteGeoSerializer(GeoFeatureModelSerializer):
         fields = ['id']+get_fields(Site, exclude=DEFAULT_FIELDS+['coordinates'])
         geo_field = 'coordinates'
 
+class SiteCoordinatesSerializer(GeoFeatureModelSerializer):
+    class Meta:
+        model = Site
+        fields = ['id', 'name']
+        geo_field = 'coordinates'
+        depth = 1
 
 class ExcludePlolygonSiteGeoSerializer(DynamicDepthSerializer):
     ADM0 = ExcludePloygonFieldADM0Serializer()

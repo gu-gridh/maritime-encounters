@@ -17,6 +17,12 @@ class SiteViewSet(DynamicDepthViewSet):
     bbox_filter_include_overlapping = True
 
 
+class SiteCoordinatesViewSet(GeoViewSet):
+    serializer_class = serializers.SiteCoordinatesSerializer
+    queryset = models.Site.objects.all().order_by('id')
+    filterset_fields = get_fields(models.Site, exclude=DEFAULT_FIELDS + ['geometry'])
+    
+
 class SiteGeoViewSet(GeoViewSet):
 
     serializer_class = serializers.SiteGeoSerializer
