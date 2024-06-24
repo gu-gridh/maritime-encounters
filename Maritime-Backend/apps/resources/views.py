@@ -20,7 +20,7 @@ class SiteViewSet(DynamicDepthViewSet):
 class SiteCoordinatesViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
     queryset = models.Site.objects.all().order_by('id')
-    filterset_fields = get_fields(models.Site, exclude=DEFAULT_FIELDS + ['geometry'])
+    filterset_fields = get_fields(models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
     
 
 class SiteGeoViewSet(GeoViewSet):
