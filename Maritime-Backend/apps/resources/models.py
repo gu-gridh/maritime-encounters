@@ -473,6 +473,7 @@ class Radiocarbon(abstract.AbstractBaseModel):
     
     c14_age = models.IntegerField(null=True, blank=True, verbose_name=_("c14_age"), help_text=_("The radiocarbion age"))
     c14_std = models.IntegerField(null=True, blank=True, verbose_name=_("c14_std"), help_text=_("The radiocarbion deviation"))
+    density = models.FloatField(null=True, blank=True, verbose_name=_("density"), help_text=_("The quality measure of the measurement)."))
     
     material = models.ForeignKey(Material, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("material"), help_text=_("The material of the Radiocarbon."))
     species = models.ForeignKey(Species, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("species"), help_text=_("The species of the Radiocarbon."))
@@ -480,6 +481,8 @@ class Radiocarbon(abstract.AbstractBaseModel):
     d13c = models.FloatField(null=True, blank=True, verbose_name=_("d13c"), help_text=_("The delta 13c of the sample."))
     d15n = models.FloatField(null=True, blank=True, verbose_name=_("d15n"), help_text=_("The d15n of the sample."))
     
+    feature = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("feature"), help_text=_("The feature of the Radiocarbon."))
+
     percentage_of_Carbon = models.FloatField(null=True, blank=True, verbose_name=_("percentage_of_Carbon"), help_text=_("The percentage of Carbon of the sample."))
     Carbon_ratio_to_Nitrogen = models.FloatField(null=True, blank=True, verbose_name=_("percentage_of_Nitrogen"), help_text=_("The percentage of the Carbon to Nitrogen."))
     percentage_of_Yield = models.FloatField(null=True, blank=True, verbose_name=_("percentage_of_Yield"), help_text=_("The percentage of the Yield of the sample."))
