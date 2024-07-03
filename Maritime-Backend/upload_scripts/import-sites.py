@@ -11,7 +11,7 @@ from apps.geography.models import *
 from apps.resources.models import Site  # Replace 'your_app' with the name of your Django app
 
 # Path to your CSV file
-csv_file_path = '../resources/NMI_samples_final_AGCorrection.csv'
+csv_file_path = ''
 
 # Load the CSV data
 df = pd.read_csv(csv_file_path)
