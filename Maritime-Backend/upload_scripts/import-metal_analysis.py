@@ -11,7 +11,7 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5
 from apps.resources.models import *  # Replace 'your_app' with the name of your Django app
 
 # Path to your CSV file
-csv_file_path = '../resources/NMI_samples_final_AGCorrection.csv'
+csv_file_path = ''
 
 # Load the CSV data
 df = pd.read_csv(csv_file_path)
