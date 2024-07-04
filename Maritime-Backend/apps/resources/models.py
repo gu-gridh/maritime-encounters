@@ -466,7 +466,7 @@ class Radiocarbon(abstract.AbstractBaseModel):
 
     site      = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site"), help_text=_("The site in which the date is located."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("sample"), help_text=_("The sample of the Radiocarbon."))
-    site_type = models.ForeignKey(SiteType, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("site_type"), help_text=_("The site type."))
+    site_type = models.ManyToManyField(SiteType, verbose_name=_("site_type"), help_text=_("The site type."))
     lab_id     = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("lab_id"), help_text=_("The lab id of the sample."))
 
     period      = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("period"), help_text=_("The period of the Radiocarbon."))
