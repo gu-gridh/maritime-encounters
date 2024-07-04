@@ -1,8 +1,12 @@
 import os
+import sys
 import django
 import pandas as pd
 from django.contrib.gis.geos import Point
 from django.contrib.gis.geos import GEOSGeometry
+
+# Add the parent directory to the system path
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Set up Django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maritime.settings')  # Replace 'your_project' with your project's name
