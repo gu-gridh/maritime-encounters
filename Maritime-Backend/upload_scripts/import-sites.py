@@ -24,16 +24,34 @@ df = pd.read_csv(csv_file_path)
    
 def upload_sites(data):
     for row in data.itertuples(index=False):
-        adm0 = ADM0.objects.get(row.GID_0)
-        adm1 = ADM1.objects.get(row.GID_1)
-        adm2 = ADM2.objects.get(row.GID_2)
-        adm3 = ADM3.objects.get(row.GID_3)
-        adm4 = ADM4.objects.get(row.GID_4)
+        if not pd.isnull(row.GID_0):
+            adm0 = ADM0.objects.get(code=row.GID_0)
+        else:
+            adm0 = None
+        if not pd.isnull(row.GID_1):    
+            adm1 = ADM1.objects.get(code=row.GID_1)
+        else:
+            adm1 = None
+        if not pd.isnull(row.GID_2):
+            adm2 = ADM2.objects.get(code=row.GID_2)
+        else:
+            adm2 = None
+        if not pd.isnull(row.GID_3):
+            adm3 = ADM3.objects.get(code=row.GID_3)
+        else:
+            adm3 = None
+        if not pd.isnull(row.GID_4):
+            adm4 = ADM4.objects.get(code=row.GID_4)
+        else:
+            adm4 = None
 
-        point = Point(row.lat, row.lon)  # Note that Point takes (longitude, latitude) order
+        if not pd.isnull(row.lat) or pd.isnull(row.lng):
+            point = Point(row.lat, row.lng)  # Note that Point takes (longitude, latitude) order
+        else:
+            point = None
 
         Site.objects.update_or_create(
-            name=row.site_name,
+            name=row.site,
             defaults={
                 'coordinates':point,
                 'ADM0': adm0,
@@ -46,5 +64,6 @@ def upload_sites(data):
 # Call the function and pass the data
 # In case of different name of columns in the CSV file, replace the column names accordingly
 # If ADMS are not in the database then you need first to import them through import ADMs script
+upload_sites(df)
 print("Data imported successfully")
 
