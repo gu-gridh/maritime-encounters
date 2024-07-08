@@ -235,13 +235,13 @@ class Element(abstract.AbstractBaseModel):
         return self.name
 
     class Meta:
-        verbose_name = _("Elemnt")
-        verbose_name_plural = _("Elemnts")
+        verbose_name = _("Element")
+        verbose_name_plural = _("Elements")
 
 
 class ElementRatio(abstract.AbstractBaseModel):
     elemant_name = models.ForeignKey(Element, on_delete=models.SET_NULL, null=True, blank=True, verbose_name=_(
-        "elemant_name"), help_text=_("The elemant name of the sample."))
+        "element_name"), help_text=_("The element name of the sample."))
     element_ratio = models.FloatField(null=True, blank=True, verbose_name=_(
         "element_ratio"), help_text=_("The element ratio of the sample."))
 
@@ -249,8 +249,8 @@ class ElementRatio(abstract.AbstractBaseModel):
         return self.elemant_name
 
     class Meta:
-        verbose_name = _("Elemnt Ratio")
-        verbose_name_plural = _("Elemnts Ratio")
+        verbose_name = _("Element Ratio")
+        verbose_name_plural = _("Elements Ratio")
 
 
 class Material(abstract.AbstractTagModel):
