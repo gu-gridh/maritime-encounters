@@ -33,7 +33,6 @@ def upload_adm0(data):
 def upload_adm1(data):
     for row in data.itertuples(index=False):
         adm0 = ADM0.objects.get(code=row.GID_0, name=row.COUNTRY)
-        adm0 = ADM0.objects.get(code=row.GID_0, name=row.COUNTRY)
         ADM1.objects.get_or_create(
             code=row.GID_1,
             defaults={
@@ -149,6 +148,10 @@ def upload_parish(data):
 
 # call function based on your need and pass the data as argument
 # In case if fields names are different, you can change the field names in the function
-# upload_adm0(df)   
+# upload_adm0(df)
+# upload_adm1(df)  
+# upload_adm2(df) 
+# upload_adm3(df)
+upload_adm4(df)
 print("Data imported successfully")
 
