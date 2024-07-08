@@ -1173,7 +1173,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "radiocarbon_years"), help_text=_("The radiocarbon years of the object."))
     radiocarbon_std = models.IntegerField(null=True, blank=True, verbose_name=_(
         "radiocarbon_std"), help_text=_("The radiocarbon standard deviation of the object."))
-    objects = models.ArrayField(models.ManyToManyField(ObjectDescriptions), blank=True, verbose_name=_(
+    objects = models.ManyToManyField(ObjectDescriptions, blank=True, verbose_name=_(
         "Objects"), help_text=_("The objects found at the site."))
     comments = models.TextField(null=True, blank=True, verbose_name=_(
         "comments"), help_text=_("General comments about the entry."))
