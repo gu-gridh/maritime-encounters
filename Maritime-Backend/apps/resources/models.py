@@ -1138,6 +1138,8 @@ class Metalwork(abstract.AbstractBaseModel):
         "Check if the site is associated with multiple periods."))
     dating = models.ManyToManyField(Period, blank=True, verbose_name=_(
         "Period(s) of activity"), help_text=_("The period(s) of activity of the site."))
+    date_string = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "Original Dating Text"), help_text=_("The dating text from the original file."))
     dating_certain = models.BooleanField(blank=True, verbose_name=_("Dating Certainty"), help_text=_(
         "Check if the dating is certain and does not need review later."))
     dendro_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
