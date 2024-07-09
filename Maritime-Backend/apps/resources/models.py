@@ -68,7 +68,54 @@ class Context(abstract.AbstractTagModel):
         verbose_name_plural = _("Contexts")
 
 
+class ObjectCategories(abstract.AbstractTagModel):
+
+    def __str__(self) -> str:
+        return self.text
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    class Meta:
+        verbose_name = _("Object Category")
+        verbose_name_plural = _("Object Categories")
+
+
+class ObjectSubcategories(abstract.AbstractTagModel):
+    category = models.ForeignKey(ObjectCategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+        "category"), help_text=_("The category of the object, e.g. Weapon, Vessel."))
+    subcategory = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "subcategory"), help_text=_("The subcategory of the object, e.g. Sword, Ring."))
+
+    def __str__(self) -> str:
+        return self.text
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    class Meta:
+        verbose_name = _("Object Subcategory")
+        verbose_name_plural = _("Object Subcategories")
+
+
+class ObjectMaterials(abstract.AbstractTagModel):
+
+    def __str__(self) -> str:
+        return self.text
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    class Meta:
+        verbose_name = _("Object Material")
+        verbose_name_plural = _("Object Materials")
+
+
 class ObjectDescription(abstract.AbstractTagModel):
+    text = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+        "subcategory"), help_text=_("The subcategory of the object."))
+    material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
+        "material"), help_text=_("The material(s) of the object."))
 
     def __str__(self) -> str:
         return self.text
@@ -964,36 +1011,6 @@ class AccessionNum(abstract.AbstractBaseModel):
         verbose_name_plural = _("Accession Numbers")
 
 
-# class CoordinateMeta(abstract.AbstractBaseModel):
-#     certain = models.BooleanField(null=True, blank=True, verbose_name=_(
-#         "certain"), help_text=_("The certainty of the coordinate."))
-#     coord_system = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-#         "coord_system"), help_text=_("The original coordinate system of the coordinates."))
-#     orig_coords = models.ArrayField(models.FloatField(), null=True, blank=True, verbose_name=_(
-#         "orig_coords"), help_text=_("The original coordinates."))
-
-#     def __str__(self) -> str:
-#         name_str = f"{self.orig_coords}"
-#         return name_str
-
-#     class Meta:
-#         verbose_name = _("Converted Coordinates")
-#         verbose_name_plural = _("Converted Coords")
-
-# class PrimaryContext(abstract.AbstractBaseModel):
-#     context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-#         "context"), help_text=_("The site or excavation context."))
-#     certain = models.BooleanField(null=True, blank=True, verbose_name=_("certain"), help_text=_("The certainty of the context description."))
-
-#     def __str__(self) -> str:
-#         name_str = f"{self.context}"
-#         return name_str
-
-#     class Meta:
-#         verbose_name = _("Primary Context")
-#         verbose_name_plural = _("Primary Contexts")
-
-
 class FindContext(abstract.AbstractTagModel):
 
     def __str__(self) -> str:
@@ -1033,57 +1050,14 @@ class ContextKeywords(abstract.AbstractTagModel):
         verbose_name_plural = _("Context Keywords")
 
 
-class ObjectCategories(abstract.AbstractTagModel):
-
-    def __str__(self) -> str:
-        return self.text
-
-    def __repr__(self) -> str:
-        return str(self)
-
-    class Meta:
-        verbose_name = _("Object Category")
-        verbose_name_plural = _("Object Categories")
-
-
-class ObjectSubcategories(abstract.AbstractTagModel):
-    category = models.ForeignKey(ObjectCategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "category"), help_text=_("The category of the object, e.g. Weapon, Vessel."))
-    subcategory = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "subcategory"), help_text=_("The subcategory of the object, e.g. Sword, Ring."))
-
-    def __str__(self) -> str:
-        return self.text
-
-    def __repr__(self) -> str:
-        return str(self)
-
-    class Meta:
-        verbose_name = _("Object Subcategory")
-        verbose_name_plural = _("Object Subcategories")
-
-
-class ObjectMaterials(abstract.AbstractTagModel):
-
-    def __str__(self) -> str:
-        return self.text
-
-    def __repr__(self) -> str:
-        return str(self)
-
-    class Meta:
-        verbose_name = _("Object Material")
-        verbose_name_plural = _("Object Materials")
-
-
-class ObjectDescriptions(abstract.AbstractBaseModel):
+class ObjectDetail(abstract.AbstractBaseModel):
     subcategory = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "subcategory"), help_text=_("The subcategory of the object."))
     material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
         "material"), help_text=_("The material(s) of the object."))
     # count = models.IntegerField(null=True, blank=True, verbose_name=_(
     #     "count"), help_text=_("The number of objects."))
-    # certain = models.BooleanField(null=True, blank=True, verbose_name=_(
+    # certain = models.BooleanField(blank=True, verbose_name=_(
     #     "certain"), help_text=_("The certainty of the object count."))
 
     def __str__(self) -> str:
@@ -1091,8 +1065,25 @@ class ObjectDescriptions(abstract.AbstractBaseModel):
         return name_str
 
     class Meta:
-        verbose_name = _("Object Description")
-        verbose_name_plural = _("Object Descriptions")
+        verbose_name = _("Object Detail")
+        verbose_name_plural = _("Object Details")
+
+
+class ObjectCounts(abstract.AbstractBaseModel):
+    object_type = models.ForeignKey(ObjectDescription, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+        "Object Type"), help_text=_("The type of the object."))
+    count = models.IntegerField(null=True, blank=True, verbose_name=_(
+        "count"), help_text=_("The number of objects."))
+    certain = models.BooleanField(blank=True, verbose_name=_(
+        "certain"), help_text=_("The certainty of the object count."))
+
+    def __str__(self) -> str:
+        name_str = f"{self.object_type}: {self.count}"
+        return name_str
+
+    class Meta:
+        verbose_name = _("Object Count")
+        verbose_name_plural = _("Object Counts")
 
 
 class ContextFindsCategories(abstract.AbstractTagModel):
@@ -1125,60 +1116,60 @@ class ContextFindsSubcategories(abstract.AbstractTagModel):
 
 class Metalwork(abstract.AbstractBaseModel):
     entry_num = models.ForeignKey(EntryNum, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "entry_num"), help_text=_("The entry number of the object."))
+        "Entry Number"), help_text=_("The entry number of the object."))
     literature_num = models.ForeignKey(LiteratureNum, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "literature_num"), help_text=_("The literature number of the object."))
+        "Literature Number"), help_text=_("The literature number of the object."))
     accession_num = models.ForeignKey(AccessionNum, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "accession_num"), help_text=_("The accession number of the object."))
-    accession_certain = models.BooleanField(blank=True, verbose_name=_("accession_num_certainty"), help_text=_(
+        "Accession Number"), help_text=_("The accession number of the object."))
+    accession_certain = models.BooleanField(blank=True, verbose_name=_("Accession Number Certainty"), help_text=_(
         "Check if the accession number is certain and does not need review later."))
     museum = models.ForeignKey(MuseumMeta, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "museum"), help_text=_("The museum that holds or recorded the object."))
+        "Museum"), help_text=_("The museum that holds or recorded the object."))
     collection = models.ForeignKey(MuseumCollection, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "collection"), help_text=_("The title of the museum or personal collection."))
-    museum_certain = models.BooleanField(blank=True, verbose_name=_("museum_certainty"), help_text=_(
-        "Check if the museum is certain and does not need review later."))
+        "Collection"), help_text=_("The title of the museum or personal collection."))
+    museum_certain = models.BooleanField(blank=True, verbose_name=_("Museum/Collection Certainty"), help_text=_(
+        "Check if the museum/collection is certain and does not need review later."))
     location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "location"), help_text=_("The location of the object."))
+        "Location"), help_text=_("The location of the object."))
     location_certain = models.BooleanField(blank=True, verbose_name=_(
-        "certain"), help_text=_("The certainty of the coordinate."))
+        "Location Certainty"), help_text=_("The certainty of the coordinate."))
     coord_system = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "coord_system"), help_text=_("The EPSG code of the original coordinate system."))
+        "Coordinate System"), help_text=_("The EPSG code of the original coordinate system."))
     orig_coords = ArrayField(models.FloatField(), size=2, null=True, blank=True, verbose_name=_(
-        "orig_coords"), help_text=_("The original coordinates."))
+        "Original Coordinates"), help_text=_("The original coordinates that were converted to lat/long.  Include if you are unsure of the accuracy of the conversion."))
     primary_context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "primary_context"), help_text=_("The site or excavation context."))
-    primary_context_certain = models.BooleanField(blank=True, verbose_name=_("primary_context_certainty"), help_text=_(
+        "Primary Context"), help_text=_("The site or excavation context."))
+    primary_context_certain = models.BooleanField(blank=True, verbose_name=_("Primary Context Certainty"), help_text=_(
         "Check if the primary context is certain and does not need review later."))
     find_context = models.ForeignKey(FindContext, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "find_context"), help_text=_("The context of the find. Should provide more detail than the primary context."))
-    find_context_certain = models.BooleanField(blank=True, verbose_name=_("find_context_certainty"), help_text=_(
+        "Find Context"), help_text=_("The context of the find. Should provide more detail than the primary context."))
+    find_context_certain = models.BooleanField(blank=True, verbose_name=_("Find Context Certainty"), help_text=_(
         "Check if the find context is certain and does not need review later."))
     context_detail = models.ForeignKey(ContextDetail, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "context_detail"), help_text=_("The detailed context of the find."))
-    context_detail_certain = models.BooleanField(blank=True, verbose_name=_("context_detail_certainty"), help_text=_(
+        "Context Detail"), help_text=_("The detailed context of the find. E.g., a specific layer or feature."))
+    context_detail_certain = models.BooleanField(blank=True, verbose_name=_("Context Detail Certainty"), help_text=_(
         "Check if the context detail is certain and does not need review later."))
     context_keywords = models.ManyToManyField(ContextKeywords, blank=True, verbose_name=_(
-        "context_keywords"), help_text=_("Keywords that describe the context of the find."))
-    multiperiod = models.BooleanField(blank=True, verbose_name=_("multiperiod"), help_text=_(
+        "Context Keywords"), help_text=_("Keywords that describe the context of the find."))
+    multiperiod = models.BooleanField(blank=True, verbose_name=_("Multiperiod"), help_text=_(
         "Check if the site is associated with multiple periods."))
     dating = models.ManyToManyField(Period, blank=True, verbose_name=_(
         "Period(s) of activity"), help_text=_("The period(s) of activity of the site."))
-    dating_certain = models.BooleanField(blank=True, verbose_name=_("dating_certainty"), help_text=_(
+    dating_certain = models.BooleanField(blank=True, verbose_name=_("Dating Certainty"), help_text=_(
         "Check if the dating is certain and does not need review later."))
     dendro_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "dendro_date"), help_text=_("The dendrochronological date of the object."))
+        "Dendro Date"), help_text=_("The dendrochronological date of the object."))
     radiocarbon_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "radiocarbon_date"), help_text=_("The radiocarbon date of the object."))
-    radiocarbon_years = models.IntegerField(null=True, blank=True, verbose_name=_(
-        "radiocarbon_years"), help_text=_("The radiocarbon years of the object."))
+        "Radiocarbon Date"), help_text=_("The radiocarbon date of the object."))
+    radiocarbon_years = models.CharField(max_length=256, blank=True, verbose_name=_(
+        "Radiocarbon Year(s)"), help_text=_("The radiocarbon year(s) of the object."))
     radiocarbon_std = models.IntegerField(null=True, blank=True, verbose_name=_(
-        "radiocarbon_std"), help_text=_("The radiocarbon standard deviation of the object."))
-    objects = models.ManyToManyField(ObjectDescriptions, blank=True, verbose_name=_(
+        "Radiocarbon StD"), help_text=_("The radiocarbon standard deviation of the object."))
+    objects = models.ManyToManyField(ObjectDescription, blank=True, through=ObjectCounts, verbose_name=_(
         "Objects"), help_text=_("The objects found at the site."))
     comments = models.TextField(null=True, blank=True, verbose_name=_(
-        "comments"), help_text=_("General comments about the entry."))
-    certain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('certain_context_descriptors_subcategoris'), blank=True, verbose_name=_(
-        "certain_context_descriptors"), help_text=_("Objects, etc. that were found at the site and do not need review later."))
+        "Comments"), help_text=_("General comments about the entry."))
+    certain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('certain_context_descriptors_subcategories'), blank=True, verbose_name=_(
+        "Related Finds/Materials - Certain"), help_text=_("Objects, etc. that were found at the site and do not need review later. Relates to presence/absence fields in original dataset."))
     uncertain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('uncertain_context_descriptors_subcategories'), blank=True, verbose_name=_(
-        "possible_context_descriptors"), help_text=_("Objects, etc. that were found at the site and need review later."))
+        "Related Finds/Materials - Possible"), help_text=_("Objects, etc. that were found at the site and need review later. Relates to presence/absence fields in original dataset."))

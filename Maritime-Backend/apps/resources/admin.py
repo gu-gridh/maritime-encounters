@@ -181,7 +181,7 @@ class SiteAdmin(admin.GISModelAdmin):
     autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4']
     # list_filter = ['name', 'ADM1']
     ordering = ['name']
-    list_per_page = 50 
+    list_per_page = 50
 
 
 @admin.register(PlankBoats)
@@ -356,12 +356,19 @@ class ObjectMaterialsAdmin(admin.ModelAdmin):
     ordering = ['text']
 
 
-@admin.register(ObjectDescriptions)
-class ObjectDescriptionsAdmin(admin.ModelAdmin):
-    list_display = ['subcategory', 'subcategory']
-    search_fields = ['subcategory__category__text', 'subcategory', 'material']
-    list_filter = ['subcategory__category__text', 'subcategory', 'material']
-    ordering = ['subcategory']
+# @admin.register(ObjectDescriptions)
+# class ObjectDescriptionsAdmin(admin.ModelAdmin):
+#     list_display = ['subcategory', 'subcategory']
+#     search_fields = ['subcategory__category__text', 'subcategory', 'material']
+#     list_filter = ['subcategory__category__text', 'subcategory', 'material']
+#     ordering = ['subcategory']
+
+@admin.register(ObjectCounts)
+class ObjectCountsAdmin(admin.ModelAdmin):
+    list_display = ['object_type', 'count']
+    search_fields = ['object_type']
+    list_filter = ['object_type']
+    ordering = ['object_type']
 
 
 @admin.register(ContextFindsCategories)
