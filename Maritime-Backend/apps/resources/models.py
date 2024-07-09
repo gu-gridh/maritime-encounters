@@ -2,6 +2,7 @@ import maritime.abstract.models as abstract
 from django.utils.translation import gettext_lazy as _
 from django.contrib.gis.db import models
 import apps.geography.models as geography
+from django.contrib.postgres.fields import ArrayField
 
 
 class Location(abstract.AbstractBaseModel):
@@ -67,17 +68,17 @@ class Context(abstract.AbstractTagModel):
         verbose_name_plural = _("Contexts")
 
 
-# class ObjectDescription(abstract.AbstractTagModel):
+class ObjectDescription(abstract.AbstractTagModel):
 
-#     def __str__(self) -> str:
-#         return self.text
+    def __str__(self) -> str:
+        return self.text
 
-#     def __repr__(self) -> str:
-#         return str(self)
+    def __repr__(self) -> str:
+        return str(self)
 
-#     class Meta:
-#         verbose_name = _("Object Description")
-#         verbose_name_plural = _("Object Descriptions")
+    class Meta:
+        verbose_name = _("Object Description")
+        verbose_name_plural = _("Object Descriptions")
 
 
 class SampleType(abstract.AbstractTagModel):
@@ -925,7 +926,7 @@ class MuseumCollection(abstract.AbstractBaseModel):
 
 
 class EntryNum(abstract.AbstractBaseModel):
-    entry_num = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+    entry_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "entry_num"), help_text=_("The entry number of the object."))
 
     def __str__(self) -> str:
@@ -938,7 +939,7 @@ class EntryNum(abstract.AbstractBaseModel):
 
 
 class LiteratureNum(abstract.AbstractBaseModel):
-    literature_num = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+    literature_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "literature_num"), help_text=_("The literature number of the object."))
 
     def __str__(self) -> str:
@@ -951,7 +952,7 @@ class LiteratureNum(abstract.AbstractBaseModel):
 
 
 class AccessionNum(abstract.AbstractBaseModel):
-    accession_num = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+    accession_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "accession_num"), help_text=_("The accession number of the object."))
 
     def __str__(self) -> str:
@@ -1078,7 +1079,7 @@ class ObjectMaterials(abstract.AbstractTagModel):
 class ObjectDescriptions(abstract.AbstractBaseModel):
     subcategory = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "subcategory"), help_text=_("The subcategory of the object."))
-    material = models.ManyToManyField(ObjectMaterials, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+    material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
         "material"), help_text=_("The material(s) of the object."))
     # count = models.IntegerField(null=True, blank=True, verbose_name=_(
     #     "count"), help_text=_("The number of objects."))
@@ -1143,7 +1144,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "certain"), help_text=_("The certainty of the coordinate."))
     coord_system = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "coord_system"), help_text=_("The EPSG code of the original coordinate system."))
-    orig_coords = models.ArrayField(models.FloatField(), size=2, null=True, blank=True, verbose_name=_(
+    orig_coords = ArrayField(models.FloatField(), size=2, null=True, blank=True, verbose_name=_(
         "orig_coords"), help_text=_("The original coordinates."))
     primary_context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "primary_context"), help_text=_("The site or excavation context."))
@@ -1177,7 +1178,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "Objects"), help_text=_("The objects found at the site."))
     comments = models.TextField(null=True, blank=True, verbose_name=_(
         "comments"), help_text=_("General comments about the entry."))
-    certain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, blank=True, verbose_name=_(
+    certain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('certain_context_descriptors_subcategoris'), blank=True, verbose_name=_(
         "certain_context_descriptors"), help_text=_("Objects, etc. that were found at the site and do not need review later."))
-    uncertain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, blank=True, verbose_name=_(
+    uncertain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('uncertain_context_descriptors_subcategories'), blank=True, verbose_name=_(
         "possible_context_descriptors"), help_text=_("Objects, etc. that were found at the site and need review later."))

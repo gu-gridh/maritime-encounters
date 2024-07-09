@@ -181,6 +181,7 @@ class SiteAdmin(admin.GISModelAdmin):
     autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4']
     # list_filter = ['name', 'ADM1']
     ordering = ['name']
+    list_per_page = 50 
 
 
 @admin.register(PlankBoats)
@@ -357,9 +358,9 @@ class ObjectMaterialsAdmin(admin.ModelAdmin):
 
 @admin.register(ObjectDescriptions)
 class ObjectDescriptionsAdmin(admin.ModelAdmin):
-    list_display = ['subcategory__category', 'subcategory', 'material']
-    search_fields = ['subcategory__category', 'subcategory', 'material']
-    list_filter = ['subcategory__category', 'subcategory', 'material']
+    list_display = ['subcategory', 'subcategory']
+    search_fields = ['subcategory__category__text', 'subcategory', 'material']
+    list_filter = ['subcategory__category__text', 'subcategory', 'material']
     ordering = ['subcategory']
 
 
@@ -382,7 +383,7 @@ class ContextFindsSubcategoriesAdmin(admin.ModelAdmin):
 @admin.register(Metalwork)
 class MetalworkAdmin(admin.ModelAdmin):
     list_display = ['entry_num', 'literature_num', 'accession_num', 'collection',
-                    'location', 'primary_context', 'find_context', 'context_detail', 'dating']
+                    'location', 'primary_context', 'find_context', 'context_detail']
     search_fields = ['entry_num', 'literature_num', 'accession_num', 'collection',
                      'location', 'primary_context', 'find_context', 'context_detail', 'dating']
     list_filter = ['entry_num', 'literature_num', 'accession_num', 'collection',
