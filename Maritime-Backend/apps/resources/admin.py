@@ -365,10 +365,10 @@ class ObjectMaterialsAdmin(admin.ModelAdmin):
 
 @admin.register(ObjectCounts)
 class ObjectCountsAdmin(admin.ModelAdmin):
-    list_display = ['object_type', 'count']
-    search_fields = ['object_type']
-    list_filter = ['object_type']
-    ordering = ['object_type']
+    list_display = ['metal', 'count']
+    search_fields = ['metal']
+    list_filter = ['metal']
+    ordering = ['metal']
 
 
 @admin.register(ContextFindsCategories)

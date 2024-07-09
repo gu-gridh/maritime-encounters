@@ -133,7 +133,7 @@ class EntryNum(abstract.AbstractBaseModel):
         "entry_num"), help_text=_("The entry number of the object."))
 
     def __str__(self) -> str:
-        name_str = f"{self.entry_num}"
+        name_str = f"{self.entry_number}"
         return name_str
 
     class Meta:
@@ -696,7 +696,7 @@ class Radiocarbon(abstract.AbstractBaseModel):
 
     def __str__(self) -> str:
 
-        name_str = f"{self.site.name} - {self.site_type.text}"
+        name_str = f"{self.site.name} - {self.lab_id}"
         return name_str
 
     class Meta:
@@ -710,7 +710,7 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "sample"), help_text=_("The sample of the metal."))
 
-    museum_entry = models.ForeignKey(EntryNum, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+    museum_entry = models.ForeignKey("AccessionNum", on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "museum entries"), help_text=_("The AMA of the metal."))
     context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "context"), help_text=_("The context of the metal."))
@@ -990,7 +990,7 @@ class LiteratureNum(abstract.AbstractBaseModel):
         "literature_num"), help_text=_("The literature number of the object."))
 
     def __str__(self) -> str:
-        name_str = f"{self.literature_num}"
+        name_str = f"{self.literature_number}"
         return name_str
 
     class Meta:
@@ -1003,7 +1003,7 @@ class AccessionNum(abstract.AbstractBaseModel):
         "accession_num"), help_text=_("The accession number of the object."))
 
     def __str__(self) -> str:
-        name_str = f"{self.accession_num}"
+        name_str = f"{self.accession_number}"
         return name_str
 
     class Meta:
@@ -1144,7 +1144,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "Dendro Date"), help_text=_("The dendrochronological date of the object."))
     radiocarbon_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Radiocarbon Date"), help_text=_("The radiocarbon date of the object."))
-    radiocarbon_years = models.CharField(max_length=256, blank=True, verbose_name=_(
+    radiocarbon_years = models.CharField(max_length=256, blank=True, null=True, verbose_name=_(
         "Radiocarbon Year(s)"), help_text=_("The radiocarbon year(s) of the object."))
     radiocarbon_std = models.IntegerField(null=True, blank=True, verbose_name=_(
         "Radiocarbon StD"), help_text=_("The radiocarbon standard deviation of the object."))
@@ -1155,7 +1155,13 @@ class Metalwork(abstract.AbstractBaseModel):
     uncertain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('uncertain_context_descriptors_subcategories'), blank=True, verbose_name=_(
         "Related Finds/Materials - Possible"), help_text=_("Objects, etc. that were found at the site and need review later. Relates to presence/absence fields in original dataset."))
 
+    def __str__(self) -> str:
+        name_str = f"{self.museum} - {self.collection}"
+        return name_str
 
+    class Meta:
+        verbose_name = _("Metal work")
+        verbose_name_plural = _("Metal works")
 class ObjectCounts(models.Model):
     metal = models.ForeignKey(
         Metalwork, on_delete=models.CASCADE, null=True, blank=True)
