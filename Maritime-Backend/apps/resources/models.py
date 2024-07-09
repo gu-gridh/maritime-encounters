@@ -128,6 +128,19 @@ class ObjectDescription(abstract.AbstractTagModel):
         verbose_name_plural = _("Object Descriptions")
 
 
+class EntryNum(abstract.AbstractBaseModel):
+    entry_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "entry_num"), help_text=_("The entry number of the object."))
+
+    def __str__(self) -> str:
+        name_str = f"{self.entry_num}"
+        return name_str
+
+    class Meta:
+        verbose_name = _("Entry Number")
+        verbose_name_plural = _("Entry Numbers")
+
+
 class SampleType(abstract.AbstractTagModel):
     # Represents the type of the sample
 
@@ -697,7 +710,7 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "sample"), help_text=_("The sample of the metal."))
 
-    museum_entry = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+    museum_entry = models.ForeignKey(EntryNum, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "museum entries"), help_text=_("The AMA of the metal."))
     context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "context"), help_text=_("The context of the metal."))
@@ -972,19 +985,6 @@ class MuseumCollection(abstract.AbstractBaseModel):
         verbose_name_plural = _("Museum Collections")
 
 
-class EntryNum(abstract.AbstractBaseModel):
-    entry_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "entry_num"), help_text=_("The entry number of the object."))
-
-    def __str__(self) -> str:
-        name_str = f"{self.entry_num}"
-        return name_str
-
-    class Meta:
-        verbose_name = _("Entry Number")
-        verbose_name_plural = _("Entry Numbers")
-
-
 class LiteratureNum(abstract.AbstractBaseModel):
     literature_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "literature_num"), help_text=_("The literature number of the object."))
@@ -1050,40 +1050,23 @@ class ContextKeywords(abstract.AbstractTagModel):
         verbose_name_plural = _("Context Keywords")
 
 
-class ObjectDetail(abstract.AbstractBaseModel):
-    subcategory = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "subcategory"), help_text=_("The subcategory of the object."))
-    material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
-        "material"), help_text=_("The material(s) of the object."))
-    # count = models.IntegerField(null=True, blank=True, verbose_name=_(
-    #     "count"), help_text=_("The number of objects."))
-    # certain = models.BooleanField(blank=True, verbose_name=_(
-    #     "certain"), help_text=_("The certainty of the object count."))
+# class ObjectDetail(abstract.AbstractBaseModel):
+#     subcategory = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+#         "subcategory"), help_text=_("The subcategory of the object."))
+#     material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
+#         "material"), help_text=_("The material(s) of the object."))
+#     # count = models.IntegerField(null=True, blank=True, verbose_name=_(
+#     #     "count"), help_text=_("The number of objects."))
+#     # certain = models.BooleanField(blank=True, verbose_name=_(
+#     #     "certain"), help_text=_("The certainty of the object count."))
 
-    def __str__(self) -> str:
-        name_str = f"{self.subcategory}: {self.material}"
-        return name_str
+#     def __str__(self) -> str:
+#         name_str = f"{self.subcategory}: {self.material}"
+#         return name_str
 
-    class Meta:
-        verbose_name = _("Object Detail")
-        verbose_name_plural = _("Object Details")
-
-
-class ObjectCounts(abstract.AbstractBaseModel):
-    object_type = models.ForeignKey(ObjectDescription, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "Object Type"), help_text=_("The type of the object."))
-    count = models.IntegerField(null=True, blank=True, verbose_name=_(
-        "count"), help_text=_("The number of objects."))
-    certain = models.BooleanField(blank=True, verbose_name=_(
-        "certain"), help_text=_("The certainty of the object count."))
-
-    def __str__(self) -> str:
-        name_str = f"{self.object_type}: {self.count}"
-        return name_str
-
-    class Meta:
-        verbose_name = _("Object Count")
-        verbose_name_plural = _("Object Counts")
+#     class Meta:
+#         verbose_name = _("Object Detail")
+#         verbose_name_plural = _("Object Details")
 
 
 class ContextFindsCategories(abstract.AbstractTagModel):
@@ -1165,11 +1148,18 @@ class Metalwork(abstract.AbstractBaseModel):
         "Radiocarbon Year(s)"), help_text=_("The radiocarbon year(s) of the object."))
     radiocarbon_std = models.IntegerField(null=True, blank=True, verbose_name=_(
         "Radiocarbon StD"), help_text=_("The radiocarbon standard deviation of the object."))
-    objects = models.ManyToManyField(ObjectDescription, blank=True, through=ObjectCounts, verbose_name=_(
-        "Objects"), help_text=_("The objects found at the site."))
     comments = models.TextField(null=True, blank=True, verbose_name=_(
         "Comments"), help_text=_("General comments about the entry."))
     certain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('certain_context_descriptors_subcategories'), blank=True, verbose_name=_(
         "Related Finds/Materials - Certain"), help_text=_("Objects, etc. that were found at the site and do not need review later. Relates to presence/absence fields in original dataset."))
     uncertain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('uncertain_context_descriptors_subcategories'), blank=True, verbose_name=_(
         "Related Finds/Materials - Possible"), help_text=_("Objects, etc. that were found at the site and need review later. Relates to presence/absence fields in original dataset."))
+
+
+class ObjectCounts(models.Model):
+    metal = models.ForeignKey(
+        Metalwork, on_delete=models.CASCADE, null=True, blank=True)
+    object = models.ForeignKey(
+        ObjectDescription, on_delete=models.CASCADE, null=True, blank=True)
+    count = models.IntegerField(null=True, blank=True, verbose_name=_(
+        "Number of objects"), help_text=_("The number of objects of this type with the same entry number, literature number, and accession number."))

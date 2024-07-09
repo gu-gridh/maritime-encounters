@@ -387,6 +387,11 @@ class ContextFindsSubcategoriesAdmin(admin.ModelAdmin):
     ordering = ['category', 'text']
 
 
+class RelObjectCountAdmin(admin.TabularInline):
+    model = ObjectCounts
+    extra = 1
+
+
 @admin.register(Metalwork)
 class MetalworkAdmin(admin.ModelAdmin):
     list_display = ['entry_num', 'literature_num', 'accession_num', 'collection',
@@ -396,3 +401,6 @@ class MetalworkAdmin(admin.ModelAdmin):
     list_filter = ['entry_num', 'literature_num', 'accession_num', 'collection',
                    'location', 'primary_context', 'find_context', 'context_detail', 'dating']
     ordering = ['entry_num']
+    inlines = [
+        RelObjectCountAdmin
+    ]
