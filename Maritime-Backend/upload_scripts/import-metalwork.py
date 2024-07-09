@@ -51,7 +51,7 @@ for place, entry_num, adm0, adm1, adm2, adm3, adm4, province, parish, x, y in df
     )
     site_cache[entry_num] = site
 
-for entry_num, lit_num, accession_num in df[['entryNo', 'literatureNo', 'accessionNo']].drop_duplicates.values:
+for entry_num, lit_num, accession_num in df[['entryNo', 'literatureNo', 'accessionNo']].drop_duplicates().values:
     entryNo, created = EntryNum.objects.get_or_create(
         entry_number=entry_num)
     entry_num_cache[entry_num] = entryNo
