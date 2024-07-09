@@ -1158,12 +1158,12 @@ class Metalwork(abstract.AbstractBaseModel):
         "Related Finds/Materials - Possible"), help_text=_("Objects, etc. that were found at the site and need review later. Relates to presence/absence fields in original dataset."))
 
     def __str__(self) -> str:
-        name_str = f"{self.museum} - {self.collection}"
+        name_str = f"{self.entry_num} - {self.literature_num}"
         return name_str
 
     class Meta:
-        verbose_name = _("Metal work")
-        verbose_name_plural = _("Metal works")
+        verbose_name = _("Metalwork")
+        verbose_name_plural = _("Metalworks")
 
 
 class ObjectCounts(models.Model):
