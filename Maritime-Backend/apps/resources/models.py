@@ -1162,6 +1162,8 @@ class Metalwork(abstract.AbstractBaseModel):
     class Meta:
         verbose_name = _("Metal work")
         verbose_name_plural = _("Metal works")
+
+
 class ObjectCounts(models.Model):
     metal = models.ForeignKey(
         Metalwork, on_delete=models.CASCADE, null=True, blank=True)
@@ -1169,3 +1171,5 @@ class ObjectCounts(models.Model):
         ObjectDescription, on_delete=models.CASCADE, null=True, blank=True)
     count = models.IntegerField(null=True, blank=True, verbose_name=_(
         "Number of objects"), help_text=_("The number of objects of this type with the same entry number, literature number, and accession number."))
+    certainty = models.BooleanField(blank=True, verbose_name=_("Count Certainty"), help_text=_(
+        "Check if the count is certain and does not need review later."))
