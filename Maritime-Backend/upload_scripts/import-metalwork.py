@@ -111,7 +111,7 @@ for row in df.itertuples(index=False):
     finds_sample = finds_cache.get(row.findContext)
     context_detail_sample = context_detail_cache.get(row.detailContext)
 
-    MetalAnalysis.objects.update_or_create(
+    Metalwork.objects.update_or_create(
         entry_num=entry_sample,
         literature_num=lit_sample,
         accession_num=accession_sample,
