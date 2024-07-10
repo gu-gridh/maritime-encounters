@@ -6,6 +6,8 @@ from .models import *
 from apps.geography.models import *
 
 # ADMs serializers: We need to exclude PolygonField from the serializer to make it faster
+
+
 class ExcludePloygonFieldADM0Serializer(DynamicDepthSerializer):
     class Meta:
         model = ADM0
@@ -16,6 +18,7 @@ class ExcludePloygonFieldADM1Serializer(DynamicDepthSerializer):
     class Meta:
         model = ADM1
         fields = ['id']+get_fields(ADM1, exclude=DEFAULT_FIELDS+['geometry'])
+
 
 class ExcludePloygonFieldADM2Serializer(DynamicDepthSerializer):
     class Meta:
@@ -40,18 +43,22 @@ class ExcludePloygonFieldADM5Serializer(DynamicDepthSerializer):
         model = ADM5
         fields = ['id']+get_fields(ADM5, exclude=DEFAULT_FIELDS+['geometry'])
 
+
 class SiteSerializer(DynamicDepthSerializer):
 
     class Meta:
         model = Site
         fields = ['id']+get_fields(Site, exclude=DEFAULT_FIELDS)
 
+
 class SiteGeoSerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = Site
-        fields = ['id']+get_fields(Site, exclude=DEFAULT_FIELDS+['coordinates'])
+        fields = ['id'] + \
+            get_fields(Site, exclude=DEFAULT_FIELDS+['coordinates'])
         geo_field = 'coordinates'
+
 
 class SiteCoordinatesSerializer(GeoFeatureModelSerializer):
     class Meta:
@@ -60,6 +67,7 @@ class SiteCoordinatesSerializer(GeoFeatureModelSerializer):
         geo_field = 'coordinates'
         depth = 1
 
+
 class ExcludePlolygonSiteGeoSerializer(DynamicDepthSerializer):
     ADM0 = ExcludePloygonFieldADM0Serializer()
     ADM1 = ExcludePloygonFieldADM1Serializer()
@@ -67,21 +75,35 @@ class ExcludePlolygonSiteGeoSerializer(DynamicDepthSerializer):
     ADM3 = ExcludePloygonFieldADM3Serializer()
     ADM4 = ExcludePloygonFieldADM4Serializer()
     # ADM5 = ExcludePloygonFieldADM5Serializer()
+
     class Meta:
         model = Site
-        fields = ['id']+get_fields(Site, exclude=DEFAULT_FIELDS+['coordinates'])
+        fields = ['id'] + \
+            get_fields(Site, exclude=DEFAULT_FIELDS+['coordinates'])
         # geo_field = 'coordinates'
 
 
 class ExcludeSitePloygonSampleSerializer(DynamicDepthSerializer):
     site = ExcludePlolygonSiteGeoSerializer()
+
     class Meta:
         model = NewSamples
         fields = ['id']+get_fields(NewSamples, exclude=DEFAULT_FIELDS)
 
+
 class MetalAnalysisSerializer(DynamicDepthSerializer):
     site = ExcludePlolygonSiteGeoSerializer()
     sample = ExcludeSitePloygonSampleSerializer()
+
     class Meta:
         model = MetalAnalysis
         fields = ['id']+get_fields(MetalAnalysis, exclude=DEFAULT_FIELDS)
+
+
+class MetalworkSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+    sample = ExcludeSitePloygonSampleSerializer()
+
+    class Meta:
+        model = Metalwork
+        fields = ['id']+get_fields(Metalwork, exclude=DEFAULT_FIELDS)

@@ -1,6 +1,3 @@
-# Replace 'your_app' with the name of your Django app
-from apps.resources.models import *
-from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5
 import os
 import sys
 import django
@@ -8,6 +5,7 @@ import json
 import pandas as pd
 from datetime import datetime
 from django.contrib.gis.geos import Point
+
 
 # Add the parent directory to the system path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -18,9 +16,11 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maritime.settings')
 # Set up Django
 django.setup()
 
+# Replace 'your_app' with the name of your Django app
+from apps.resources.models import *
+from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5
 
-# Path to your CSV file
-csv_file_path = '../../resources/c_horn_metalwork_v2.csv'
+csv_file_path = ''
 
 # Load the CSV data
 df = pd.read_csv(csv_file_path)
@@ -143,5 +143,14 @@ for row in df.itertuples(index=False):
         # uncertain_context_descriptors=
 
     )
+json_file_path = ''
+
+# Load the CSV data
+df = pd.json_normalize(json.load(open(json_file_path)))
+# Import data into ADM levels
+
+for row in df.rows(index=False):
+    ()
+
 
 print("Data imported successfully")
