@@ -18,7 +18,7 @@ from apps.resources.models import *
 from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5
 
 # Path to your CSV file
-csv_file_path = '/Users/xkaria/GRIDH/maritime-enconters/resources/NMI_samples_final_AGCorrection.csv'
+csv_file_path = '/Users/xkaria/GRIDH/maritime-enconters/resources/NMI_samples_final_AGCorrectionv2.csv'
 
 # Load the CSV data
 df = pd.read_csv(csv_file_path)
@@ -29,6 +29,9 @@ metal_cache = {}
 sampler_cache = {}
 new_sample_cache = {}
 context_cache = {}
+categories_cache = {}
+object_subcategories = {}
+object_material_cache = {}
 object_description_cache = {}
 period_cache = {}
 phase_cache = {}
@@ -85,13 +88,37 @@ for context_name in df[['context']].drop_duplicates().values:
     )
     context_cache[context_name] = context
 
+for category in df[['object_category']].drop_duplicates().values:
+    category = category[0]
+    object_type, created = ObjectCategories.objects.get_or_create(
+        text=category.capitalize()
+    )
+    categories_cache[category] = object_type
+
+for sub_category in df[['object_description']].drop_duplicates().values:
+    sub_category = sub_category[0]
+    object_type, created = ObjectSubcategories.objects.get_or_create(
+        category=categories_cache.get(sub_category.capitalize()),
+        subcategory=sub_category.capitalize()
+    )
+    object_subcategories[sub_category] = object_type
+
+
+for object_material in df[['Metal']].drop_duplicates().values:
+    obj_material = object_material[0]
+    object, created = ObjectMaterials.objects.get_or_create(
+        text=obj_material,
+    )
+    object_material_cache[obj_material] = object
 
 for object_description, metal in df[['object_description', 'Metal']].drop_duplicates().values:
-    object_description = object_description[0]
-    material = metal_cache.get(metal[0])
+    object = object_subcategories.get(object_description.capitalize())
+    material = object_material_cache.get(metal)
+
     object_description, created = ObjectDescription.objects.get_or_create(
-        text=object_description.capitalize()
+        type=object
     )
+
     object_description.material.add(material)
     object_description_cache[object_description] = object_description
 
