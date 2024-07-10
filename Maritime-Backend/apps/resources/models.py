@@ -81,7 +81,7 @@ class ObjectCategories(abstract.AbstractTagModel):
         verbose_name_plural = _("Object Categories")
 
 
-class ObjectSubcategories(abstract.AbstractTagModel):
+class ObjectSubcategories(models.Model):
     category = models.ForeignKey(ObjectCategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "category"), help_text=_("The category of the object, e.g. Weapon, Vessel."))
     subcategory = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
@@ -112,7 +112,7 @@ class ObjectMaterials(abstract.AbstractTagModel):
 
 
 class ObjectDescription(abstract.AbstractBaseModel):
-    text = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+    type = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "subcategory"), help_text=_("The subcategory of the object."))
     material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
         "material"), help_text=_("The material(s) of the object."))
