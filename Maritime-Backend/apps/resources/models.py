@@ -88,7 +88,7 @@ class ObjectSubcategories(models.Model):
         "subcategory"), help_text=_("The subcategory of the object, e.g. Sword, Ring."))
 
     def __str__(self) -> str:
-        return self.text
+        return self.subcategory
 
     def __repr__(self) -> str:
         return str(self)
