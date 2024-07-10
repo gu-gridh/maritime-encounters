@@ -118,7 +118,7 @@ class ObjectDescription(abstract.AbstractBaseModel):
         "material"), help_text=_("The material(s) of the object."))
 
     def __str__(self) -> str:
-        return self.type
+        return self.text
 
     def __repr__(self) -> str:
         return str(self)
