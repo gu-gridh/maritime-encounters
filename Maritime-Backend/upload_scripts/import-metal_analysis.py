@@ -18,7 +18,7 @@ from apps.resources.models import *
 from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5
 
 # Path to your CSV file
-csv_file_path = '/Users/xkaria/GRIDH/maritime-enconters/resources/NMI_samples_final_AGCorrectionv2.csv'
+csv_file_path = ''
 
 # Load the CSV data
 df = pd.read_csv(csv_file_path)
@@ -35,6 +35,7 @@ object_material_cache = {}
 object_description_cache = {}
 period_cache = {}
 phase_cache = {}
+assocation_cache = {}
 
 for sampler_name in df[['Sampler']].drop_duplicates().values:
     sampler_name = sampler_name[0]
@@ -60,7 +61,6 @@ for site_name, adm0, adm1, adm2 in df[['site_name', 'COUNTRY', 'NAME_1', 'NAME_2
     )
     site_cache[site_name] = site
 
-
 for site_name, metal_name, drilled_location, weight, pictures, sampler_names, date, note in df[['site_name', 'Metal', 'Drilled_location', 'Weight', 'Pictures', 'Sampler', 'Date', 'Note']].values:
 
     date_format = "%d/%m/%Y %H:%M"
@@ -79,7 +79,7 @@ for site_name, metal_name, drilled_location, weight, pictures, sampler_names, da
         date=parsed_date,
         note=note
     )
-    new_sample_cache[(site_name, metal_name)] = new_sample
+    new_sample_cache[(site_name, metal_name, drilled_location)] = new_sample
 
 for context_name in df[['context']].drop_duplicates().values:
     context_name = context_name[0]
@@ -103,7 +103,6 @@ for sub_category in df[['object_description']].drop_duplicates().values:
     )
     object_subcategories[sub_category] = object_type
 
-
 for object_material in df[['Metal']].drop_duplicates().values:
     obj_material = object_material[0]
     object, created = ObjectMaterials.objects.get_or_create(
@@ -111,16 +110,14 @@ for object_material in df[['Metal']].drop_duplicates().values:
     )
     object_material_cache[obj_material] = object
 
-for object_description, metal in df[['object_description', 'Metal']].drop_duplicates().values:
-    object = object_subcategories.get(object_description.capitalize())
-    material = object_material_cache.get(metal)
-
-    object_description, created = ObjectDescription.objects.get_or_create(
+for object_description, mat in df[['object_description', 'Metal']].drop_duplicates().values:
+    object = object_subcategories.get(object_description)
+    material = object_material_cache.get(mat)
+    object_desc, created = ObjectDescription.objects.get_or_create(
         type=object
     )
-
-    object_description.material.add(material)
-    object_description_cache[object_description] = object_description
+    object_desc.material.add(material)
+    object_description_cache[object_description] = object_desc
 
 for phase_n in df[['phase']].drop_duplicates().values:
     phase_n = phase_n[0]
@@ -142,21 +139,28 @@ for start_date, end_date, period_name, period_phase in df[['start_date', 'end_da
     )
     period_cache[period_name, period_phase, start_date, end_date] = period
 
+for ass_num in df[['Catalogue_no_']].values:
+    assoc_number= ass_num[0]
+    ass_number, created = AccessionNum.objects.get_or_create(
+        accession_number=assoc_number
+    )
+    assocation_cache[assoc_number] = ass_number
 
 for row in df.itertuples(index=False):
     site_sample = site_cache.get(row.site_name)
-    metal_name = metal_cache.get(row.Metal)
-    sampler_name = sampler_cache.get(row.Sampler)
-
+    if not pd.isna(row.typology):
+        typology_row = row.typology
+    else:
+        typology_row = None
     MetalAnalysis.objects.update_or_create(
         site=site_sample,
         sample=new_sample_cache.get((row.site_name, row.Metal)),
-        museum_entry=row.Catalogue_no_,
+        museum_entry=assocation_cache.get(row.Catalogue_no_),
         context=context_cache.get(row.context),
         object_description=object_description_cache.get(
             row.object_description),
         general_typology=row.general_typology,
-        typology=row.typology,
+        typology=typology_row,
         period=period_cache.get(row.period),
 
     )
