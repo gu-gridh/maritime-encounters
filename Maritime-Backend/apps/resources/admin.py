@@ -104,10 +104,10 @@ class SamplerAdmin(admin.ModelAdmin):
 
 @admin.register(ObjectDescription)
 class ObjectDescriptionAdmin(admin.ModelAdmin):
-    list_display = ['text']
-    search_fields = ['text']
-    list_filter = ['text']
-    ordering = ['text']
+    list_display = ['type']
+    search_fields = ['type']
+    list_filter = ['type']
+    ordering = ['type']
 
 
 @admin.register(Cleat)
