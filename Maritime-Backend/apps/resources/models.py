@@ -111,7 +111,7 @@ class ObjectMaterials(abstract.AbstractTagModel):
         verbose_name_plural = _("Object Materials")
 
 
-class ObjectDescription(abstract.AbstractTagModel):
+class ObjectDescription(abstract.AbstractBaseModel):
     text = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "subcategory"), help_text=_("The subcategory of the object."))
     material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
