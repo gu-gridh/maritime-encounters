@@ -1,11 +1,9 @@
-# Replace 'your_app' with the name of your Django app
-from apps.resources.models import *
-from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5
 import os
 import sys
 import django
 import pandas as pd
 from datetime import datetime
+from ast import literal_eval
 
 # Add the parent directory to the system path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
@@ -15,9 +13,12 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maritime.settings')
 django.setup()
 
+# Replace 'your_app' with the name of your Django app
+from apps.resources.models import *
+from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5
 
 # Path to your CSV file
-csv_file_path = ''
+csv_file_path = '/Users/xkaria/GRIDH/maritime-enconters/resources/NMI_samples_final_AGCorrection.csv'
 
 # Load the CSV data
 df = pd.read_csv(csv_file_path)
@@ -46,6 +47,7 @@ for metal_name in df[['Metal']].drop_duplicates().values:
     )
     metal_cache[metal_name] = metal
 
+# you can upload sites using imort-sites.py
 for site_name, adm0, adm1, adm2 in df[['site_name', 'COUNTRY', 'NAME_1', 'NAME_2']].drop_duplicates().values:
     site = Site.objects.get(
         name=site_name,
@@ -84,11 +86,13 @@ for context_name in df[['context']].drop_duplicates().values:
     context_cache[context_name] = context
 
 
-for object_description in df[['object_description']].drop_duplicates().values:
+for object_description, metal in df[['object_description', 'Metal']].drop_duplicates().values:
     object_description = object_description[0]
+    material = metal_cache.get(metal[0])
     object_description, created = ObjectDescription.objects.get_or_create(
         text=object_description.capitalize()
     )
+    object_description.material.add(material)
     object_description_cache[object_description] = object_description
 
 for phase_n in df[['phase']].drop_duplicates().values:
