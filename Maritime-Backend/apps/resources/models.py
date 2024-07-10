@@ -87,8 +87,15 @@ class ObjectSubcategories(models.Model):
     subcategory = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "subcategory"), help_text=_("The subcategory of the object, e.g. Sword, Ring."))
 
-    def __str__(self) -> str:
-        return self.subcategory
+    if subcategory:
+        def __str__(self) -> str:
+            return self.subcategory
+    elif category:
+        def __str__(self) -> str:
+            return self.category
+    else:
+        def __str__(self) -> str:
+            return ''
 
     def __repr__(self) -> str:
         return str(self)
@@ -116,12 +123,6 @@ class ObjectDescription(abstract.AbstractBaseModel):
         "subcategory"), help_text=_("The subcategory of the object."))
     material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
         "material"), help_text=_("The material(s) of the object."))
-
-    def __str__(self) -> str:
-        return self.type
-
-    def __repr__(self) -> str:
-        return str(self)
 
     class Meta:
         verbose_name = _("Object Description")
