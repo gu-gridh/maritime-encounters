@@ -390,6 +390,7 @@ class ContextFindsSubcategoriesAdmin(admin.ModelAdmin):
 class RelObjectCountAdmin(admin.TabularInline):
     model = ObjectCounts
     extra = 1
+    classes = ('collapse', )
 
 
 @admin.register(Metalwork)

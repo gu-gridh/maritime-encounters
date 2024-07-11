@@ -19,7 +19,7 @@ class Location(abstract.AbstractBaseModel):
         "Coordinates"), help_text=_("Mid-point coordinates of the location."))
 
     def __str__(self) -> str:
-        return self.location_name
+        return self.location_name or ''
 
     class Meta:
         verbose_name = _("Location")
@@ -401,6 +401,8 @@ class Site(abstract.AbstractBaseModel):
                              on_delete=models.SET_NULL, verbose_name=_("AMD3"), help_text=_("ADM3"))
     ADM4 = models.ForeignKey(geography.ADM4, null=True, blank=True,  related_name="sites",
                              on_delete=models.SET_NULL, verbose_name=_("AMD4"), help_text=_("ADM4"))
+    Province = models.ForeignKey(geography.Province, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("Landskap (Province)"), help_text=_("Swedish landskap/province"))
+    Parish = models.ForeignKey(geography.Parish, null=True, blank=True,  related_name="sites", on_delete=models.SET_NULL, verbose_name=_("Socken (Parish)"), help_text=_("Swedish socken/parish"))
     # Placename is particularly used outside of Sweden
     placename = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Placename"), help_text=_("Free-form, non-indexed placename of the site."))
@@ -1119,7 +1121,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "Location Certainty"), help_text=_("The certainty of the coordinate."))
     coord_system = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Coordinate System"), help_text=_("The EPSG code of the original coordinate system."))
-    orig_coords = ArrayField(models.FloatField(), size=2, null=True, blank=True, verbose_name=_(
+    orig_coords = ArrayField(models.CharField(), size=2, null=True, blank=True, verbose_name=_(
         "Original Coordinates"), help_text=_("The original coordinates that were converted to lat/long.  Include if you are unsure of the accuracy of the conversion."))
     primary_context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Primary Context"), help_text=_("The site or excavation context."))
@@ -1149,7 +1151,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "Radiocarbon Date"), help_text=_("The radiocarbon date of the object."))
     radiocarbon_years = models.CharField(max_length=256, blank=True, null=True, verbose_name=_(
         "Radiocarbon Year(s)"), help_text=_("The radiocarbon year(s) of the object."))
-    radiocarbon_std = models.IntegerField(null=True, blank=True, verbose_name=_(
+    radiocarbon_std = models.CharField(null=True, blank=True, verbose_name=_(
         "Radiocarbon StD"), help_text=_("The radiocarbon standard deviation of the object."))
     comments = models.TextField(null=True, blank=True, verbose_name=_(
         "Comments"), help_text=_("General comments about the entry."))
@@ -1159,7 +1161,10 @@ class Metalwork(abstract.AbstractBaseModel):
         "Related Finds/Materials - Possible"), help_text=_("Objects, etc. that were found at the site and need review later. Relates to presence/absence fields in original dataset."))
 
     def __str__(self) -> str:
-        name_str = f"{self.entry_num} - {self.literature_num}"
+        if self.entry_num and self.literature_num:
+            name_str = f"{self.entry_num} - {self.literature_num}"
+        else:
+            name_str = self.entry_num or self.literature_num or self.accession_num or self.collection or ''
         return name_str
 
     class Meta:
