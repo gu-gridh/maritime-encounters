@@ -66,7 +66,7 @@ for entry_num, lit_num, accession_num in df[['entryNo', 'literatureNo', 'accessi
 for location_name, place, entry_num in df[['placeDetail', 'place', 'entryNo']].drop_duplicates().values:
     location_name = location_name[0]
     location, created = Location.objects.get_or_create(
-        site__name=', '.join(entry_num, place),
+        site__name=f"{entry_num}, {place}",
         location_detail=location_name
     )
     locations_cache[location_name] = location
