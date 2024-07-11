@@ -46,7 +46,7 @@ def upload_sites(data):
             adm4 = None
 
         if not pd.isnull(row.lat) or pd.isnull(row.lng):
-            point = Point(row.lat, row.lng)  # Note that Point takes (longitude, latitude) order
+            point = Point(row.lng, row.lat)  # Note that Point takes (longitude, latitude) order
         else:
             point = None
 
