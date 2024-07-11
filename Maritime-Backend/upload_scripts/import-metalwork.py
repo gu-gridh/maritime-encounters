@@ -39,7 +39,7 @@ context_detail_cache = {}
 
 for place, entry_num, adm0, adm1, adm2, adm3, adm4, province, parish, x, y in df[['place', 'entryNo', 'ADM_0', 'ADM_1', 'ADM_2', 'ADM_3', 'ADM_4', 'province', 'parish', 'x', 'y']].values:
     site = Site.objects.get_or_create(
-        name=', '.join(entry_num, place),
+        name=f"{entry_num}, {place}",
         ADM0__name=adm0,
         ADM1__name=adm1,
         ADM2__name=adm2,
