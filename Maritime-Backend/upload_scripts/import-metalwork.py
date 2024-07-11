@@ -95,7 +95,7 @@ for row in df_clip.itertuples(index=False):
         collection=MuseumCollection.objects.get_or_create(collection=row.museumCollection.strip().title())[0] if not pd.isnull(row.museumCollection) else None,
         museum_certain=row.museumCertain,
         location=Location.objects.get_or_create(
-        site=Site.objects.get(coordinates=Point(row.x,row.y), name=site_name),
+        site=Site.objects.get_or_create(coordinates=Point(row.x,row.y), name=site_name)[0],
         location_detail=row.placeDetail)[0],
         location_certain=row.locationCertain,
         coord_system=row.origCoordSys,
@@ -178,7 +178,7 @@ for row in df_clip.itertuples(index=False):
                     poss_context_desc.append(context_subcat)
 
     
-    db_object = Metalwork.objects.get(entry_num__entry_number=row.entryNo)
+    db_object = Metalwork.objects.get(entry_num__entry_number=row.entryNo, literature_num__literature_number=row.literatureNo)
     db_object.context_keywords.set(keywords)
     db_object.dating.set(datings)
     db_object.certain_context_descriptors.set(cert_context_desc)
