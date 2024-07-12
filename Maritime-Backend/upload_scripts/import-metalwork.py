@@ -56,8 +56,8 @@ for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['p
     adm2 = ADM2.objects.get(name=adm2n, ADM1__name=adm1n) if adm2n != None else None
     adm3 = ADM3.objects.get(name=adm3n, ADM2__name=adm2n) if adm3n != None else None
     adm4 = ADM4.objects.get(name=adm4n, ADM3__name=adm3n, ADM3__ADM2__name=adm2n) if adm4n != None else None
-    province = Province.objects.get(name=provincen)
-    parish= Parish.objects.get(name=parishn)
+    province = None#Province.objects.get(name=provincen)
+    parish= None#Parish.objects.get(name=parishn)
     point = Point(x, y) if not pd.isnull(y) or pd.isnull(x) else None # Note that Point takes (longitude, latitude) order
 
     site = Site.objects.get_or_create(
@@ -80,10 +80,10 @@ for category in desc_df.columns:
 
 # Import data by row
 for row in df.itertuples(index=False):
-    site_name = row.place or f"{row.parish}: {row.y}, {row.x}" or f"{row.province}: {row.y}, {row.x}" or f"{row.ADM_4}: {row.y}, {row.x}" or f"{row.ADM_3}: {row.y}, {row.x}" or f"{row.ADM_2}: {row.y}, {row.x}"
+    site_name = row.place or f"{row.parish}: {row.y}, {row.x}" or f"{row.province}: {row.y}, {row.x}" or f"{row.ADM_4}: {row.y}, {row.x}" or f"{row.ADM_3}: {row.y}, {row.x}" or f"{row.ADM_2}: {row.y}, {row.x}" or "NAME IS MISSING"
     
     # Add data to boolean, character/text, and some foreignkey fields
-    Metalwork.objects.update_or_create(
+    db_object=Metalwork.objects.update_or_create(
         entry_num=EntryNum.objects.get_or_create(entry_number=row.entryNo)[0], 
         literature_num=LiteratureNum.objects.get_or_create(literature_number = row.literatureNo)[0],
         accession_num=AccessionNum.objects.get_or_create(accession_number = row.accessionNo)[0],
@@ -91,8 +91,7 @@ for row in df.itertuples(index=False):
         collection=MuseumCollection.objects.get_or_create(collection=row.museumCollection.strip().title())[0] if not pd.isnull(row.museumCollection) else None,
         museum_certain=row.museumCertain,
         location=Location.objects.get_or_create(
-        site=Site.objects.get_or_create(coordinates=Point(row.x,row.y), name=site_name)[0],
-        location_detail=row.placeDetail)[0],
+        site=Site.objects.get_or_create(coordinates=Point(row.x,row.y), name=site_name)[0], location_detail=row.placeDetail)[0],
         location_certain=row.locationCertain,
         coord_system=row.origCoordSys,
         orig_coords=[row.xOrig, row.yOrig] if row.xOrig or row.yOrig else None,
@@ -110,7 +109,7 @@ for row in df.itertuples(index=False):
         radiocarbon_years=row.radioCarbonYear, 
         radiocarbon_std=row.stdDeviation, 
         comments=row.comments
-    )
+    )[0]
     
     # Add data to remaining fields with more complex data structure
     keywords=[]
@@ -171,7 +170,7 @@ for row in df.itertuples(index=False):
                 materials.append(material_text)
             object_desc=ObjectDescription.objects.get_or_create(subcategory=subcategory_text,category=category_text)[0]
             
-            db_object = Metalwork.objects.get(entry_num__entry_number=row.entryNo, literature_num__literature_number=row.literatureNo)
+            # db_object = Metalwork.objects.get(entry_num__entry_number=row.entryNo, literature_num__literature_number=row.literatureNo)
             object_counts = ObjectCount.objects.get_or_create(metal=db_object, object = object_desc, count = finds.obj_count, certainty = finds.certain)[0]
             object_counts.material.set(materials)
             objects_list.append(object_counts)
@@ -192,7 +191,7 @@ for row in df.itertuples(index=False):
                     poss_context_desc.append(context_subcat)
 
     # Set ManyToMany fields using the lists
-    db_object = Metalwork.objects.get(entry_num__entry_number=row.entryNo, literature_num__literature_number=row.literatureNo)
+    # db_object = Metalwork.objects.get(entry_num__entry_number=row.entryNo, literature_num__literature_number=row.literatureNo)
     db_object.context_keywords.set(keywords)
     db_object.dating.set(datings)
     db_object.certain_context_descriptors.set(cert_context_desc)
