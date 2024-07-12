@@ -38,14 +38,14 @@ phase_cache = {}
 assocation_cache = {}
 
 for sampler_name in df[['Sampler']].drop_duplicates().values:
-    sampler_name = sampler_name[0]
+    sampler_name = sampler_name[0].strip()
     sampler, created = Sampler.objects.get_or_create(
         name=sampler_name
     )
     sampler_cache[sampler_name] = sampler
 
 for metal_name in df[['Metal']].drop_duplicates().values:
-    metal_name = metal_name[0]
+    metal_name = metal_name[0].strip()
     metal, created = Element.objects.get_or_create(
         name=metal_name,
     )
@@ -54,7 +54,7 @@ for metal_name in df[['Metal']].drop_duplicates().values:
 # you can upload sites using imort-sites.py
 for site_name, adm0, adm1, adm2 in df[['site_name', 'COUNTRY', 'NAME_1', 'NAME_2']].drop_duplicates().values:
     site = Site.objects.get(
-        name=site_name,
+        name=site_name.strip(),
         ADM0__name=adm0,
         ADM1__name=adm1,
         ADM2__name=adm2,
@@ -82,29 +82,29 @@ for site_name, metal_name, drilled_location, weight, pictures, sampler_names, da
     new_sample_cache[(site_name, metal_name, drilled_location)] = new_sample
 
 for context_name in df[['context']].drop_duplicates().values:
-    context_name = context_name[0]
+    context_name = context_name[0].strip()
     context, created = Context.objects.get_or_create(
         text=context_name
     )
     context_cache[context_name] = context
 
 for category in df[['object_category']].drop_duplicates().values:
-    category = category[0]
+    category = category[0].strip()
     object_type, created = ObjectCategories.objects.get_or_create(
         text=category.capitalize()
     )
     categories_cache[category] = object_type
 
-for sub_category in df[['object_description']].drop_duplicates().values:
-    sub_category = sub_category[0]
+for sub_category, category in df[['object_description', 'object_category']].drop_duplicates().values:
+    sub_category = sub_category.strip()
     object_type, created = ObjectSubcategories.objects.get_or_create(
-        category=categories_cache.get(sub_category.capitalize()),
+        category=categories_cache.get(category.capitalize()),
         subcategory=sub_category.capitalize()
     )
     object_subcategories[sub_category] = object_type
 
 for object_material in df[['Metal']].drop_duplicates().values:
-    obj_material = object_material[0]
+    obj_material = object_material[0].strip()
     object, created = ObjectMaterials.objects.get_or_create(
         text=obj_material,
     )
@@ -127,17 +127,19 @@ for phase_n in df[['phase']].drop_duplicates().values:
     phase_cache[phase_n] = phase
 
 for start_date, end_date, period_name, period_phase in df[['start_date', 'end_date', 'period', 'phase']].values:
+
     if pd.isna(period_phase):
         period_phase = None
     else:
         period_phase = phase_cache.get(period_phase)
+
     period, created = Period.objects.get_or_create(
         start_date=start_date,
         end_date=end_date,
         name=period_name,
         phase=period_phase
     )
-    period_cache[period_name, period_phase, start_date, end_date] = period
+    period_cache[(period_name, period_phase, start_date, end_date)] = period
 
 for ass_num in df[['Catalogue_no_']].values:
     assoc_number= ass_num[0]
@@ -149,19 +151,22 @@ for ass_num in df[['Catalogue_no_']].values:
 for row in df.itertuples(index=False):
     site_sample = site_cache.get(row.site_name)
     if not pd.isna(row.typology):
-        typology_row = row.typology
+        typology_row = row.typology.strip()
     else:
         typology_row = None
+
+    phase = phase_cache.get(row.phase)
+
     MetalAnalysis.objects.update_or_create(
         site=site_sample,
-        sample=new_sample_cache.get((row.site_name, row.Metal)),
+        sample=new_sample_cache.get((row.site_name, row.Metal, row.Drilled_location)),
         museum_entry=assocation_cache.get(row.Catalogue_no_),
         context=context_cache.get(row.context),
         object_description=object_description_cache.get(
             row.object_description),
         general_typology=row.general_typology,
         typology=typology_row,
-        period=period_cache.get(row.period),
+        period=period_cache.get((row.period, phase, row.start_date, row.end_date)),
 
     )
 

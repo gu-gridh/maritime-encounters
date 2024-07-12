@@ -124,6 +124,26 @@ class ObjectDescription(abstract.AbstractBaseModel):
     material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
         "material"), help_text=_("The material(s) of the object."))
 
+    def __str__(self) -> str:
+
+        if self.type:
+            if self.type.subcategory and self.type.category:
+                name_str= f"{self.type.category.text} - {self.type.subcategory}"
+
+            elif self.type.subcategory:
+                name_str= f"{self.type.subcategory}"
+
+            elif self.type.category:
+                name_str= f"{self.type.category.text}"
+
+            else:
+                name_str= ""
+        else:
+            name_str= ""
+        return name_str
+
+    def __repr__(self) -> str:
+        return str(self)
     class Meta:
         verbose_name = _("Object Description")
         verbose_name_plural = _("Object Descriptions")
