@@ -18,11 +18,19 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, 
 
 #Download geopackage from https://gadm.org/download_world.html (file link: https://geodata.ucdavis.edu/gadm/gadm4.1/gadm_410-gpkg.zip)
 
-#Path to geopackage file
+#Path to geopackage file - you may need to do some preprocessing to fix Cork (Ireland) and NA values
 gpkg = ''
 
 #Generate a list of the layers in the geopackage
 layers = fiona.listlayers(gpkg)
+
+
+ADM0.objects.all().delete()
+ADM1.objects.all().delete()
+ADM2.objects.all().delete()
+ADM3.objects.all().delete()
+ADM4.objects.all().delete()
+ADM5.objects.all().delete()
 
 # Import data into ADM levels
 def upload_adm0(data):
@@ -37,11 +45,11 @@ def upload_adm0(data):
 def upload_adm1(data):
     for row in data.itertuples(index=False):
         try:
-            adm0 = ADM0.objects.get(code=row.GID_0)
+            adm0 = ADM0.objects.get(name = row.COUNTRY)
             ADM1.objects.update_or_create(
                 code=row.GID_1,
+                name = row.NAME_1, 
                 defaults={
-                    'name': row.NAME_1, 
                     'name_translation': row.VARNAME_1,
                     'geometry': row.geometry, 
                     'ADM0': adm0,
@@ -50,55 +58,36 @@ def upload_adm1(data):
                     }
             )
         except:
-            ADM1.objects.update_or_create(
-                code=row.GID_1,
-                defaults={
-                    'name': row.NAME_1, 
-                    'name_translation': row.VARNAME_1,
-                    'geometry': row.geometry,
-                    'ADM0': ADM0.objects.create(code=row.GID_0, name=row.COUNTRY),
-                    'type': row.TYPE_1,
-                    'type_translation': row.ENGTYPE_1
-                    }
-            )
+            pass
+
         
 def upload_adm2(data):
     for row in data.itertuples(index=False):
-            try:
-                adm1 = ADM1.objects.get(code=row.GID_1)
-                ADM2.objects.update_or_create(
-                    code=row.GID_2,
-                    defaults={
-                        'name': row.NAME_2, 
-                        'name_translation': row.VARNAME_2,
-                        'geometry': row.geometry, 
-                        'ADM1': adm1,
-                        'type': row.TYPE_2,
-                        'type_translation': row.ENGTYPE_2
-                        }
-                )
-            except:
-                ADM2.objects.update_or_create(
-                    code=row.GID_2,
-                    defaults={
-                        'name': row.NAME_2, 
-                        'name_translation': row.VARNAME_2,
-                        'geometry': row.geometry,
-                        'ADM1': ADM1.objects.create(code=row.GID_1, name=row.NAME_1),
-                        'type': row.TYPE_2,
-                        'type_translation': row.ENGTYPE_2
-                        }
-                )
+        try:
+            adm1 = ADM1.objects.get(code=row.GID_1, name=row.NAME_1)
+            ADM2.objects.update_or_create(
+                code=row.GID_2,
+                name = row.NAME_2, 
+                defaults={
+                    'name_translation': row.VARNAME_2,
+                    'geometry': row.geometry, 
+                    'ADM1': adm1,
+                    'type': row.TYPE_2,
+                    'type_translation': row.ENGTYPE_2
+                    }
+            )
+        except:
+            pass
                 
 
 def upload_adm3(data):
     for row in data.itertuples(index=False):
         try:
-            adm2 = ADM2.objects.get(code=row.GID_2)
+            adm2 = ADM2.objects.get(name=row.NAME_2,code=row.GID_2)
             ADM3.objects.update_or_create(
                 code=row.GID_3,
+                name = row.NAME_3, 
                 defaults={
-                    'name': row.NAME_3, 
                     'name_translation': row.VARNAME_3,
                     'geometry': row.geometry, 
                     'ADM2': adm2,
@@ -107,17 +96,7 @@ def upload_adm3(data):
                     }
             )
         except:
-            ADM3.objects.update_or_create(
-                code=row.GID_3,
-                defaults={
-                    'name': row.NAME_3, 
-                    'name_translation': row.VARNAME_3,
-                    'geometry': row.geometry,
-                    'ADM2': ADM2.objects.create(code=row.GID_2, name=row.NAME_2),
-                    'type': row.TYPE_3,
-                    'type_translation': row.ENGTYPE_3
-                    }
-            )
+            pass
 
 def upload_adm4(data):
     for row in data.itertuples(index=False):
@@ -135,18 +114,8 @@ def upload_adm4(data):
                     }
         )
         except:
-            ADM4.objects.update_or_create(
-                code=row.GID_4,
-                defaults={
-                    'name': row.NAME_4, 
-                    'name_translation': row.VARNAME_4,
-                    'geometry': row.geometry,
-                    'ADM3': ADM3.objects.create(code=row.GID_3, name=row.NAME_3),
-                    'type': row.TYPE_4,
-                    'type_translation': row.ENGTYPE_4
-                    }
-        )
-            
+            pass
+
 
 def upload_adm5(data):
     for row in data.itertuples(index=False):
@@ -164,17 +133,7 @@ def upload_adm5(data):
                     }
             )
         except:
-            ADM5.objects.update_or_create(
-                code=row.GID_5,
-                defaults={
-                    'name': row.NAME_5, 
-                    'name_translation': row.VARNAME_5,
-                    'geometry': row.geometry,
-                    'ADM4': ADM4.objects.create(code=row.GID_4, name=row.NAME_4),
-                    'type': row.TYPE_5,
-                    'type_translation': row.ENGTYPE_5
-                    }
-            )
+            pass
 
 # call function based on your need and pass the data as argument
 # loops through all layers in geopackage to create a dataframe with wkt geometry fields
@@ -183,17 +142,17 @@ def upload_adm5(data):
 for layer in layers:
     data = gpd.read_file(gpkg, layer=layer).to_wkt()
     if '0' in layer:
-        upload_adm0(data)
+        upload_adm0(data[data.COUNTRY.isin(['Germany','Denmark','Sweden','Norway','France','United Kingdom','Ireland','Poland','NA'])])
     elif '1' in layer:
-        upload_adm1(data)
+        upload_adm1(data[data.COUNTRY.isin(['Germany','Denmark','Sweden','Norway','France','United Kingdom','Ireland','Poland','NA'])])
     elif '2' in layer:
-        upload_adm2(data)
+        upload_adm2(data[data.COUNTRY.isin(['Germany','Denmark','Sweden','Norway','France','United Kingdom','Ireland','Poland','NA'])])
     elif '3' in layer:
-        upload_adm3(data)
+        upload_adm3(data[data.COUNTRY.isin(['Germany','Denmark','Sweden','Norway','France','United Kingdom','Ireland','Poland','NA'])])
     elif '4' in layer:
-        upload_adm4(data)
-    elif '5' in layer:
-        upload_adm5(data)
+        upload_adm4(data[data.COUNTRY.isin(['Germany','Denmark','Sweden','Norway','France','United Kingdom','Ireland','Poland'])])
+    # elif '5' in layer:
+    #     upload_adm5(data[data.COUNTRY.isin(['Germany','Denmark','Sweden','Norway','France','United Kingdom','Ireland','Poland'])])
 
 
 print("Data imported successfully")

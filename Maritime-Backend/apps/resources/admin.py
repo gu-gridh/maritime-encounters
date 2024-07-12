@@ -6,6 +6,7 @@ from maritime.utils import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
 from admin_auto_filters.filters import AutocompleteFilter
 from django.contrib.admin import EmptyFieldListFilter
 from django.conf import settings
+import mapwidgets
 
 
 class SiteFilter(AutocompleteFilter):
@@ -14,15 +15,18 @@ class SiteFilter(AutocompleteFilter):
 
 
 @admin.register(Location)
-class LocationAdmin(admin.GISModelAdmin):
+class LocationAdmin(admin.ModelAdmin):
     list_display = ['location_name', 'site']
     search_fields = ['location_name', 'site__name']
     list_filter = ['location_name', 'site']
     ordering = ['location_name']
+    formfield_overrides = {
+        models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}
+    }
 
 
 @admin.register(SiteType)
-class SiteTypeAdmin(admin.GISModelAdmin):
+class SiteTypeAdmin(admin.ModelAdmin):
     list_display = ['text']
     search_fields = ['text']
     list_filter = ['text']
@@ -104,10 +108,12 @@ class SamplerAdmin(admin.ModelAdmin):
 
 @admin.register(ObjectDescription)
 class ObjectDescriptionAdmin(admin.ModelAdmin):
-    list_display = ['type']
-    search_fields = ['type']
-    list_filter = ['type']
-    ordering = ['type']
+    list_display = ['category','subcategory']
+    search_fields = ['category__text','subcategory__subcategory']
+    list_filter = ['category','subcategory']
+    ordering = ['category__text','subcategory__subcategory']
+
+        
 
 
 @admin.register(Cleat)
@@ -175,17 +181,20 @@ class DatingMethodAdmin(admin.ModelAdmin):
 
 
 @admin.register(Site)
-class SiteAdmin(admin.GISModelAdmin):
+class SiteAdmin(admin.ModelAdmin):
     list_display = ['name', 'ADM0',]
     search_fields = ['name', 'ADM0__name', 'ADM1__name',]
     autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4']
     # list_filter = ['name', 'ADM1']
     ordering = ['name']
     list_per_page = 50
+    formfield_overrides = {
+        models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}
+    }
 
 
 @admin.register(PlankBoats)
-class PlankBoatAdmin(admin.GISModelAdmin):
+class PlankBoatAdmin(admin.ModelAdmin):
     list_display = ['name', 'location', 'period', 'location']
     search_fields = ['name', 'location__location_name', 'period__name']
     list_filter = ['name', 'location']
@@ -193,7 +202,7 @@ class PlankBoatAdmin(admin.GISModelAdmin):
 
 
 @admin.register(LogBoats)
-class LogBoatAdmin(admin.GISModelAdmin):
+class LogBoatAdmin(admin.ModelAdmin):
     list_display = ['name', 'site', 'period']
     search_fields = ['name', 'period__name', 'site__name']
     list_filter = ['name']
@@ -201,7 +210,7 @@ class LogBoatAdmin(admin.GISModelAdmin):
 
 
 @admin.register(LandingPoints)
-class LandingPointsAdmin(admin.GISModelAdmin):
+class LandingPointsAdmin(admin.ModelAdmin):
     list_display = ['site', 'period']
     search_fields = ['site__name', 'period__name']
     list_filter = ['site']
@@ -211,21 +220,21 @@ class LandingPointsAdmin(admin.GISModelAdmin):
 
 
 @admin.register(NewSamples)
-class NewSamplesAdmin(admin.GISModelAdmin):
+class NewSamplesAdmin(admin.ModelAdmin):
     list_display = ['site', 'sampler', 'metal']
     search_fields = ['site__name']
     list_filter = ['site']
 
 
 @admin.register(Radiocarbon)
-class RadiocarbonAdmin(admin.GISModelAdmin):
+class RadiocarbonAdmin(admin.ModelAdmin):
     list_display = ['site', 'period']
     search_fields = ['site__name', 'period__name']
     list_filter = ['site', 'period']
 
 
 @admin.register(MetalAnalysis)
-class MetalAnalysisAdmin(admin.GISModelAdmin):
+class MetalAnalysisAdmin(admin.ModelAdmin):
     list_display = ['site', 'museum_entry', 'context']
     search_fields = ['site__name']
     list_filter = ['site']
@@ -233,38 +242,39 @@ class MetalAnalysisAdmin(admin.GISModelAdmin):
         RelMetalElementAdmin,
         RelMetalIsotopAdmin,
     ]
+    autocomplete_fields=['context','object_description','site','museum_entry','sample','period']
 
 
 @admin.register(aDNA)
-class aDNAAdmin(admin.GISModelAdmin):
+class aDNAAdmin(admin.ModelAdmin):
     list_display = ['site']
     search_fields = ['site__name']
     list_filter = ['site']
 
 
 @admin.register(IsotopesBio)
-class IsotopesBioAdmin(admin.GISModelAdmin):
+class IsotopesBioAdmin(admin.ModelAdmin):
     list_display = ['site']
     search_fields = ['site__name']
     list_filter = ['site']
 
 
 @admin.register(LNHouses)
-class LNHousesAdmin(admin.GISModelAdmin):
+class LNHousesAdmin(admin.ModelAdmin):
     list_display = ['site']
     search_fields = ['site__name']
     list_filter = ['site']
 
 
 @admin.register(NorwayDaggers)
-class NorwayDaggersAdmin(admin.GISModelAdmin):
+class NorwayDaggersAdmin(admin.ModelAdmin):
     list_display = ['site']
     search_fields = ['site__name']
     list_filter = ['site']
 
 
 @admin.register(NorwayShaftHoleAxes)
-class NorwayShaftHoleAxesAdmin(admin.GISModelAdmin):
+class NorwayShaftHoleAxesAdmin(admin.ModelAdmin):
     list_display = ['site', 'museum']
     search_fields = ['site__name', 'museum']
     list_filter = ['site', 'museum']
@@ -342,10 +352,10 @@ class ObjectCategoriesAdmin(admin.ModelAdmin):
 
 @admin.register(ObjectSubcategories)
 class ObjectSubcategoriesAdmin(admin.ModelAdmin):
-    list_display = ['category', 'subcategory']
-    search_fields = ['category', 'subcategory']
-    list_filter = ['category', 'subcategory']
-    ordering = ['category', 'subcategory']
+    list_display = ['subcategory']
+    search_fields = ['subcategory']
+    list_filter = ['subcategory']
+    ordering = ['subcategory']
 
 
 @admin.register(ObjectMaterials)
@@ -363,12 +373,16 @@ class ObjectMaterialsAdmin(admin.ModelAdmin):
 #     list_filter = ['subcategory__category__text', 'subcategory', 'material']
 #     ordering = ['subcategory']
 
-@admin.register(ObjectCounts)
-class ObjectCountsAdmin(admin.ModelAdmin):
-    list_display = ['metal', 'count']
-    search_fields = ['metal']
+@admin.register(ObjectCount)
+class ObjectCountAdmin(admin.ModelAdmin):
+    list_display = ['metal', 'object','material_list','count']
+    search_fields = ['metal__entry_num__entry_number','metal__literature_num__literature_number']
     list_filter = ['metal']
     ordering = ['metal']
+    filter_horizontal=['material']
+    autocomplete_fields=['metal','object']
+    def material_list(self,obj):
+        return [material.text for material in obj.material.all()]
 
 
 @admin.register(ContextFindsCategories)
@@ -388,20 +402,23 @@ class ContextFindsSubcategoriesAdmin(admin.ModelAdmin):
 
 
 class RelObjectCountAdmin(admin.TabularInline):
-    model = ObjectCounts
+    model = ObjectCount
     extra = 1
-    classes = ('collapse', )
+    filter_horizontal=['material']
+    autocomplete_fields=['object']
 
 
 @admin.register(Metalwork)
 class MetalworkAdmin(admin.ModelAdmin):
     list_display = ['entry_num', 'literature_num', 'accession_num', 'collection',
-                    'location', 'primary_context', 'find_context', 'context_detail']
+                    'location', 'main_context', 'find_context', 'context_detail']
     search_fields = ['entry_num', 'literature_num', 'accession_num', 'collection',
-                     'location', 'primary_context', 'find_context', 'context_detail', 'dating']
+                     'location', 'main_context', 'find_context', 'context_detail', 'dating']
     list_filter = ['entry_num', 'literature_num', 'accession_num', 'collection',
-                   'location', 'primary_context', 'find_context', 'context_detail', 'dating']
+                   'location', 'main_context', 'find_context', 'context_detail', 'dating']
     ordering = ['entry_num']
     inlines = [
         RelObjectCountAdmin
     ]
+    filter_horizontal=['context_keywords','dating', 'context_keywords','certain_context_descriptors','uncertain_context_descriptors']
+    autocomplete_fields=['entry_num','literature_num','accession_num','museum','collection','location','main_context','find_context','context_detail']

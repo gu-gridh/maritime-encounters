@@ -24,16 +24,26 @@ df = pd.read_csv(csv_file_path)
    
 def upload_sites(data):
     for row in data.itertuples(index=False):
+        print(f"{row.GID_0}, {row.GID_1}, {row.GID_2}, {row.GID_3}, {row.GID_4}")
         if not pd.isnull(row.GID_0):
-            adm0 = ADM0.objects.get(code=row.GID_0)
+            try:
+                adm0 = ADM0.objects.get(code=row.GID_0)
+            except:
+                adm0 = None
         else:
             adm0 = None
-        if not pd.isnull(row.GID_1):    
-            adm1 = ADM1.objects.get(code=row.GID_1)
+        if not pd.isnull(row.GID_1):
+            try:    
+                adm1 = ADM1.objects.get(code=row.GID_1)
+            except:
+                adm1 = None
         else:
             adm1 = None
         if not pd.isnull(row.GID_2):
-            adm2 = ADM2.objects.get(code=row.GID_2)
+            try:
+                adm2 = ADM2.objects.get(code=row.GID_2)
+            except:
+                adm2 = None
         else:
             adm2 = None
         if not pd.isnull(row.GID_3):
@@ -45,13 +55,13 @@ def upload_sites(data):
         else:
             adm4 = None
 
-        if not pd.isnull(row.lat) or pd.isnull(row.lng):
-            point = Point(row.lng, row.lat)  # Note that Point takes (longitude, latitude) order
+        if not pd.isnull(row.lat) or pd.isnull(row.lon):
+            point = Point(row.lon, row.lat)  # Note that Point takes (longitude, latitude) order
         else:
             point = None
 
         Site.objects.update_or_create(
-            name=row.site,
+            name=row.site_name,
             defaults={
                 'coordinates':point,
                 'ADM0': adm0,
