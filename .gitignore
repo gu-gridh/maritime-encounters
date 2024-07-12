@@ -192,3 +192,6 @@ migrations
 */**/.DS_Store
 # /apps/*.py
 *.sql
+
+Maritime-Backend/configs/
+Maritime-Backend/maritime/settings_local.py
