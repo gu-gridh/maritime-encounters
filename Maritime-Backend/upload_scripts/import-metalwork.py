@@ -49,7 +49,6 @@ site_cache = {}
 
 #Add administrative data to sites and create site objects
 for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['place', 'ADM_0', 'ADM_1', 'ADM_2', 'ADM_3', 'ADM_4', 'province', 'parish', 'x', 'y']].drop_duplicates(['x','y','place']).values:
-    print(adm3n)
     site_name = place or f"{parish}: {y}, {x}" or f"{province}: {y}, {x}" or f"{adm4n}: {y}, {x}" or f"{adm3n}: {y}, {x}" or f"{adm2n}: {y}, {x}"
     adm0 = ADM0.objects.get(name=adm0n) if adm0n != None else None
     adm1 = ADM1.objects.get(name=adm1n) if adm1n != None else None
