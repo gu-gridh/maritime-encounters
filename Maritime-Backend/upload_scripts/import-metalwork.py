@@ -41,7 +41,7 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, 
 csv_file_path = ''
 
 # Load the CSV data
-df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)[:2000]
+df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)
 
 # Import data into caches
 site_cache = {}
