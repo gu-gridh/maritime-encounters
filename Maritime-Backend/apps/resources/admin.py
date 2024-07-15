@@ -184,7 +184,7 @@ class DatingMethodAdmin(admin.ModelAdmin):
 class SiteAdmin(admin.ModelAdmin):
     list_display = ['name', 'ADM0',]
     search_fields = ['name', 'ADM0__name', 'ADM1__name',]
-    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4']
+    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish']
     # list_filter = ['name', 'ADM1']
     ordering = ['name']
     list_per_page = 50
