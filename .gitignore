@@ -195,3 +195,5 @@ migrations
 
 Maritime-Backend/configs/
 Maritime-Backend/maritime/settings_local.py
+Maritime-Backend/static_build
+Maritime-Backend/upload_scripts/import-sites_missing_gadm.py

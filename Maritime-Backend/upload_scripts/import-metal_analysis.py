@@ -17,6 +17,7 @@ django.setup()
 from apps.resources.models import *
 from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5
 
+
 # Path to your CSV file
 csv_file_path = ''
 
@@ -88,36 +89,36 @@ for context_name in df[['context']].drop_duplicates().values:
     )
     context_cache[context_name] = context
 
-for category in df[['object_category']].drop_duplicates().values:
-    category = category[0].strip()
-    object_type, created = ObjectCategories.objects.get_or_create(
-        text=category.capitalize()
-    )
-    categories_cache[category] = object_type
+# for category in df[['object_category']].drop_duplicates().values:
+#     category = category[0].strip()
+#     object_type, created = ObjectCategories.objects.get_or_create(
+#         text=category.capitalize()
+#     )
+#     categories_cache[category] = object_type
 
-for sub_category, category in df[['object_description', 'object_category']].drop_duplicates().values:
-    sub_category = sub_category.strip()
-    object_type, created = ObjectSubcategories.objects.get_or_create(
-        category=categories_cache.get(category.capitalize()),
-        subcategory=sub_category.capitalize()
-    )
-    object_subcategories[sub_category] = object_type
+# for sub_category, category in df[['object_description', 'object_category']].drop_duplicates().values:
+#     sub_category = sub_category.strip()
+#     object_type, created = ObjectSubcategories.objects.get_or_create(
+#         category=categories_cache.get(category.capitalize()),
+#         subcategory=sub_category.capitalize()
+#     )
+#     object_subcategories[sub_category] = object_type
 
-for object_material in df[['Metal']].drop_duplicates().values:
-    obj_material = object_material[0].strip()
-    object, created = ObjectMaterials.objects.get_or_create(
-        text=obj_material,
-    )
-    object_material_cache[obj_material] = object
+# for object_material in df[['Metal']].drop_duplicates().values:
+#     obj_material = object_material[0].strip()
+#     object, created = ObjectMaterials.objects.get_or_create(
+#         text=obj_material,
+#     )
+#     object_material_cache[obj_material] = object
 
-for object_description, mat in df[['object_description', 'Metal']].drop_duplicates().values:
-    object = object_subcategories.get(object_description)
-    material = object_material_cache.get(mat)
-    object_desc, created = ObjectDescription.objects.get_or_create(
-        type=object
-    )
-    object_desc.material.add(material)
-    object_description_cache[object_description] = object_desc
+# for object_description, mat in df[['object_description', 'Metal']].drop_duplicates().values:
+#     object = object_subcategories.get(object_description)
+#     material = object_material_cache.get(mat)
+#     object_desc, created = ObjectDescription.objects.get_or_create(
+#         type=object
+#     )
+#     object_desc.material.add(material)
+#     object_description_cache[object_description] = object_desc
 
 for phase_n in df[['phase']].drop_duplicates().values:
     phase_n = phase_n[0]
@@ -156,18 +157,22 @@ for row in df.itertuples(index=False):
         typology_row = None
 
     phase = phase_cache.get(row.phase)
+    
+    category_text = ObjectCategories.objects.get_or_create(text=row.object_category.capitalize().strip())[0]
+    subcategory_text = ObjectSubcategories.objects.get_or_create(subcategory=row.object_description.capitalize().strip())[0]
 
-    MetalAnalysis.objects.update_or_create(
+    obj=MetalAnalysis.objects.update_or_create(
         site=site_sample,
         sample=new_sample_cache.get((row.site_name, row.Metal, row.Drilled_location)),
         museum_entry=assocation_cache.get(row.Catalogue_no_),
         context=context_cache.get(row.context),
-        object_description=object_description_cache.get(
-            row.object_description),
+        object_description=ObjectDescription.objects.get_or_create(subcategory=subcategory_text, category=category_text)[0],
         general_typology=row.general_typology,
         typology=typology_row,
         period=period_cache.get((row.period, phase, row.start_date, row.end_date)),
+    )[0]
 
-    )
+
+
 
 print("Data imported successfully")

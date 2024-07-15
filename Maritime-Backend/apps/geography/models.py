@@ -44,7 +44,7 @@ class ADM1(Base):
         verbose_name_plural = _("ADM1")
     
     def __str__(self) -> str:
-        return f"{self.name} - {self.ADM0.name}"
+        return f"{self.name} - {self.ADM0.name} "
 
 
 # ADM2: Counties
@@ -56,7 +56,10 @@ class ADM2(Base):
         verbose_name_plural = _("ADM2")
     
     def __str__(self) -> str:
-        return f"{self.name} - {self.ADM1.name} "
+        try:
+            return f"{self.name} - {self.ADM1.name}"
+        except:
+            return 'MISSING FROM GEOGRAPHY'
 
 # ADM3: Municipality
 class ADM3(Base):
