@@ -38,7 +38,7 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, 
 # ContextFindsSubcategories.objects.all().delete()
 
 
-csv_file_path = '../../resources/c_horn_metalwork_v2.csv'
+csv_file_path = ''
 
 # Load the CSV data
 df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)
