@@ -41,7 +41,7 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, 
 csv_file_path = 'c_horn_metalwork_v2.csv'
 
 # Load the CSV data
-df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)[13971:]
+df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)
 
 
 #Add administrative data to sites and create site objects
