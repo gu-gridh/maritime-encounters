@@ -38,10 +38,11 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, 
 # ContextFindsSubcategories.objects.all().delete()
 
 
-csv_file_path = ''
+csv_file_path = 'c_horn_metalwork_v2.csv'
 
 # Load the CSV data
 df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)[13971:]
+
 
 #Add administrative data to sites and create site objects
 for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['place', 'ADM_0', 'ADM_1', 'ADM_2', 'ADM_3', 'ADM_4', 'province', 'parish', 'x', 'y']].drop_duplicates(['x','y','place']).values:
