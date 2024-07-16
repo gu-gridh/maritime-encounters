@@ -38,10 +38,11 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, 
 # ContextFindsSubcategories.objects.all().delete()
 
 
-csv_file_path = ''
+csv_file_path = 'c_horn_metalwork_v2.csv'
 
 # Load the CSV data
-df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)
+df = pd.read_csv(csv_file_path)[13971:]
+df = df.replace(np.nan, None).replace('[]',None)
 
 #Add administrative data to sites and create site objects
 for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['place', 'ADM_0', 'ADM_1', 'ADM_2', 'ADM_3', 'ADM_4', 'province', 'parish', 'x', 'y']].drop_duplicates(['x','y','place']).values:
@@ -89,7 +90,7 @@ for row in df.itertuples(index=False):
         location_certain=row.locationCertain,
         coord_system=row.origCoordSys,
         orig_coords=[row.xOrig, row.yOrig] if row.xOrig or row.yOrig else None,
-        main_context=Context.objects.get_or_create(text=row.mainContext)[0],
+        main_context=Context.objects.get_or_create(text=row.mainContext if row.mainContext != None else 'Uncertain')[0],
         main_context_certain=row.mainContextCertain,
         find_context=FindContext.objects.get_or_create(text=row.findContext)[0],
         find_context_certain=row.findContextCertain,
