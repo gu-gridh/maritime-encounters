@@ -1156,8 +1156,8 @@ class Metalwork(abstract.AbstractBaseModel):
         return name_str
 
     class Meta:
-        verbose_name = _("Metal work")
-        verbose_name_plural = _("Metal works")
+        verbose_name = _("Metalwork")
+        verbose_name_plural = _("Metalworks")
 
 
 class ObjectCount(models.Model):
