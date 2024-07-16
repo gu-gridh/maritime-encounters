@@ -41,7 +41,7 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, 
 csv_file_path = ''
 
 # Load the CSV data
-df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)
+df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)[:30]
 
 #Add administrative data to sites and create site objects
 for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['place', 'ADM_0', 'ADM_1', 'ADM_2', 'ADM_3', 'ADM_4', 'province', 'parish', 'x', 'y']].drop_duplicates(['x','y','place']).values:
@@ -51,8 +51,8 @@ for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['p
     adm2 = ADM2.objects.get(name=adm2n, ADM1__name=adm1n) if adm2n != None else None
     adm3 = ADM3.objects.get(name=adm3n, ADM2__name=adm2n) if adm3n != None else None
     adm4 = ADM4.objects.get(name=adm4n, ADM3__name=adm3n, ADM3__ADM2__name=adm2n) if adm4n != None else None
-    province = Province.objects.get(name=provincen) if provincen != None else None
-    parish= Parish.objects.get(name=parishn) if parishn != None else None
+    province = None #Province.objects.get(name=provincen) if provincen != None else None
+    parish= None #Parish.objects.get(name=parishn) if parishn != None else None
     point = Point(x, y) if not pd.isnull(y) or pd.isnull(x) else None # Note that Point takes (longitude, latitude) order
 
     site = Site.objects.get_or_create(
@@ -85,7 +85,7 @@ for row in df.itertuples(index=False):
         collection=MuseumCollection.objects.get_or_create(collection=row.museumCollection.strip().title())[0] if not pd.isnull(row.museumCollection) else None,
         museum_certain=row.museumCertain,
         location=Location.objects.get_or_create(
-        site=Site.objects.get_or_create(coordinates=Point(row.x,row.y), name=site_name)[0], location_detail=row.placeDetail)[0],
+        site=Site.objects.get_or_create(coordinates=Point(row.x,row.y) if row.x and row.y else None, name=site_name)[0], location_detail=row.placeDetail)[0],
         location_certain=row.locationCertain,
         coord_system=row.origCoordSys,
         orig_coords=[row.xOrig, row.yOrig] if row.xOrig or row.yOrig else None,
@@ -165,9 +165,10 @@ for row in df.itertuples(index=False):
             object_desc=ObjectDescription.objects.get_or_create(subcategory=subcategory_text,category=category_text)[0]
             
             # db_object = Metalwork.objects.get(entry_num__entry_number=row.entryNo, literature_num__literature_number=row.literatureNo)
-            object_counts = ObjectCount.objects.get_or_create(metal=db_object, object = object_desc, count = finds.obj_count, certainty = finds.certain)[0]
+            object_counts = ObjectCount.objects.create(metal=db_object, object = object_desc, count = finds.obj_count, certainty = finds.certain)
             object_counts.material.set(materials)
             objects_list.append(object_counts)
+
     
     # Assign categories to the subcategories using keys in the dictionary, append the subcategory objects to a list, add the list to the current db object        
     data = pd.json_normalize(literal_eval(row.certainContextDescriptors))
@@ -190,6 +191,6 @@ for row in df.itertuples(index=False):
     db_object.dating.set(datings)
     db_object.certain_context_descriptors.set(cert_context_desc)
     db_object.uncertain_context_descriptors.set(poss_context_desc)
+
         
-    
 print("Data imported successfully")
