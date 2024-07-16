@@ -89,7 +89,7 @@ for row in df.itertuples(index=False):
         location_certain=row.locationCertain,
         coord_system=row.origCoordSys,
         orig_coords=[row.xOrig, row.yOrig] if row.xOrig or row.yOrig else None,
-        main_context=Context.objects.get_or_create(text=row.mainContext)[0],
+        main_context=Context.objects.get_or_create(text=row.mainContext if row.mainContext != None else 'Uncertain')[0],
         main_context_certain=row.mainContextCertain,
         find_context=FindContext.objects.get_or_create(text=row.findContext)[0],
         find_context_certain=row.findContextCertain,

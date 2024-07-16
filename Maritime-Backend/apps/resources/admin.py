@@ -412,8 +412,8 @@ class RelObjectCountAdmin(admin.TabularInline):
 class MetalworkAdmin(admin.ModelAdmin):
     list_display = ['entry_num', 'literature_num', 'accession_num', 'collection',
                     'location', 'main_context', 'find_context', 'context_detail']
-    search_fields = ['entry_num', 'literature_num', 'accession_num', 'collection',
-                     'location', 'main_context', 'find_context', 'context_detail', 'dating']
+    search_fields = ['entry_num__entry_number', 'literature_num__literature_number', 'accession_num__accession_number', 'collection__collection',
+                     'location__location_name','main_context__text', 'find_context__text', 'context_detail__text', 'dating__name', 'dating__phase__text']
     list_filter = ['entry_num', 'literature_num', 'accession_num', 'collection',
                    'location', 'main_context', 'find_context', 'context_detail', 'dating']
     ordering = ['entry_num']
