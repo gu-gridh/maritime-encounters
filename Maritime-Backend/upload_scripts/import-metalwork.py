@@ -38,10 +38,10 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, 
 # ContextFindsSubcategories.objects.all().delete()
 
 
-csv_file_path = ''
+csv_file_path = '../../resources/c_horn_metalwork_v2.csv'
 
 # Load the CSV data
-df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)[:30]
+df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]',None)
 
 #Add administrative data to sites and create site objects
 for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['place', 'ADM_0', 'ADM_1', 'ADM_2', 'ADM_3', 'ADM_4', 'province', 'parish', 'x', 'y']].drop_duplicates(['x','y','place']).values:
@@ -51,8 +51,8 @@ for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['p
     adm2 = ADM2.objects.get(name=adm2n, ADM1__name=adm1n) if adm2n != None else None
     adm3 = ADM3.objects.get(name=adm3n, ADM2__name=adm2n) if adm3n != None else None
     adm4 = ADM4.objects.get(name=adm4n, ADM3__name=adm3n, ADM3__ADM2__name=adm2n) if adm4n != None else None
-    province = None #Province.objects.get(name=provincen) if provincen != None else None
-    parish= None #Parish.objects.get(name=parishn) if parishn != None else None
+    province = Province.objects.get(name=provincen) if provincen != None else None
+    parish= Parish.objects.get(name=parishn) if parishn != None else None
     point = Point(x, y) if not pd.isnull(y) or pd.isnull(x) else None # Note that Point takes (longitude, latitude) order
 
     site = Site.objects.get_or_create(
