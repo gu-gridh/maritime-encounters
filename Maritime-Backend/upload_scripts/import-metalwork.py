@@ -50,13 +50,13 @@ def get_or_create_object(model, **kwargs):
 with transaction.atomic():
     for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['place', 'ADM_0', 'ADM_1', 'ADM_2', 'ADM_3', 'ADM_4', 'province', 'parish', 'x', 'y']].drop_duplicates(['x', 'y', 'place']).values:
         site_name = place or f"{parishn}: {y}, {x}" or f"{provincen}: {y}, {x}" or f"{adm4n}: {y}, {x}" or f"{adm3n}: {y}, {x}" or f"{adm2n}: {y}, {x}"
-        adm0 = ADM0.objects.filter(name=adm0n).first() if adm0n else None
-        adm1 = ADM1.objects.filter(name=adm1n).first() if adm1n else None
-        adm2 = ADM2.objects.filter(name=adm2n, ADM1__name=adm1n).first() if adm2n else None
-        adm3 = ADM3.objects.filter(name=adm3n, ADM2__name=adm2n).first() if adm3n else None
-        adm4 = ADM4.objects.filter(name=adm4n, ADM3__name=adm3n, ADM3__ADM2__name=adm2n).first() if adm4n else None
-        province = Province.objects.filter(name=provincen).first() if provincen else None
-        parish = Parish.objects.filter(name=parishn).first() if parishn else None
+        adm0 = ADM0.objects.filter(name=adm0n) if adm0n else None
+        adm1 = ADM1.objects.filter(name=adm1n) if adm1n else None
+        adm2 = ADM2.objects.filter(name=adm2n, ADM1__name=adm1n) if adm2n else None
+        adm3 = ADM3.objects.filter(name=adm3n, ADM2__name=adm2n) if adm3n else None
+        adm4 = ADM4.objects.filter(name=adm4n, ADM3__name=adm3n, ADM3__ADM2__name=adm2n) if adm4n else None
+        province = Province.objects.filter(name=provincen) if provincen else None
+        parish = Parish.objects.filter(name=parishn) if parishn else None
         point = Point(x, y) if not pd.isnull(y) and not pd.isnull(x) else None
         
         Site.objects.get_or_create(
