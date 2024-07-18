@@ -174,19 +174,28 @@ def upload_parishes(data):
         provinces = Province.objects.filter(geometry__bboverlaps=row.geometry) 
         province= provinces[0] if len(provinces) !=0 else None
             
-        Parish.objects.update_or_create(
+        Parish.objects.get_or_create(
             code=row.omradesnummer,
-            defaults={
-                'name': row.sockenstadnamn,
-                'name_translation': row.sockenstadnamn,
-                'geometry': row.geometry, 
-                'country': adm2.ADM1.ADM0 if adm2 != None else ADM0.objects.get(name='Sweden'),
-                'county':adm2.ADM1 if adm2 != None else None,
-                'municipality':adm2 if adm2 != None else None,
-                'province':province,
-                'type': 'Socken',
-                'type_translation': 'Parish'
-                } 
+            name = row.sockenstadnamn,
+            name_translation = row.sockenstadnamn,
+            geometry = row.geometry,
+            country = adm2.ADM1.ADM0 if adm2 != None else ADM0.objects.get(name='Sweden'),
+            county = adm2.ADM1 if adm2 != None else None,
+            municipality = adm2 if adm2 != None else None,
+            province = province,
+            type = 'Socken',
+            type_translation = 'Parish'
+            # defaults={
+            #     'name': row.sockenstadnamn,
+            #     'name_translation': row.sockenstadnamn,
+            #     'geometry': row.geometry, 
+            #     'country': adm2.ADM1.ADM0 if adm2 != None else ADM0.objects.get(name='Sweden'),
+            #     'county':adm2.ADM1 if adm2 != None else None,
+            #     'municipality':adm2 if adm2 != None else None,
+            #     'province':province,
+            #     'type': 'Socken',
+            #     'type_translation': 'Parish'
+            #     } 
         )
             
 
