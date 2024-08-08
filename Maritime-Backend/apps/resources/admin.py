@@ -266,20 +266,6 @@ class LNHousesAdmin(admin.ModelAdmin):
     list_filter = ['site']
 
 
-@admin.register(NorwayDaggers)
-class NorwayDaggersAdmin(admin.ModelAdmin):
-    list_display = ['site']
-    search_fields = ['site__name']
-    list_filter = ['site']
-
-
-@admin.register(NorwayShaftHoleAxes)
-class NorwayShaftHoleAxesAdmin(admin.ModelAdmin):
-    list_display = ['site', 'museum']
-    search_fields = ['site__name', 'museum']
-    list_filter = ['site', 'museum']
-
-
 @admin.register(MuseumMeta)
 class MuseumMetaAdmin(admin.ModelAdmin):
     list_display = ['museum']
@@ -420,5 +406,34 @@ class MetalworkAdmin(admin.ModelAdmin):
     inlines = [
         RelObjectCountAdmin
     ]
-    filter_horizontal=['context_keywords','dating', 'context_keywords','certain_context_descriptors','uncertain_context_descriptors']
+    filter_horizontal=['context_keywords','dating', 'context_keywords','certain_context_descriptors','uncertain_context_descriptors','museum']
     autocomplete_fields=['entry_num','literature_num','accession_num','museum','collection','location','main_context','find_context','context_detail']
+    
+@admin.register(Form)
+class FormAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    list_filter = ['name']
+    ordering = ['name']
+    
+@admin.register(Variant)
+class VariantAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    list_filter = ['name']
+    ordering = ['name']
+    
+@admin.register(ObjectIds)
+class ObjectIdsAdmin(admin.ModelAdmin):
+    list_display = ['art_id','systemnr','stednr','loknr','frednr','other_id']
+    search_fields = ['art_id','systemnr','stednr','loknr','frednr','other_id']
+    list_filter = ['art_id','systemnr','stednr','loknr','frednr','other_id']
+    ordering = ['art_id','systemnr','stednr','loknr','frednr','other_id']
+    
+@admin.register(IndividualObjects)
+class IndividualObjectsAdmin(admin.ModelAdmin):
+    list_display = ['site','object_id','accession_number','object_type','form','variant','material','period','start_date','end_date']
+    search_fields = ['site__name','object_id','accession_number','object_type','form__name','variant__name','period__name','start_date','end_date']
+    ordering = ['accession_number']
+    autocomplete_fields=['site','accession_number','object_type','form','variant','period','material']
+

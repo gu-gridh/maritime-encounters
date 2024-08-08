@@ -913,57 +913,45 @@ class LNHouses(abstract.AbstractBaseModel):
         verbose_name = _("Late Neolithic House")
         verbose_name_plural = _("Late Neolithic Houses")
 
-
-class NorwayDaggers(abstract.AbstractBaseModel):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "site"), help_text=_("The site in which the Dagger is located."))
-    type = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "type"), help_text=_("The type of the Dagger."))
-    period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "period"), help_text=_("The period of the Dagger."))
-    context = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "context"), help_text=_("The context of the Dagger."))
-
-    comments = models.TextField(null=True, blank=True, verbose_name=_(
-        "comments"), help_text=_("The comments of the Dagger."))
-    references = models.TextField(null=True, blank=True, verbose_name=_(
-        "references"), help_text=_("The references of the Dagger."))
+class Form(abstract.AbstractBaseModel):
+    name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Name"), help_text=_("The form of an object, e.g. shafthole axe, miniature, etc."))
 
     def __str__(self) -> str:
-        name_str = f"{self.type} - {self.context} {self.site.name}"
-        return name_str
+        return self.name
 
     class Meta:
-        verbose_name = _("Norway Dagger")
-        verbose_name_plural = _("Norway Daggers")
-
-
-class NorwayShaftHoleAxes(abstract.AbstractBaseModel):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "site"), help_text=_("The site in which the Shaft Hole Axe is located."))
-    museum = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "museum"), help_text=_("The museum of the Shaft Hole Axe."))
-    museum_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "museum_number"), help_text=_("The museum number of the Shaft Hole Axe."))
-    object_type = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "type"), help_text=_("The type of the Shaft Hole Axe."))
-    period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "period"), help_text=_("The period of the Shaft Hole Axe."))
-    form = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "form"), help_text=_("The form of the Shaft Hole Axe."))
-    variant = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "variant"), help_text=_("The variant of the Shaft Hole Axe."))
-    material = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "material"), help_text=_("The material of the Shaft Hole Axe."))
+        verbose_name = _("Form")
+        verbose_name_plural = _("Forms")
+        
+class Variant(abstract.AbstractBaseModel):
+    name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Name"), help_text=_("The variant of an object form, e.g. simple (enkel), Type A, etc."))
 
     def __str__(self) -> str:
-        name_str = f"{self.museum}"
-        return name_str
+        return self.name
 
     class Meta:
-        verbose_name = _("Norway Shaft Hole Axe")
-        verbose_name_plural = _("Norway Shaft Hole Axes")
-
+        verbose_name = _("Variant")
+        verbose_name_plural = _("Variants")
+        
+class ObjectIds(abstract.AbstractBaseModel):
+    art_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Art ID"), help_text=_("Norweigian ID of the object."))
+    systemnr = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Systemnr"), help_text=_("Danish ID systemnr."))
+    stednr = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Stednr"), help_text=_("Danish ID stednr."))
+    loknr = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Loknr"), help_text=_("Danish ID loknr."))
+    frednr = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Frednr"), help_text=_("Danish ID frednr."))
+    other_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Other ID"), help_text=_("Any other ID of the object."))
+    
+    def __str__(self) -> str:
+        if self.art_id:
+            return self.art_id
+        elif self.systemnr and self.stednr and self.loknr and self.frednr:
+            return f"{self.systemnr} {self.stednr} {self.loknr} {self.frednr}"
+        else:
+            return self.other_id
+    class Meta:
+        verbose_name = _("Object ID")
+        verbose_name_plural = _("Object IDs")
+    
 
 class MuseumMeta(abstract.AbstractBaseModel):
     museum = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
@@ -1097,7 +1085,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "Accession Number"), help_text=_("The accession number of the object."))
     accession_certain = models.BooleanField(blank=True, verbose_name=_("Accession Number Certainty"), help_text=_(
         "Check if the accession number is certain and does not need review later."), default=True)
-    museum = models.ForeignKey(MuseumMeta, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+    museum = models.ManyToManyField(MuseumMeta, null=True, blank=True, verbose_name=_(
         "Museum"), help_text=_("The museum that holds or recorded the object."))
     collection = models.ForeignKey(MuseumCollection, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Collection"), help_text=_("The title of the museum or personal collection."))
@@ -1183,3 +1171,33 @@ class ObjectCount(models.Model):
     class Meta:
         verbose_name = _("Object Count")
         verbose_name_plural = _("Object Counts")
+        
+
+class IndividualObjects(abstract.AbstractBaseModel):
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Site"), help_text=_("The site in which the object was located."))
+    accession_number = models.ForeignKey(AccessionNum, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Accession Number"), help_text=_("The accession number of the object."))
+    museum = models.ForeignKey(MuseumMeta, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Museum"), help_text=_("The museum that holds or recorded the object."))
+    object_type = models.ForeignKey(ObjectDescription, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Object Type"), help_text=_("The type of the object."))
+    form = models.ForeignKey(Form, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Form"), help_text=_("The form of the object."))
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Variant"), help_text=_("The variant of the object."))
+    count = models.IntegerField(null=True, blank=True, verbose_name=_("Count"), help_text=_("The number of objects."))
+    material = models.ForeignKey(ObjectMaterials, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Material"), help_text=_("The material of the object."))
+    period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Period"), help_text=_("The period of the object."))
+    orig_coords = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Original Coords"), help_text=_("The original coordinates of the object."))
+    orig_crs = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Original CRS"), help_text=_("The original CRS of the object."))
+    start_date = models.IntegerField(null=True, blank=True, verbose_name=_("Start Date"), help_text=_("The start date of the object."))
+    end_date = models.IntegerField(null=True, blank=True, verbose_name=_("End Date"), help_text=_("The end date of the object."))
+    object_id = models.ForeignKey(ObjectIds, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Object ID"), help_text=_("The ID of the object in the relevant national database."))
+    
+    def __str__(self) -> str:
+        if self.accession_number and self.object_type and self.form and self.variant:
+            return f"{self.accession_number} - {self.object_type}, {self.form}, {self.variant}"
+        elif self.accession_number and self.object_type and self.form:
+            return f"{self.accession_number} - {self.object_type}, {self.form}"
+        elif self.accession_number and self.object_type:
+            return f"{self.accession_number} - {self.object_type}"
+        else:
+            return self.object_type
+    class Meta:
+        verbose_name = _("Individual Find")
+        verbose_name_plural = _("Individual Finds")
