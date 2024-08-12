@@ -1,5 +1,3 @@
-from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, Parish
-from apps.resources.models import *
 import os
 import sys
 import django
@@ -13,13 +11,12 @@ from ast import literal_eval
 # Add the parent directory to the system path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-# Set the DJANGO_SETTINGS_MODULE environment variable
-os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maritime.settings')
-
-# Set up Django
+# Set up Django environment
+os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maritime.settings')  # Replace 'your_project' with your project's name
 django.setup()
 
-# Replace 'your_app' with the name of your Django app
+from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5, Province, Parish
+from apps.resources.models import *
 
 
 # Clear current data in database
@@ -46,8 +43,7 @@ df = pd.read_csv(csv_file_path).replace(np.nan, None).replace('[]', None)
 
 # Add administrative data to sites and create site objects
 for place, adm0n, adm1n, adm2n, adm3n, adm4n, provincen, parishn, x, y in df[['place', 'ADM_0', 'ADM_1', 'ADM_2', 'ADM_3', 'ADM_4', 'province', 'parish', 'x', 'y']].drop_duplicates(['x', 'y', 'place']).values:
-    site_name = place or f"{parishn}: {y}, {x}" or f"{provincen}: {y}, {x}" or f"{
-        adm4n}: {y}, {x}" or f"{adm3n}: {y}, {x}" or f"{adm2n}: {y}, {x}"
+    site_name = place or f"{parishn}: {y}, {x}" or f"{provincen}: {y}, {x}" or f"{adm4n}: {y}, {x}" or f"{adm3n}: {y}, {x}" or f"{adm2n}: {y}, {x}"
     adm0 = ADM0.objects.get(name=adm0n) if adm0n != None else None
     adm1 = ADM1.objects.get(name=adm1n) if adm1n != None else None
     adm2 = ADM2.objects.get(
@@ -81,8 +77,7 @@ for category in desc_df.columns:
 
 # Import data by row
 for row in df.itertuples(index=False):
-    site_name = row.place or f"{row.parish}: {row.y}, {row.x}" or f"{row.province}: {row.y}, {row.x}" or f"{row.ADM_4}: {
-        row.y}, {row.x}" or f"{row.ADM_3}: {row.y}, {row.x}" or f"{row.ADM_2}: {row.y}, {row.x}" or "NAME IS MISSING"
+    site_name = row.place or f"{row.parish}: {row.y}, {row.x}" or f"{row.province}: {row.y}, {row.x}" or f"{row.ADM_4}: {row.y}, {row.x}" or f"{row.ADM_3}: {row.y}, {row.x}" or f"{row.ADM_2}: {row.y}, {row.x}" or "NAME IS MISSING"
 
     # Add data to boolean, character/text, and some foreignkey fields
     db_object = Metalwork.objects.update_or_create(
