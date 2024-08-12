@@ -23,9 +23,11 @@ django.setup()
 from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4
 from apps.resources.models import *
 
-# Site.objects.all().delete()
-# IndividualObjects.objects.all().delete()
-# AccessionNum.objects.all().delete()
+Site.objects.all().delete()
+IndividualObjects.objects.all().delete()
+AccessionNum.objects.all().delete()
+Period.objects.all().delete()
+Phase.objects.all().delete()
 
 
 # Define common coordinate system codes
@@ -112,55 +114,73 @@ def clean_data(file_path,utm_32_n,utm_33_n,ngo1948):
 
 def upload_data(data):
     for row in data.itertuples(index=False):
-        
         # Translate the Norwegian text to English
-        type_translated=GoogleTranslator(source='auto',target='en').translate(text=row.Gjenstand).strip().capitalize() if row.Gjenstand != None else None
-        form_translated=GoogleTranslator(source='auto',target='en').translate(text=row.Form).strip().capitalize() if row.Form != None else None    
-        variant_translated=GoogleTranslator(source='auto',target='en').translate(text=row.Variant).strip().capitalize() if row.Variant != None else None
-        material_translated=GoogleTranslator(source='auto',target='en').translate(text=row.Materiale).strip().capitalize() if row.Materiale != None else None
-        period_translated=GoogleTranslator(source='auto',target='en').translate(text=row.Periode).strip().capitalize() if row.Periode != None else None
-        periods=period_translated.split('/')
+        type_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Gjenstand.strip().capitalize()) if row.Gjenstand != None else None
+        form_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Form.strip().capitalize()) if row.Form != None else None    
+        variant_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Variant.strip().capitalize()) if row.Variant != None else None
+        material_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Materiale.strip().capitalize()) if row.Materiale != None else None
+        materials=[material.capitalize() for material in material_translated.split('/')] if material_translated != None else None
+        period_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Periode.strip().capitalize()) if row.Periode != None else None
+        periods=[period.capitalize() for period in period_translated.split('/')] if period_translated != None else None
         
-        # Clean and split text for Dating data that contains specific years
-        if row.Datering != None and 'f.kr.' in row.Datering.lower():
-            dates_string = row.Datering.lower().replace('f.kr.','').split('-')
-            dates = [(date*-1) for date in dates_string] #Make BC years negative for compatibility with Danish data
-        elif row.Datering != None and ('e.kr.' in row.Datering.lower() or 'e. kr.' in row.Datering.lower()):
-            dates = row.Datering.lower().replace('e.kr.','').replace('e. kr.','').split('-')
-        else:
-            dates=[None,None]
-            
+        
         # Add data to the non-ManyToMany fields    
         db_object = IndividualObjects.objects.get_or_create(
             site = Site.objects.get_or_create(name=row.Art_Id, coordinates=Point(row.x,row.y))[0],
             accession_number = AccessionNum.objects.get_or_create(accession_number=row.Museumsnr)[0],
             # museum = MuseumMeta.objects.get_or_create(museum_number=row.Museumsnr)[0],
-            object_type = ObjectDescription.objects.get_or_create(category=ObjectCategories.objects.get_or_create(text='NEEDS REVIEW')[0], subcategory=ObjectSubcategories.objects.get_or_create(subcategory=type_translated)[0])[0],
+            object_type = ObjectDescription.objects.get_or_create( subcategory=ObjectSubcategories.objects.get_or_create(subcategory=type_translated)[0])[0],
             type_original = row.Gjenstand,
-            form = Form.objects.get_or_create(name=form_translated)[0],
+            form_translation = form_translated,
             form_original = row.Form,
-            variant = Variant.objects.get_or_create(name=variant_translated)[0],
+            variant = Variant.objects.get_or_create(name=variant_translated.title())[0],
             variant_original = row.Variant,
             count = row.Antall_gjenstander,
-            material = ObjectMaterials.objects.get_or_create(text=material_translated)[0] if material_translated != None else None,
             material_original = row.Materiale,
             period_original = row.Periode,
             orig_coords = f"[{row.Kart_aust},{row.Kart_Nord}]",
             orig_crs = row.Kart_Projeksjon,
-            start_date = dates[0] if len(dates)>1 else None,
-            end_date = dates[1] if len(dates)>1 else None,
             dating_original= row.Datering,
             object_id = ObjectIds.objects.get_or_create(art_id=row.Art_Id)[0]
         )[0]
         
         # Loop through lists for ManyToMany fields
         datings_list=[]
-        if len(periods)>0:
+        category_list=[]
+        materials_list=[]
+        
+        
+        if periods != None:
             for item in periods:
-                dating_text = Period.objects.get_or_create(
-                        name=item)[0]
+                if 'Earl' in item or 'Late' in item or 'Old' in item or 'Younger' in item or 'Middle' in item:
+                    dating_text = Period.objects.get_or_create(name=item.title().replace('Older', '').replace('Younger', '').replace('Early', '').replace('Late','').replace('Earlier','').replace('Old','').replace('Eolithic','Neolithic').replace('Middle','').strip(), phase=Phase.objects.get_or_create(text=item.title().replace('Older', 'Early').replace('Younger', 'Late').replace('Eolithic','Neolithic').strip())[0])[0]
+                else:
+                    dating_text = Period.objects.get_or_create(
+                            name=item.title(), phase=None)[0]
                 datings_list.append(dating_text)
         db_object.period.set(datings_list)
+        
+        if type_translated == 'Dagger':
+            category_text = ObjectCategories.objects.get_or_create(text='Weapons')[0]
+            category_list.append(category_text)
+        elif type_translated == 'Shaft hole Axe':
+            categories = ['Tools','Weapons']
+            for category in categories:
+                category_text = ObjectCategories.objects.get_or_create(text=category)[0]
+                category_list.append(category_text)
+        elif type_translated == 'Sickle':
+            category_text = ObjectCategories.objects.get_or_create(text='Tools')[0]
+            category_list.append(category_text)
+        else:
+            category_text = ObjectCategories.objects.get_or_create(text='Needs Review')[0]
+            category_list.append(category_text)
+        db_object.object_type.category.set(category_list)
+        
+        if materials != None:
+            for item in materials:
+                material = ObjectMaterials.objects.get_or_create(text=item)[0]
+                materials_list.append(material)
+        db_object.material.set(materials_list)
             
         
 if __name__ == '__main__':

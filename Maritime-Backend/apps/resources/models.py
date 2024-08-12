@@ -116,7 +116,7 @@ class ObjectMaterials(abstract.AbstractTagModel):
 
 
 class ObjectDescription(abstract.AbstractBaseModel):
-    category = models.ForeignKey(ObjectCategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+    category = models.ManyToManyField(ObjectCategories, null=True, blank=True, verbose_name=_(
         "category"), help_text=_("The category of the object, e.g. Weapon, Vessel."))
     subcategory = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "subcategory"), help_text=_("The subcategory of the object."))
@@ -125,8 +125,9 @@ class ObjectDescription(abstract.AbstractBaseModel):
     #     "material"), help_text=_("The material(s) of the object."))
 
     def __str__(self) -> str:
-
-        name_str = f"{self.category} - {self.subcategory}" or 'No Info'
+        def category_list(self):
+            categories = ','.join([category.text for category in self.category.all()])
+        name_str = f"{self.subcategory}" or 'No Info'
         return name_str
 
     def __repr__(self) -> str:
@@ -918,11 +919,11 @@ class LNHouses(abstract.AbstractBaseModel):
 
 
 class Form(abstract.AbstractBaseModel):
-    name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+    name = models.CharField(max_length=254, null=True, blank=True, verbose_name=_(
         "Name"), help_text=_("The form of an object, e.g. shafthole axe, miniature, etc."))
 
     def __str__(self) -> str:
-        return self.name
+        return self.name or 'Not specified'
 
     class Meta:
         verbose_name = _("Form")
@@ -1203,15 +1204,17 @@ class IndividualObjects(abstract.AbstractBaseModel):
         'Object Type (pre-translation)'), help_text=_('The object type text before translation to English.'))
     form = models.ForeignKey(Form, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Form"), help_text=_("The form of the object."))
-    form_original = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        'Form (pre-translation)'), help_text=_('The form text before translation to English.'))
+    form_translation = models.TextField(max_length=1000, null=True,blank=True,verbose_name=_(
+        'Form (Long Description)'), help_text=_('The form text before translation to English.'))
+    form_original = models.TextField(max_length=1000, null=True, blank=True, verbose_name=_(
+        'Form (Pre-translation)'), help_text=_('The form text before translation to English.'))
     variant = models.ForeignKey(Variant, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Variant"), help_text=_("The variant of the object."))
     variant_original = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         'Variant (pre-translation)'), help_text=_('The variant text before translation to English.'))
     count = models.IntegerField(null=True, blank=True, verbose_name=_(
         "Count"), help_text=_("The number of objects."))
-    material = models.ForeignKey(ObjectMaterials, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+    material = models.ManyToManyField(ObjectMaterials, null=True, blank=True, verbose_name=_(
         "Material"), help_text=_("The material of the object."))
     material_original = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         'Material (pre-translation)'), help_text=_('The material text before translation to English.'))
@@ -1223,10 +1226,10 @@ class IndividualObjects(abstract.AbstractBaseModel):
         "Original Coords"), help_text=_("The original coordinates of the object."))
     orig_crs = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Original CRS"), help_text=_("The original CRS of the object."))
-    start_date = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
-        "Start Date"), help_text=_("The start date of the object."))
-    end_date = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
-        "End Date"), help_text=_("The end date of the object."))
+    # start_date = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
+    #     "Start Date"), help_text=_("The start date of the object."))
+    # end_date = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
+    #     "End Date"), help_text=_("The end date of the object."))
     dating_original = models.CharField(max_length=256,null=True,blank=True,verbose_name=_("Dating (pre-translation)"), help_text=_("The original dating string before translation and processing."))
     object_id = models.ForeignKey(ObjectIds, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Object ID"), help_text=_("The ID of the object in the relevant national database."))

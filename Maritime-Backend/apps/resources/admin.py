@@ -108,7 +108,7 @@ class SamplerAdmin(admin.ModelAdmin):
 
 @admin.register(ObjectDescription)
 class ObjectDescriptionAdmin(admin.ModelAdmin):
-    list_display = ['category', 'subcategory']
+    list_display = ['subcategory']
     search_fields = ['category__text', 'subcategory__subcategory']
     list_filter = ['category', 'subcategory']
     ordering = ['category__text', 'subcategory__subcategory']
@@ -411,8 +411,7 @@ class MetalworkAdmin(admin.ModelAdmin):
     ]
     filter_horizontal = ['context_keywords', 'dating', 'context_keywords',
                          'certain_context_descriptors', 'uncertain_context_descriptors', 'museum', 'collection']
-    autocomplete_fields = ['entry_num', 'literature_num', 'accession_num', 'museum',
-                           'collection', 'location', 'main_context', 'find_context', 'context_detail']
+    autocomplete_fields = ['entry_num', 'literature_num', 'accession_num','location', 'main_context', 'find_context', 'context_detail']
 
 
 @admin.register(Form)
@@ -448,5 +447,6 @@ class IndividualObjectsAdmin(admin.ModelAdmin):
     search_fields = ['site__name', 'object_id__art_id',
                      'form__name', 'variant__name', 'period__name', 'start_date', 'end_date']
     ordering = ['site']
+    filter_horizontal = ['material','period']
     autocomplete_fields = ['site', 'accession_number',
-                           'object_type', 'form', 'variant', 'period', 'material']
+                           'object_type', 'form', 'variant']
