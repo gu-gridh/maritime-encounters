@@ -23,11 +23,11 @@ django.setup()
 from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4
 from apps.resources.models import *
 
-Site.objects.all().delete()
-IndividualObjects.objects.all().delete()
-AccessionNum.objects.all().delete()
-Period.objects.all().delete()
-Phase.objects.all().delete()
+# Site.objects.all().delete()
+# IndividualObjects.objects.all().delete()
+# AccessionNum.objects.all().delete()
+# Period.objects.all().delete()
+# Phase.objects.all().delete()
 
 
 # Define common coordinate system codes
@@ -178,7 +178,7 @@ def upload_data(data):
         
         if materials != None:
             for item in materials:
-                material = ObjectMaterials.objects.get_or_create(text=item)[0]
+                material = ObjectMaterials.objects.get_or_create(text=item.strip().title())[0]
                 materials_list.append(material)
         db_object.material.set(materials_list)
             
