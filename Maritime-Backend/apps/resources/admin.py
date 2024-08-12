@@ -444,9 +444,9 @@ class ObjectIdsAdmin(admin.ModelAdmin):
 
 @admin.register(IndividualObjects)
 class IndividualObjectsAdmin(admin.ModelAdmin):
-    list_display = ['site', 'accession_number']
-    search_fields = ['site__name', 'object_id__art_id', 'accession_number', 
+    list_display = ['site','accession_number']
+    search_fields = ['site__name', 'object_id__art_id',
                      'form__name', 'variant__name', 'period__name', 'start_date', 'end_date']
-    ordering = ['accession_number']
+    ordering = ['site']
     autocomplete_fields = ['site', 'accession_number',
                            'object_type', 'form', 'variant', 'period', 'material']

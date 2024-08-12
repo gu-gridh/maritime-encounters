@@ -1233,7 +1233,7 @@ class IndividualObjects(abstract.AbstractBaseModel):
 
     def __str__(self) -> str:
         if self.accession_number:
-            return self.accession_number
+            return self.accession_number.accession_number
         else:
             return 'Item missing accession number'
 
