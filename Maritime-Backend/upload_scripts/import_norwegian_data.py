@@ -23,8 +23,9 @@ django.setup()
 from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4
 from apps.resources.models import *
 
-Site.objects.all().delete()
-IndividualObjects.objects.all().delete()
+# Site.objects.all().delete()
+# IndividualObjects.objects.all().delete()
+# AccessionNum.objects.all().delete()
 
 
 # Define common coordinate system codes
@@ -141,7 +142,7 @@ def upload_data(data):
             variant = Variant.objects.get_or_create(name=variant_translated)[0],
             variant_original = row.Variant,
             count = row.Antall_gjenstander,
-            material = ObjectMaterials.objects.get_or_create(text=material_translated)[0],
+            material = ObjectMaterials.objects.get_or_create(text=material_translated)[0] if material_translated != None else None,
             material_original = row.Materiale,
             period_original = row.Periode,
             orig_coords = f"[{row.Kart_aust},{row.Kart_Nord}]",
