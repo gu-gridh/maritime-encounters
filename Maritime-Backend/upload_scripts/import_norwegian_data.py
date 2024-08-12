@@ -85,39 +85,65 @@ def clean_data(file_path,utm_32_n,utm_33_n,ngo1948):
     df = pd.read_excel(file_path).replace(np.nan, None).replace('[]', None)
 
     # Clean coordinates so they're correctly interpreted as float
-    df['Kart_Nord'] = df['Kart_Nord'].str.replace(',', '.')
-    df['Kart_aust'] = df['Kart_aust'].str.replace(',', '.')
+    try:
+        # print(df['Kart_Nord'].value_counts)
 
-    # print(df['Kart_Nord'].value_counts)
+        geom_df = df.dropna(subset=['Kart_Nord','Kart_aust'])
+        other_df = df[df['Kart_Nord'].isnull()]
 
-    geom_df = df.dropna(subset=['Kart_Nord','Kart_aust'])
-    other_df = df[df['Kart_Nord'].isnull()]
+        # Split dataframe by coordinate system
+        utm32 = df[df['Kart_Projeksjon'] == 'EU89-UTM; Sone 32']
+        utm33 = df[df['Kart_Projeksjon'] == 'EU89-UTM; Sone 33']
+        ngo = df[df['Kart_Projeksjon'] == 'NGO1948 Gauss-K; Akse 1']
 
-    # Split dataframe by coordinate system
-    utm32 = df[df['Kart_Projeksjon'] == 'EU89-UTM; Sone 32']
-    utm33 = df[df['Kart_Projeksjon'] == 'EU89-UTM; Sone 33']
-    ngo = df[df['Kart_Projeksjon'] == 'NGO1948 Gauss-K; Akse 1']
+        # Create a dataframe for each coordinate system and convert to WGS84
+        utm_32_n_df = gpd.GeoDataFrame(utm32,geometry=gpd.points_from_xy(utm32['Kart_aust'], utm32['Kart_Nord'], crs=utm_32_n).to_crs('EPSG:4326'))
 
-    # Create a dataframe for each coordinate system and convert to WGS84
-    utm_32_n_df = gpd.GeoDataFrame(utm32,geometry=gpd.points_from_xy(utm32['Kart_aust'], utm32['Kart_Nord'], crs=utm_32_n).to_crs('EPSG:4326'))
+        utm_33_n_df = gpd.GeoDataFrame(utm33,geometry=gpd.points_from_xy(utm33['Kart_aust'], utm33['Kart_Nord'], crs=utm_33_n).to_crs('EPSG:4326'))
 
-    utm_33_n_df = gpd.GeoDataFrame(utm33,geometry=gpd.points_from_xy(utm33['Kart_aust'], utm33['Kart_Nord'], crs=utm_33_n).to_crs('EPSG:4326'))
+        ngo1948_df = gpd.GeoDataFrame(ngo, geometry=gpd.points_from_xy(ngo['Kart_aust'], ngo['Kart_Nord'], crs=ngo1948).to_crs('EPSG:4326'))
 
-    ngo1948_df = gpd.GeoDataFrame(ngo, geometry=gpd.points_from_xy(ngo['Kart_aust'], ngo['Kart_Nord'], crs=ngo1948).to_crs('EPSG:4326'))
+        # Concatenate the converted geodataframes and extract the x and y coordinates expected by the site import function
+        geo_df = pd.concat([utm_32_n_df, utm_33_n_df, ngo1948_df, other_df])
+        geo_df['x'] = geo_df.get_coordinates()['x']
+        geo_df['y'] = geo_df.get_coordinates()['y']
 
-    # Concatenate the converted geodataframes and extract the x and y coordinates expected by the site import function
-    geo_df = pd.concat([utm_32_n_df, utm_33_n_df, ngo1948_df, other_df])
-    geo_df['x'] = geo_df.get_coordinates()['x']
-    geo_df['y'] = geo_df.get_coordinates()['y']
+        return geo_df
+    
+    except:
+        df['Kart_Nord'] = df['Kart_Nord'].str.replace(',', '.')
+        df['Kart_aust'] = df['Kart_aust'].str.replace(',', '.')
 
-    return geo_df
+        # print(df['Kart_Nord'].value_counts)
+
+        geom_df = df.dropna(subset=['Kart_Nord','Kart_aust'])
+        other_df = df[df['Kart_Nord'].isnull()]
+
+        # Split dataframe by coordinate system
+        utm32 = df[df['Kart_Projeksjon'] == 'EU89-UTM; Sone 32']
+        utm33 = df[df['Kart_Projeksjon'] == 'EU89-UTM; Sone 33']
+        ngo = df[df['Kart_Projeksjon'] == 'NGO1948 Gauss-K; Akse 1']
+
+        # Create a dataframe for each coordinate system and convert to WGS84
+        utm_32_n_df = gpd.GeoDataFrame(utm32,geometry=gpd.points_from_xy(utm32['Kart_aust'], utm32['Kart_Nord'], crs=utm_32_n).to_crs('EPSG:4326'))
+
+        utm_33_n_df = gpd.GeoDataFrame(utm33,geometry=gpd.points_from_xy(utm33['Kart_aust'], utm33['Kart_Nord'], crs=utm_33_n).to_crs('EPSG:4326'))
+
+        ngo1948_df = gpd.GeoDataFrame(ngo, geometry=gpd.points_from_xy(ngo['Kart_aust'], ngo['Kart_Nord'], crs=ngo1948).to_crs('EPSG:4326'))
+
+        # Concatenate the converted geodataframes and extract the x and y coordinates expected by the site import function
+        geo_df = pd.concat([utm_32_n_df, utm_33_n_df, ngo1948_df, other_df])
+        geo_df['x'] = geo_df.get_coordinates()['x']
+        geo_df['y'] = geo_df.get_coordinates()['y']
+
+        return geo_df
 
 def upload_data(data):
     for row in data.itertuples(index=False):
         # Translate the Norwegian text to English
         type_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Gjenstand.strip().capitalize()) if row.Gjenstand != None else None
         form_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Form.strip().capitalize()) if row.Form != None else None    
-        variant_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Variant.strip().capitalize()) if row.Variant != None else None
+        variant_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Variant.strip().title()) if row.Variant != None else None
         material_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Materiale.strip().capitalize()) if row.Materiale != None else None
         materials=[material.capitalize() for material in material_translated.split('/')] if material_translated != None else None
         period_translated=GoogleTranslator(source='norwegian',target='en').translate(text=row.Periode.strip().capitalize()) if row.Periode != None else None
@@ -133,7 +159,7 @@ def upload_data(data):
             type_original = row.Gjenstand,
             form_translation = form_translated,
             form_original = row.Form,
-            variant = Variant.objects.get_or_create(name=variant_translated.title())[0],
+            variant = Variant.objects.get_or_create(name=variant_translated)[0],
             variant_original = row.Variant,
             count = row.Antall_gjenstander,
             material_original = row.Materiale,
