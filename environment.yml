@@ -1,0 +1,32 @@
+name: diana
+channels:
+  - conda-forge
+  - anaconda
+  - defaults
+dependencies:
+  - python=3.12*
+  - pip>=24.2
+  - gdal
+  - django>= 5.0, < 6.0
+  - django-filter>=23.5.0
+  - djangorestframework>=3.14.0 
+  - djangorestframework-gis==1.0
+  - django-cors-headers==4.3.1
+  - pyvips>=2.2.2
+  - gunicorn==21.2.0
+  - psycopg2-binary==2.9.9
+  - pip:
+    - django-admin-interface==0.28.3
+    - drf-generators==0.5.0
+    - drf-dynamic-fields==0.4.0
+    - django-cleanup==8.0.0
+    - django-polymorphic>=3.1.0
+    - django-admin-autocomplete-filter==0.7.1
+    - django-admin-numeric-filter==0.1.9
+    - django-leaflet-admin-list==0.0.7
+    - django-ckeditor==6.7.0
+    - django-admin-rangefilter==0.12.0
+    - django-markdownfield
+    - djangorestframework-xml
+    - django_better_admin_arrayfield
+    - django-map-widgets
