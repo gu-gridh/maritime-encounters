@@ -16,8 +16,8 @@ class SiteFilter(AutocompleteFilter):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ['site', 'location_detail','location_name','coordinates']
-    search_fields = ['location_name', 'site__name','location_name']
+    list_display = ['site', 'location_detail', 'location_name', 'coordinates']
+    search_fields = ['location_name', 'site__name', 'location_name']
     list_filter = ['location_name', 'site']
     ordering = ['location_detail']
     formfield_overrides = {
@@ -108,12 +108,10 @@ class SamplerAdmin(admin.ModelAdmin):
 
 @admin.register(ObjectDescription)
 class ObjectDescriptionAdmin(admin.ModelAdmin):
-    list_display = ['category','subcategory']
-    search_fields = ['category__text','subcategory__subcategory']
-    list_filter = ['category','subcategory']
-    ordering = ['category__text','subcategory__subcategory']
-
-        
+    list_display = ['subcategory']
+    search_fields = ['category__text', 'subcategory__subcategory']
+    list_filter = ['category', 'subcategory']
+    ordering = ['category__text', 'subcategory__subcategory']
 
 
 @admin.register(Cleat)
@@ -184,7 +182,8 @@ class DatingMethodAdmin(admin.ModelAdmin):
 class SiteAdmin(admin.ModelAdmin):
     list_display = ['name', 'ADM0',]
     search_fields = ['name', 'ADM0__name', 'ADM1__name',]
-    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish']
+    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2',
+                           'ADM3', 'ADM4', 'Province', 'Parish']
     # list_filter = ['name', 'ADM1']
     ordering = ['name']
     list_per_page = 50
@@ -242,7 +241,8 @@ class MetalAnalysisAdmin(admin.ModelAdmin):
         RelMetalElementAdmin,
         RelMetalIsotopAdmin,
     ]
-    autocomplete_fields=['context','object_description','site','museum_entry','sample','period']
+    autocomplete_fields = ['context', 'object_description',
+                           'site', 'museum_entry', 'sample', 'period']
 
 
 @admin.register(aDNA)
@@ -264,20 +264,6 @@ class LNHousesAdmin(admin.ModelAdmin):
     list_display = ['site']
     search_fields = ['site__name']
     list_filter = ['site']
-
-
-@admin.register(NorwayDaggers)
-class NorwayDaggersAdmin(admin.ModelAdmin):
-    list_display = ['site']
-    search_fields = ['site__name']
-    list_filter = ['site']
-
-
-@admin.register(NorwayShaftHoleAxes)
-class NorwayShaftHoleAxesAdmin(admin.ModelAdmin):
-    list_display = ['site', 'museum']
-    search_fields = ['site__name', 'museum']
-    list_filter = ['site', 'museum']
 
 
 @admin.register(MuseumMeta)
@@ -375,13 +361,15 @@ class ObjectMaterialsAdmin(admin.ModelAdmin):
 
 @admin.register(ObjectCount)
 class ObjectCountAdmin(admin.ModelAdmin):
-    list_display = ['metal', 'object','material_list','count']
-    search_fields = ['metal__entry_num__entry_number','metal__literature_num__literature_number']
+    list_display = ['metal', 'object', 'material_list', 'count']
+    search_fields = ['metal__entry_num__entry_number',
+                     'metal__literature_num__literature_number']
     list_filter = ['metal']
     ordering = ['metal']
-    filter_horizontal=['material']
-    autocomplete_fields=['metal','object']
-    def material_list(self,obj):
+    filter_horizontal = ['material']
+    autocomplete_fields = ['metal', 'object']
+
+    def material_list(self, obj):
         return [material.text for material in obj.material.all()]
 
 
@@ -404,21 +392,61 @@ class ContextFindsSubcategoriesAdmin(admin.ModelAdmin):
 class RelObjectCountAdmin(admin.TabularInline):
     model = ObjectCount
     extra = 1
-    filter_horizontal=['material']
-    autocomplete_fields=['object']
+    filter_horizontal = ['material']
+    autocomplete_fields = ['object']
+    list_display=['materials_list']
 
 
 @admin.register(Metalwork)
 class MetalworkAdmin(admin.ModelAdmin):
-    list_display = ['entry_num', 'literature_num', 'accession_num', 'collection',
+    list_display = ['entry_num', 'literature_num', 'accession_num',
                     'location', 'main_context', 'find_context', 'context_detail']
     search_fields = ['entry_num__entry_number', 'literature_num__literature_number', 'accession_num__accession_number', 'collection__collection',
-                     'location__location_name','main_context__text', 'find_context__text', 'context_detail__text', 'dating__name', 'dating__phase__text']
+                     'location__location_name', 'main_context__text', 'find_context__text', 'context_detail__text', 'dating__name', 'dating__phase__text']
     list_filter = ['entry_num', 'literature_num', 'accession_num', 'collection',
                    'location', 'main_context', 'find_context', 'context_detail', 'dating']
     ordering = ['entry_num']
     inlines = [
         RelObjectCountAdmin
     ]
-    filter_horizontal=['context_keywords','dating', 'context_keywords','certain_context_descriptors','uncertain_context_descriptors']
-    autocomplete_fields=['entry_num','literature_num','accession_num','museum','collection','location','main_context','find_context','context_detail']
+    filter_horizontal = ['context_keywords', 'dating', 'context_keywords',
+                         'certain_context_descriptors', 'uncertain_context_descriptors', 'museum', 'collection']
+    autocomplete_fields = ['entry_num', 'literature_num', 'accession_num','location', 'main_context', 'find_context', 'context_detail']
+
+
+@admin.register(Form)
+class FormAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    list_filter = ['name']
+    ordering = ['name']
+
+
+@admin.register(Variant)
+class VariantAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    list_filter = ['name']
+    ordering = ['name']
+
+
+@admin.register(ObjectIds)
+class ObjectIdsAdmin(admin.ModelAdmin):
+    list_display = ['art_id', 'systemnr',
+                    'stednr', 'loknr', 'frednr', 'other_id']
+    search_fields = ['art_id', 'systemnr',
+                     'stednr', 'loknr', 'frednr', 'other_id']
+    list_filter = ['art_id', 'systemnr',
+                   'stednr', 'loknr', 'frednr', 'other_id']
+    ordering = ['art_id', 'systemnr', 'stednr', 'loknr', 'frednr', 'other_id']
+
+
+@admin.register(IndividualObjects)
+class IndividualObjectsAdmin(admin.ModelAdmin):
+    list_display = ['site','accession_number']
+    search_fields = ['site__name', 'object_id__art_id',
+                     'form__name', 'variant__name', 'period__name', 'start_date', 'end_date']
+    ordering = ['site']
+    filter_horizontal = ['material','period']
+    autocomplete_fields = ['site', 'accession_number',
+                           'object_type', 'form', 'variant']

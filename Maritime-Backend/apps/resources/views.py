@@ -47,5 +47,5 @@ class MetalAnalysisViewSet(DynamicDepthViewSet):
 class MetalworkViewSet(DynamicDepthViewSet):
     serializer_class = serializers.MetalworkSerializer
     queryset = models.Metalwork.objects.all()
-    filterset_fields = get_fields(models.Metalwork, exclude=DEFAULT_FIELDS)
+    filterset_fields = get_fields(models.Metalwork, exclude=DEFAULT_FIELDS+['orig_coords'])
     search_fields = ['site__name', 'entry_number']
