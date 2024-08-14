@@ -116,7 +116,7 @@ class ObjectMaterials(abstract.AbstractTagModel):
 
 
 class ObjectDescription(abstract.AbstractBaseModel):
-    category = models.ManyToManyField(ObjectCategories, null=True, blank=True, verbose_name=_(
+    category = models.ManyToManyField(ObjectCategories, verbose_name=_(
         "category"), help_text=_("The category of the object, e.g. Weapon, Vessel."))
     subcategory = models.ForeignKey(ObjectSubcategories, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "subcategory"), help_text=_("The subcategory of the object."))
@@ -1101,9 +1101,9 @@ class Metalwork(abstract.AbstractBaseModel):
         "Accession Number"), help_text=_("The accession number of the object."))
     accession_certain = models.BooleanField(blank=True, verbose_name=_("Accession Number Certainty"), help_text=_(
         "Check if the accession number is certain and does not need review later."), default=True)
-    museum = models.ManyToManyField(MuseumMeta, null=True, blank=True, verbose_name=_(
+    museum = models.ManyToManyField(MuseumMeta, verbose_name=_(
         "Museum"), help_text=_("The museum that holds or recorded the object."))
-    collection = models.ManyToManyField(MuseumCollection, null=True, blank=True, verbose_name=_(
+    collection = models.ManyToManyField(MuseumCollection, verbose_name=_(
         "Collection"), help_text=_("The title of the museum or personal collection."))
     museum_certain = models.BooleanField(blank=True, verbose_name=_("Museum/Collection Certainty"), help_text=_(
         "Check if the museum/collection is certain and does not need review later."), default=True)
@@ -1214,11 +1214,11 @@ class IndividualObjects(abstract.AbstractBaseModel):
         'Variant (pre-translation)'), help_text=_('The variant text before translation to English.'))
     count = models.IntegerField(null=True, blank=True, verbose_name=_(
         "Count"), help_text=_("The number of objects."))
-    material = models.ManyToManyField(ObjectMaterials, null=True, blank=True, verbose_name=_(
+    material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
         "Material"), help_text=_("The material of the object."))
     material_original = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         'Material (pre-translation)'), help_text=_('The material text before translation to English.'))
-    period = models.ManyToManyField(Period, null=True, blank=True, verbose_name=_(
+    period = models.ManyToManyField(Period, verbose_name=_(
         "Period"), help_text=_("The period of the object."))
     period_original = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         'Period (pre-translation)'), help_text=_('The period text before translation to English.'))
