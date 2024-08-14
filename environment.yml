@@ -1,4 +1,4 @@
-name: diana
+name: maritime
 channels:
   - conda-forge
   - anaconda
