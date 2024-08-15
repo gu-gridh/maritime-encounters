@@ -91,20 +91,20 @@ def upload_adm4(data):
                 }
         )
 
-def upload_adm5(data):
-    for row in df.itertuples(index=False):
-        adm4 = ADM4.objects.get(code=row.GID_4, name=row.NAME_4, ADM3__code=row.GID_3, ADM3__name=row.NAME_3)
-        ADM5.objects.update_or_create(
-            code=row.GID_5,
-            defaults={
-                'name': row.NAME_5, 
-                'name_translation': row.VARNAME_5,
-                'geometry': row.WKT, 
-                'ADM4': adm4,
-                'type': row.TYPE_5,
-                'type_translation': row.ENGTYPE_5
-                }
-        )
+# def upload_adm5(data):
+#     for row in df.itertuples(index=False):
+#         adm4 = ADM4.objects.get(code=row.GID_4, name=row.NAME_4, ADM3__code=row.GID_3, ADM3__name=row.NAME_3)
+#         ADM5.objects.update_or_create(
+#             code=row.GID_5,
+#             defaults={
+#                 'name': row.NAME_5, 
+#                 'name_translation': row.VARNAME_5,
+#                 'geometry': row.WKT, 
+#                 'ADM4': adm4,
+#                 'type': row.TYPE_5,
+#                 'type_translation': row.ENGTYPE_5
+#                 }
+#         )
 
 def upload_province(data):
     for row in data.itertuples(index=False):

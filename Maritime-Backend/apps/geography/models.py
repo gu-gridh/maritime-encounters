@@ -86,16 +86,16 @@ class ADM4(Base):
         return f"{self.name} - {self.ADM3.name}  "
     
 
-# ADM5: Communes
-class ADM5(Base):
+# # ADM5: Communes
+# class ADM5(Base):
 
-    ADM4 = models.ForeignKey(ADM4, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM4"))
-    class Meta:
-        verbose_name = _("ADM5")
-        verbose_name_plural = _("ADM5")
+#     ADM4 = models.ForeignKey(ADM4, related_name='communes', blank=True, null=True, on_delete=models.CASCADE, verbose_name=_("ADM4"))
+#     class Meta:
+#         verbose_name = _("ADM5")
+#         verbose_name_plural = _("ADM5")
     
-    def __str__(self) -> str:
-        return f"{self.name} - {self.ADM4.name} "
+#     def __str__(self) -> str:
+#         return f"{self.name} - {self.ADM4.name} "
     
 
 class Province(Base):
