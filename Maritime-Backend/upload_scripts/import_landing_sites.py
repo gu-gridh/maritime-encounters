@@ -18,7 +18,7 @@ django.setup()
 from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4
 from apps.resources.models import *
 
-LandingPoints.objects.all().delete()
+# LandingPoints.objects.all().delete()
 
 def upload_sites_noADM(data):
     for row in data.itertuples(index=False):
