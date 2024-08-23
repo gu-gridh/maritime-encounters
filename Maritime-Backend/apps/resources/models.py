@@ -590,20 +590,25 @@ class LogBoats(abstract.AbstractBaseModel):
 class LandingPoints(abstract.AbstractBaseModel):
 
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "site"), help_text=_("The site in which the landing is located."))
-    period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "period"), help_text=_("The period of the landing."))
+        "Site"), help_text=_("The site (general location) in which the landing site is located."))
+    period = models.ManyToManyField(Period, verbose_name=_(
+        "Period(s) of Activity"), help_text=_("The period(s) of activity at the landing site."))
 
-    materials = models.ForeignKey(Material, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "materials"), help_text=_("The materials of the landing."))
+    related_finds = models.TextField(null=True, blank=True, verbose_name=_(
+        "Related Sites/Material"), help_text=_("The related sites/finds and supporting material."))
     reason = models.TextField(null=True, blank=True, verbose_name=_(
-        "reason"), help_text=_("The reason of the landing."))
-    geographic = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "geographic"), help_text=_("The geographic of the landing."))
+        "Rationale"), help_text=_("The rationale for selecting the site as a landing site."))
+    geographic = models.TextField(null=True, blank=True, verbose_name=_(
+        "Geographic Significance"), help_text=_("The geographic of the landing."))
+    start_date = models.IntegerField(null=True, blank=True, verbose_name=_("Start Date"), help_text=_("The start date of activity at the site as an integer.  Use a negative integer for BC dates."))
+    end_date = models.IntegerField(null=True, blank=True, verbose_name=_("End Date"), help_text=_("The end date of activity at the site as an integer.  Use a negative integer for BC dates."))
 
     def __str__(self) -> str:
+        
+        def periods_list(self):
+            periods = ','.join([period.name for period in self.period.all()])
 
-        name_str = f" {self.site.name} - {self.materials.text}"
+        name_str = f" {self.site.name}"
         return name_str
 
     class Meta:
@@ -971,12 +976,15 @@ class ObjectIds(abstract.AbstractBaseModel):
 
 class MuseumMeta(abstract.AbstractBaseModel):
     museum = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "museum"), help_text=_("The museum that holds or recorded the object."))
+        "Museum"), help_text=_("The museum that holds or recorded the object."))
     museum_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "museum_number"), help_text=_("The number (or short identifier) of the museum that holds or recorded the object."))
+        "Museum Number/ID"), help_text=_("The number (or short identifier) of the museum that holds or recorded the object."))
 
     def __str__(self) -> str:
-        name_str = f"{self.museum}"
+        if self.museum:
+            name_str = self.museum
+        else:
+            name_str = self.museum_number
         return name_str
 
     class Meta:
@@ -986,9 +994,9 @@ class MuseumMeta(abstract.AbstractBaseModel):
 
 class MuseumCollection(abstract.AbstractBaseModel):
     museum = models.ForeignKey(MuseumMeta, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "period"), help_text=_("The museum that holds or recorded the object."))
+        "Museum"), help_text=_("The museum that holds or recorded the object."))
     collection = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "museum_number"), help_text=_("The title of the museum or personal collection."))
+        "Collection"), help_text=_("The title of the museum or personal collection."))
 
     def __str__(self) -> str:
         name_str = f"{self.collection}"
@@ -1127,11 +1135,11 @@ class Metalwork(abstract.AbstractBaseModel):
         "Context Detail"), help_text=_("The detailed context of the find. E.g., a specific layer or feature."))
     context_detail_certain = models.BooleanField(blank=True, verbose_name=_("Context Detail Certainty"), help_text=_(
         "Check if the context detail is certain and does not need review later."), default=True)
-    context_keywords = models.ManyToManyField(ContextKeywords, blank=True, verbose_name=_(
+    context_keywords = models.ManyToManyField(ContextKeywords, verbose_name=_(
         "Context Keywords"), help_text=_("Keywords that describe the context of the find."))
     multiperiod = models.BooleanField(blank=True, verbose_name=_("Multiperiod"), help_text=_(
         "Check if the site is associated with multiple periods."))
-    dating = models.ManyToManyField(Period, blank=True, verbose_name=_(
+    dating = models.ManyToManyField(Period, verbose_name=_(
         "Period(s) of activity"), help_text=_("The period(s) of activity of the site."))
     date_string = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Original Dating Text"), help_text=_("The dating text from the original file."))

@@ -38,10 +38,10 @@ class ExcludePloygonFieldADM4Serializer(DynamicDepthSerializer):
         fields = ['id']+get_fields(ADM4, exclude=DEFAULT_FIELDS+['geometry'])
 
 
-class ExcludePloygonFieldADM5Serializer(DynamicDepthSerializer):
-    class Meta:
-        model = ADM5
-        fields = ['id']+get_fields(ADM5, exclude=DEFAULT_FIELDS+['geometry'])
+# class ExcludePloygonFieldADM5Serializer(DynamicDepthSerializer):
+#     class Meta:
+#         model = ADM5
+#         fields = ['id']+get_fields(ADM5, exclude=DEFAULT_FIELDS+['geometry'])
 
 
 class SiteSerializer(DynamicDepthSerializer):

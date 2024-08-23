@@ -210,12 +210,13 @@ class LogBoatAdmin(admin.ModelAdmin):
 
 @admin.register(LandingPoints)
 class LandingPointsAdmin(admin.ModelAdmin):
-    list_display = ['site', 'period']
+    list_display = ['site']
     search_fields = ['site__name', 'period__name']
     list_filter = ['site']
     inlines = [
         RelPeriodActivityLandingPoints,
     ]
+    filter_horizontal = ['period']
 
 
 @admin.register(NewSamples)
@@ -268,9 +269,9 @@ class LNHousesAdmin(admin.ModelAdmin):
 
 @admin.register(MuseumMeta)
 class MuseumMetaAdmin(admin.ModelAdmin):
-    list_display = ['museum']
-    search_fields = ['museum']
-    list_filter = ['museum']
+    list_display = ['museum','museum_number']
+    search_fields = ['museum','museum_number']
+    list_filter = ['museum','museum_number']
 
 
 @admin.register(MuseumCollection)

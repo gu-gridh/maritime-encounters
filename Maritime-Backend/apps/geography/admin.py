@@ -61,15 +61,15 @@ class ADM4dmin(admin.GISModelAdmin):
 
 
 
-@admin.register(ADM5)
-class ADM5Admin(admin.GISModelAdmin):
-    fields = get_fields(ADM5, exclude=DEFAULT_EXCLUDE+["id"])
-    readonly_fields = [*DEFAULT_FIELDS]
-    list_display = ['name', 'ADM4']
-    # list_filter = ['name', 'ADM4']
-    search_fields = ['name', 'ADM4__name', 'ADM4__ADM3__ADM2__name', 'ADM4__ADM3__ADM2__ADM1__name', 'ADM4__ADM3__ADM2__ADM1__ADM0__name']
-    autocomplete_fields = ['ADM4']
-    list_per_page = 30  # Adjust the number to your needs
+# @admin.register(ADM5)
+# class ADM5Admin(admin.GISModelAdmin):
+#     fields = get_fields(ADM5, exclude=DEFAULT_EXCLUDE+["id"])
+#     readonly_fields = [*DEFAULT_FIELDS]
+#     list_display = ['name', 'ADM4']
+#     # list_filter = ['name', 'ADM4']
+#     search_fields = ['name', 'ADM4__name', 'ADM4__ADM3__ADM2__name', 'ADM4__ADM3__ADM2__ADM1__name', 'ADM4__ADM3__ADM2__ADM1__ADM0__name']
+#     autocomplete_fields = ['ADM4']
+#     list_per_page = 30  # Adjust the number to your needs
 
 
 @admin.register(Province)
