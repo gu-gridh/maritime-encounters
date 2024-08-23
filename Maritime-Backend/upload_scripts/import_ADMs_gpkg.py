@@ -142,10 +142,10 @@ def upload_parish(data):
         province = Province.objects.get(code=row.LandskapKod, name=row.LandskapNamn, country=adm0)
         Parish.objects.get_or_create(
             name= row.sockenstadnamn, 
-            defaults={
-                'code':row.omradesnummer,            
+            code=row.omradesnummer, 
+            geometry= row.WKT, 
+            defaults={      
                 'name_translation': row.sockenstadnamn,
-                'geometry': row.WKT, 
                 'type': 'Socken',
                 'type_translation': 'Parish',
                 'country': adm0,
