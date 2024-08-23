@@ -47,9 +47,7 @@ def import_metalwork(csv_file_path):
         point = Point(x, y) if not pd.isnull(y) or pd.isnull(x) else None
         
         site_name = place or f"{parishn}: {y}, {x}" or f"{provincen}: {y}, {x}" or f"{adm4n}: {y}, {x}" or f"{adm3n}: {y}, {x}" or f"{adm2n}: {y}, {x}"
-        
-        print(site_name)
-        
+                
         adm0 = ADM0.objects.get(name=adm0n) if adm0n != None else None
         adm1 = ADM1.objects.get(name=adm1n) if adm1n != None else None
         adm2 = ADM2.objects.get(
