@@ -113,7 +113,7 @@ def import_metalwork(csv_file_path):
                 text=row.detailContext if row.detailContext != None else 'Unknown')[0],
             context_detail_certain=row.detailContextCertain,
             # Inverted boolean value to handle mixup during data export
-            multiperiod=False if row.multiperiod == True else True,
+            multiperiod=False if len(literal_eval(row.dating)) <1 else True,
             date_string=row.datingString,
             dating_certain=row.datingCertain,
             dendro_date=row.dendroDate,
