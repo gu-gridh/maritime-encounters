@@ -86,11 +86,11 @@ def import_metalwork(csv_file_path):
     # Import data by row
     for row in df.itertuples(index=False):
         site_name = row.place or f"{row.parish}: {row.y}, {row.x}" or f"{row.province}: {row.y}, {row.x}" or f"{row.ADM_4}: {row.y}, {row.x}" or f"{row.ADM_3}: {row.y}, {row.x}" or f"{row.ADM_2}: {row.y}, {row.x}" or "NAME IS MISSING"
-        dating_value = row.dating
-        if dating_value is None or dating_value == '':
-            multi_period = False
+        if row.dating != None:
+            multiperiod_bool = False if len(literal_eval(row.dating)) <1 else True
         else:
-            multi_period = len(literal_eval(dating_value)) > 0
+            multiperiod_bool = False
+
         # Add data to boolean, character/text, and some foreignkey fields
         db_object = Metalwork.objects.update_or_create(
             entry_num=EntryNum.objects.get_or_create(entry_number=row.entryNo)[0],
@@ -115,7 +115,7 @@ def import_metalwork(csv_file_path):
                 text=row.detailContext if row.detailContext != None else 'Unknown')[0],
             context_detail_certain=row.detailContextCertain,
             # Inverted boolean value to handle mixup during data export
-            multiperiod=multi_period,
+            multiperiod=multiperiod_bool,
             date_string=row.datingString,
             dating_certain=row.datingCertain,
             dendro_date=row.dendroDate,
