@@ -157,8 +157,8 @@ def upload_parish(data):
 
 # Add arguments for the CLI
 commands = argparse.ArgumentParser()
-commands.add_argument("file", type=str) #use a single file
-commands.add_argument("data_format", type=str, choices=['adm','province','parish'], help="The level of data being uploaded, e.g. GADM data, Swedish provinces, etc. Choice are adm, province, or parish")
+commands.add_argument("--file", type=str, help="Path to the file you want to upload", required=True) 
+commands.add_argument("--data_format", type=str, choices=['adm','province','parish'], help="The level of data being uploaded, e.g. GADM data, Swedish provinces, etc. Choice are adm, province, or parish")
 commands.add_argument("--selection", nargs="*", type=str, help="Add preferred country names separated by a space to limit the data uploaded") #converts the country selection to a list
 commands.add_argument("--adm_levels", nargs="*", type=int, help="Add preferred GADM levels as integers. If wanting to upload all layers, use 0 1 2 3 4") #converts adm level integers to a list
 
