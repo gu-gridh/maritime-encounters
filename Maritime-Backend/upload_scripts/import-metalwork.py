@@ -66,31 +66,36 @@ def import_metalwork(csv_file_path):
 
         db_object, _ = Metalwork.objects.update_or_create(
             entry_num=EntryNum.objects.get_or_create(entry_number=row.entryNo)[0],
-            literature_num=LiteratureNum.objects.get_or_create(literature_number=row.literatureNo)[0],
-            accession_num=AccessionNum.objects.get_or_create(accession_number=row.accessionNo)[0],
-            defaults={
-                'accession_certain': row.accessionCertain,
-                'museum_certain': row.museumCertain,
-                'location': Location.objects.get_or_create(site=site_obj, location_detail=row.placeDetail)[0],
-                'location_certain': row.locationCertain,
-                'coord_system': row.origCoordSys,
-                'orig_coords': [row.xOrig, row.yOrig] if row.xOrig or row.yOrig else None,
-                'main_context': Context.objects.get_or_create(text=row.mainContext if row.mainContext else 'Uncertain')[0],
-                'main_context_certain': row.mainContextCertain,
-                'find_context': FindContext.objects.get_or_create(text=row.findContext)[0],
-                'find_context_certain': row.findContextCertain,
-                'context_detail': ContextDetail.objects.get_or_create(text=row.detailContext if row.detailContext else 'Unknown')[0],
-                'context_detail_certain': row.detailContextCertain,
-                'multiperiod': multiperiod_bool,
-                'date_string': row.datingString,
-                'dating_certain': row.datingCertain,
-                'dendro_date': row.dendroDate,
-                'radiocarbon_date': row.radioCarbonDate,
-                'radiocarbon_years': row.radioCarbonYear,
-                'radiocarbon_std': row.stdDeviation,
-                'comments': row.comments
-            }
-        )
+            literature_num=LiteratureNum.objects.get_or_create(
+                literature_number=row.literatureNo)[0],
+            accession_num=AccessionNum.objects.get_or_create(
+                accession_number=row.accessionNo)[0],
+            accession_certain=row.accessionCertain,
+            museum_certain=row.museumCertain,
+            location=Location.objects.get_or_create(
+                site=site_name, location_detail=row.placeDetail)[0],
+            location_certain=row.locationCertain,
+            coord_system=row.origCoordSys,
+            orig_coords=[row.xOrig, row.yOrig] if row.xOrig or row.yOrig else None,
+            main_context=Context.objects.get_or_create(
+                text=row.mainContext if row.mainContext != None else 'Uncertain')[0],
+            main_context_certain=row.mainContextCertain,
+            find_context=FindContext.objects.get_or_create(
+                text=row.findContext)[0],
+            find_context_certain=row.findContextCertain,
+            context_detail=ContextDetail.objects.get_or_create(
+                text=row.detailContext if row.detailContext != None else 'Unknown')[0],
+            context_detail_certain=row.detailContextCertain,
+            # Inverted boolean value to handle mixup during data export
+            multiperiod=multiperiod_bool,
+            date_string=row.datingString,
+            dating_certain=row.datingCertain,
+            dendro_date=row.dendroDate,
+            radiocarbon_date=row.radioCarbonDate,
+            radiocarbon_years=row.radioCarbonYear,
+            radiocarbon_std=row.stdDeviation,
+            comments=row.comments
+        )[0]    
 
         # Process complex fields
         keywords, datings, objects_list = [], [], []
