@@ -90,7 +90,8 @@ def import_metalwork(csv_file_path):
             multiperiod_bool = False if len(literal_eval(row.dating)) <1 else True
         else:
             multiperiod_bool = False
-
+        site_row =Site.objects.get_or_create(coordinates=Point(row.x, row.y) if row.x and row.y else None, name=site_name)[0]
+        print(site_row)
         # Add data to boolean, character/text, and some foreignkey fields
         db_object = Metalwork.objects.update_or_create(
             entry_num=EntryNum.objects.get_or_create(entry_number=row.entryNo)[0],
@@ -101,7 +102,7 @@ def import_metalwork(csv_file_path):
             accession_certain=row.accessionCertain,
             museum_certain=row.museumCertain,
             location=Location.objects.get_or_create(
-                site=Site.objects.get_or_create(coordinates=Point(row.x, row.y) if row.x and row.y else None, name=site_name)[0], location_detail=row.placeDetail)[0],
+                site=site_row, location_detail=row.placeDetail)[0],
             location_certain=row.locationCertain,
             coord_system=row.origCoordSys,
             orig_coords=[row.xOrig, row.yOrig] if row.xOrig or row.yOrig else None,
