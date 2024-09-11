@@ -2,7 +2,7 @@ from rest_framework_gis.serializers import GeoFeatureModelSerializer
 from maritime.utils import get_fields, DEFAULT_FIELDS
 from .models import *
 
-class ADM0Serializer(GeoFeatureModelSerializer):
+class CountrySerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = ADM0

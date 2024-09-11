@@ -9,6 +9,12 @@ from . import models, serializers
 from maritime.abstract.views import DynamicDepthViewSet, GeoViewSet
 from maritime.abstract.models import get_fields
 
+class CountryViewSet(GeoViewSet):
+
+    queryset = models.ADM0.objects.all()
+    serializer_class = serializers.CountrySerializer
+    filterset_fields = get_fields(models.ADM0, exclude=['geometry'])
+
 class ProvinceViewSet(GeoViewSet):
 
     queryset = models.Province.objects.all()
@@ -20,14 +26,6 @@ class ParishViewSet(GeoViewSet):
     queryset = models.Parish.objects.all()
     serializer_class = serializers.ParishSerializer
     filterset_fields = get_fields(models.Parish, exclude=['geometry'])
-
-
-class ADM0ViewSet(GeoViewSet):
-
-    queryset = models.ADM0.objects.all()
-    serializer_class = serializers.ADM0Serializer
-    filterset_fields = get_fields(models.ADM0, exclude=['geometry'])
-
 
 class ADM4ViewSet(GeoViewSet):
 
