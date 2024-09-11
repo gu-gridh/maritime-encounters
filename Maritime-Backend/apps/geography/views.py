@@ -14,6 +14,7 @@ class CountryViewSet(GeoViewSet):
     queryset = models.ADM0.objects.all()
     serializer_class = serializers.CountrySerializer
     filterset_fields = get_fields(models.ADM0, exclude=['geometry'])
+    bbox_filter_field = 'geometry'  # Enable bounding box filtering
 
 class ProvinceViewSet(GeoViewSet):
 
