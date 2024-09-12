@@ -30,6 +30,9 @@ class ADM0(Base):
         verbose_name = _("ADM0")
         verbose_name_plural = _("ADM0")
     
+    def simplified_geometry(self, tolerance=0.01):
+        return self.geometry.simplify(tolerance, preserve_topology=True)
+    
     def __str__(self) -> str:
         return str(self.name)
     
