@@ -7,7 +7,7 @@ class CountrySerializer(GeoFeatureModelSerializer):
     class Meta:
         model = ADM0
         fields = get_fields(ADM0, exclude=DEFAULT_FIELDS)
-        geo_field = 'simplified_geometry'
+        geo_field = 'geometry'
         page_size=5
 
 
