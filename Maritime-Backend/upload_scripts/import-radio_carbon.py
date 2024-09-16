@@ -2,6 +2,7 @@ import os
 import sys
 import django
 import pandas as pd
+from django.contrib.gis.geos import Point
 from datetime import datetime
 
 # Add the parent directory to the system path
@@ -13,7 +14,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maritime.settings')
 # Set up Django
 django.setup()
 
-from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, ADM5
+from apps.geography.models import *
 from apps.resources.models import *  # Replace 'your_app' with the name of your Django app
 
 # Path to your CSV file
@@ -23,61 +24,81 @@ csv_file_path = '../../resources/maritime_enc_14C_062424_v2.csv'
 df = pd.read_csv(csv_file_path)
 
 # Import data into ADM levels
-
-for sampler_type in df[['site_type']].drop_duplicates().values:
-    type = sampler_type[0]
-    SiteType.objects.get_or_create(
-        text= type
-    )
-
-for material in df[['Material']].drop_duplicates().values:
-    material_name = material
-    metal = Material.objects.get_or_create(
-                text= material_name,     
-        )
-
-for species in df[['Species']].drop_duplicates().values:
-    species_name = species
-    Species.objects.get_or_create(
-                text= species_name,     
-        )
-
-for period_name, start_date, end_date, period_phase in df[['Period', 'start', 'end', 'period_2']].values:
-    Period.objects.update_or_create(
-        start_date= start_date,
-        end_date= end_date,
-        name= period_name,
-        phase= period_phase
-    )
-
-# For sites if there is no match you should be able to use import_sites.py script
-for site_name, adm0, adm1, adm2 in df[['Site', 'COUNTRY', 'NAME_1', 'NAME_2']].drop_duplicates().values:
-    site = Site.objects.get(
-                name= site_name,
-                ADM0__name= adm0,
-                ADM1__name= adm1,
-                ADM2__name=adm2,
-        )
-
-# Empty fields and NA values should be ignored
-# These columns names are based on the CSV file and in your case, it may be different
-# Make sure to change the column names to match your CSV file
-
-
 for row in df.itertuples(index=False):
+    if not pd.isnull(row.y) or pd.isnull(row.x):
+        point = Point(row.Lat,row.Lng) # Note that Point takes (longitude, latitude) order
+    else:
+        point=None
+        
+    # Add administrative data to sites and create site objects
+    if point != None:
+        try:
+            adm4 = ADM4.objects.get(geometry__contains=point)
+        except:
+            adm4 = None
+        try:
+            adm3 = ADM3.objects.get(geometry__contains=point)
+        except:
+            adm3 = None
+        try:
+            adm2 = ADM2.objects.get(geometry__contains=point)
+        except:
+            adm2 = None
+        try:
+            province = Province.objects.get(geometry__contains=point)
+        except:
+            province = None
+        try:
+            parish = Parish.objects.get(geometry__contains=point)
+        except:
+            parish = None
+            
+        adm0 = ADM0.objects.get(name=row.ADM_0) if row.ADM_0 != None else None
+        adm1 = ADM1.objects.get(name=row.ADM_1) if row.ADM_1 != None else None
+            
+        site_name = row.Site or f"{parish}, {province}: {row.y}, {row.x}" or f"{province}: {row.y}, {row.x}" or f"{adm4}: {row.y}, {row.x}" or f"{adm3}: {row.y}, {row.x}" or f"{adm2}: {row.y}, {row.x}"
+        
+        try:
+            site = Site.objects.get_or_create(
+                name=site_name,
+                ADM0=adm0,
+                ADM1=adm1,
+                ADM2=adm2,
+                ADM3=adm3,
+                ADM4=adm4,
+                Province=province,
+                Parish=parish,
+                coordinates=point
+            )[0]
+        
+        except:
+            site = Site.objects.get_or_create(
+                name=row.Site if row.Site != None else None,
+            )[0]
 
-    material = Material.objects.get(
-                text= row.Material,
+
+
+    site_type =SiteType.objects.get_or_create(
+        text= row.site_type
+    )
+
+
+    metal = Material.objects.get_or_create(
+                text= row.Material,     
         )
-    species = Species.objects.get(
-                text= row.Species,
+
+    species = Species.objects.get_or_create(
+                text= row.Species,     
         )
-    period = Period.objects.get(
-                name= row.Period,
-        )
-    site_type = SiteType.objects.get(
-                text= row.site_type,
-        )
+
+    period = Period.objects.update_or_create(
+        start_date= row.start,
+        end_date= row.end,
+        name= row.Period,
+        phase= row.period_2
+    )
+
+
     Radiocarbon.objects.get_or_create(
         site= site,
         site_type= site_type,
@@ -88,7 +109,7 @@ for row in df.itertuples(index=False):
         c14_std= row.C14STD,
         density= row.dens,
 
-        material= material,
+        material= metal,
         species= species,
 
         d13c= row.DELTA13C,
