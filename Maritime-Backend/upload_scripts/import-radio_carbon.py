@@ -25,8 +25,8 @@ df = pd.read_csv(csv_file_path)
 
 # Import data into ADM levels
 for row in df.itertuples(index=False):
-    if not pd.isnull(row.y) or pd.isnull(row.x):
-        point = Point(row.Lat,row.Lng) # Note that Point takes (longitude, latitude) order
+    if not pd.isnull(row.lat) or pd.isnull(row.lng):
+        point = Point(row.lat,row.lng) # Note that Point takes (longitude, latitude) order
     else:
         point=None
         
@@ -53,16 +53,11 @@ for row in df.itertuples(index=False):
         except:
             parish = None
             
-        adm0 = ADM0.objects.get(name=row.ADM_0) if row.ADM_0 != None else None
-        adm1 = ADM1.objects.get(name=row.ADM_1) if row.ADM_1 != None else None
-            
-        site_name = row.Site or f"{parish}, {province}: {row.y}, {row.x}" or f"{province}: {row.y}, {row.x}" or f"{adm4}: {row.y}, {row.x}" or f"{adm3}: {row.y}, {row.x}" or f"{adm2}: {row.y}, {row.x}"
+        site_name = row.site 
         
         try:
-            site = Site.objects.get_or_create(
+            obj_site = Site.objects.get_or_create(
                 name=site_name,
-                ADM0=adm0,
-                ADM1=adm1,
                 ADM2=adm2,
                 ADM3=adm3,
                 ADM4=adm4,
@@ -72,56 +67,60 @@ for row in df.itertuples(index=False):
             )[0]
         
         except:
-            site = Site.objects.get_or_create(
+            obj_site = Site.objects.get_or_create(
                 name=row.Site if row.Site != None else None,
             )[0]
 
 
-
+    site_types = []
+    # There should be a for loop here to iterate over the site types, this is many to many relationship
     site_type =SiteType.objects.get_or_create(
         text= row.site_type
-    )
+    )[0]
 
 
-    metal = Material.objects.get_or_create(
-                text= row.Material,     
-        )
+    r_metal = Material.objects.get_or_create(
+                text= row.material,     
+        )[0]
 
-    species = Species.objects.get_or_create(
-                text= row.Species,     
-        )
+    r_species = Species.objects.get_or_create(
+                text= row.species,     
+        )[0]
 
-    period = Period.objects.update_or_create(
+    period_phase = Phase.objects.get_or_create(
+        text= row.periods_2
+    )[0]
+    periods = Period.objects.get_or_create(
         start_date= row.start,
         end_date= row.end,
-        name= row.Period,
-        phase= row.period_2
-    )
+        name= row.periods_1,
+        phase= period_phase
+    )[0]
 
 
-    Radiocarbon.objects.get_or_create(
-        site= site,
-        site_type= site_type,
+    radio_carbon = Radiocarbon.objects.get_or_create(
+        site= obj_site,
+        # site_type= site_type,
         lab_id=row.labnr,
-        period= period,
+        period= periods,
 
-        c14_age= row.C14AGE,
-        c14_std= row.C14STD,
+        c14_age= row.c14age,
+        c14_std= row.c14std,
         density= row.dens,
 
-        material= metal,
-        species= species,
+        material= r_metal,
+        species= r_species,
 
-        d13c= row.DELTA13C,
+        d13c= row.delta_c13,
 
         feature= row.feature,
         
-        note=row.notes,
-        refrence=row.Refrence,
+        notes=row.notes,
+        reference=row.reference_1,
         source_database=row.source_database,
 
-
     )
+    # radio_carbon.site_type.set(site_types)
 
 print("Data imported successfully")
 
