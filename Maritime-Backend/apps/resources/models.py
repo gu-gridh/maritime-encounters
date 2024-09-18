@@ -667,13 +667,16 @@ class Radiocarbon(abstract.AbstractBaseModel):
         "site"), help_text=_("The site in which the date is located."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "sample"), help_text=_("The sample of the Radiocarbon."))
-    site_type = models.ManyToManyField(SiteType, blank=True, verbose_name=_(
-        "site_type"), help_text=_("The site type."))
+    context = models.ManyToManyField(Context, blank=True, verbose_name=_(
+        "contexts"), help_text=_("The context of site type."))
     lab_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "lab_id"), help_text=_("The lab id of the sample."))
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "period"), help_text=_("The period of the Radiocarbon."))
+
+    start_date = models.CharField(max_length=256, null=True, blank=True, help_text=_("The start date of the Radiocarbon."))
+    end_date = models.CharField(max_length=256, null=True, blank=True, help_text=_("The end date of the Radiocarbon."))
 
     c14_age = models.IntegerField(null=True, blank=True, verbose_name=_(
         "c14_age"), help_text=_("The radiocarbion age"))

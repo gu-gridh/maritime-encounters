@@ -18,7 +18,7 @@ from apps.geography.models import *
 from apps.resources.models import *  # Replace 'your_app' with the name of your Django app
 
 # Path to your CSV file
-csv_file_path = '../../resources/maritime_enc_14C_062424_v2.csv'
+csv_file_path = ''
 
 # Load the CSV data
 df = pd.read_csv(csv_file_path)
@@ -32,6 +32,10 @@ for row in df.itertuples(index=False):
         
     # Add administrative data to sites and create site objects
     if point != None:
+        try:
+            adm0 = ADM0.objects.get(geometry__contains=point)
+        except:
+            adm0 = None
         try:
             adm4 = ADM4.objects.get(geometry__contains=point)
         except:
@@ -52,7 +56,8 @@ for row in df.itertuples(index=False):
             parish = Parish.objects.get(geometry__contains=point)
         except:
             parish = None
-            
+
+        # adm0 = ADM0.objects.get(code=row.country) if row.country != None else None    
         site_name = row.site 
         
         try:
@@ -72,12 +77,16 @@ for row in df.itertuples(index=False):
             )[0]
 
 
-    site_types = []
-    # There should be a for loop here to iterate over the site types, this is many to many relationship
-    site_type =SiteType.objects.get_or_create(
-        text= row.site_type
-    )[0]
-
+    context_details = []
+    if not pd.isnull(row.site_type):
+        types = row.site_type.split("/")
+        # There should be a for loop here to iterate over the site types, this is many to many relationship
+        for i in types:
+            context_details.append(Context.objects.get_or_create(
+                text=i.strip().capitalize()
+            )[0])
+    else:
+        context_details = None
 
     r_metal = Material.objects.get_or_create(
                 text= row.material,     
@@ -86,41 +95,46 @@ for row in df.itertuples(index=False):
     r_species = Species.objects.get_or_create(
                 text= row.species,     
         )[0]
+    
+    if not pd.isnull(row.periods_2):
+        period_phase = Phase.objects.get_or_create(
+            text= row.periods_2.strip().capitalize(),
+        )[0]
+    else:
+        period_phase = None
+        
+    if not pd.isnull(row.periods_1):
+        periods = Period.objects.get_or_create(
+            name= row.periods_1.strip().capitalize(),
+            phase= period_phase
+        )[0]
+    else:
+        periods = None
 
-    period_phase = Phase.objects.get_or_create(
-        text= row.periods_2
-    )[0]
-    periods = Period.objects.get_or_create(
-        start_date= row.start,
-        end_date= row.end,
-        name= row.periods_1,
-        phase= period_phase
-    )[0]
-
-
-    radio_carbon = Radiocarbon.objects.get_or_create(
+    radio_carbon,_ = Radiocarbon.objects.get_or_create(
         site= obj_site,
-        # site_type= site_type,
-        lab_id=row.labnr,
+        lab_id= row.labnr if not pd.isnull(row.labnr) else None,
         period= periods,
 
-        c14_age= row.c14age,
-        c14_std= row.c14std,
-        density= row.dens,
+        c14_age= row.c14age if not pd.isnull(row.c14age) else None,
+        c14_std= row.c14std if not pd.isnull(row.c14std) else None,
+        density= row.dens if not pd.isnull(row.dens) else None,
+        start_date= row.start if not pd.isnull(row.start) else None,
+        end_date= row.end if not pd.isnull(row.end) else None,
+        material= r_metal if not pd.isnull(row.material) else None,
+        species= r_species if not pd.isnull(row.species) else None,
 
-        material= r_metal,
-        species= r_species,
+        d13c= row.delta_c13 if not pd.isnull(row.delta_c13) else None,
 
-        d13c= row.delta_c13,
-
-        feature= row.feature,
+        feature= row.feature if not pd.isnull(row.feature) else None,
         
-        notes=row.notes,
-        reference=row.reference_1,
-        source_database=row.source_database,
+        notes=row.notes if not pd.isnull(row.notes) else None,
+        reference=row.reference_1 if not pd.isnull(row.reference_1) else None,
+        source_database=row.source_database if not pd.isnull(row.source_database) else None,
 
     )
-    # radio_carbon.site_type.set(site_types)
+    if context_details:
+        radio_carbon.context.set(context_details)
 
 print("Data imported successfully")
 
