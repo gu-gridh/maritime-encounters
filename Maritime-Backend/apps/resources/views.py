@@ -23,6 +23,9 @@ class SiteCoordinatesViewSet(GeoViewSet):
     queryset = models.Site.objects.all().order_by('id')
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
+    bbox_filter_field = 'coordinates'
+    bbox_filter_include_overlapping = True
+    
 
 
 class SiteGeoViewSet(GeoViewSet):

@@ -65,7 +65,7 @@ class SiteCoordinatesSerializer(GeoFeatureModelSerializer):
         model = Site
         fields = ['id', 'name']
         geo_field = 'coordinates'
-        depth = 1
+        # depth = 1
 
 
 class ExcludePlolygonSiteGeoSerializer(DynamicDepthSerializer):
