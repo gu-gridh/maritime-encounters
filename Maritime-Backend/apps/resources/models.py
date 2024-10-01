@@ -594,8 +594,8 @@ class LandingPoints(abstract.AbstractBaseModel):
     period = models.ManyToManyField(Period, verbose_name=_(
         "Period(s) of Activity"), help_text=_("The period(s) of activity at the landing site."))
 
-    related_finds = models.ManyToManyField(Material, null=True, blank=True, verbose_name=_(
-        "Related Sites/Material"), help_text=_("The related sites/finds and supporting material."))
+    # related_finds = models.ManyToManyField(Material, null=True, blank=True, verbose_name=_(
+    #     "Related Sites/Material"), help_text=_("The related sites/finds and supporting material."))
     reason = models.TextField(null=True, blank=True, verbose_name=_(
         "Rationale"), help_text=_("The rationale for selecting the site as a landing site."))
     geographic = models.TextField(null=True, blank=True, verbose_name=_(
