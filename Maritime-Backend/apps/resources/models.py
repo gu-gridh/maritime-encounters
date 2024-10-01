@@ -591,10 +591,10 @@ class LandingPoints(abstract.AbstractBaseModel):
 
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Site"), help_text=_("The site (general location) in which the landing site is located."))
-    period = models.ManyToManyField(Period, blank=True, verbose_name=_(
+    period = models.ManyToManyField(Period, verbose_name=_(
         "Period(s) of Activity"), help_text=_("The period(s) of activity at the landing site."))
 
-    related_finds = models.ManyToManyField(Material, blank=True, verbose_name=_(
+    related_finds = models.TextField(null=True, blank=True, verbose_name=_(
         "Related Sites/Material"), help_text=_("The related sites/finds and supporting material."))
     reason = models.TextField(null=True, blank=True, verbose_name=_(
         "Rationale"), help_text=_("The rationale for selecting the site as a landing site."))
@@ -667,16 +667,13 @@ class Radiocarbon(abstract.AbstractBaseModel):
         "site"), help_text=_("The site in which the date is located."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "sample"), help_text=_("The sample of the Radiocarbon."))
-    context = models.ManyToManyField(Context, blank=True, verbose_name=_(
-        "contexts"), help_text=_("The context of site type."))
+    site_type = models.ManyToManyField(SiteType, verbose_name=_(
+        "site_type"), help_text=_("The site type."))
     lab_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "lab_id"), help_text=_("The lab id of the sample."))
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "period"), help_text=_("The period of the Radiocarbon."))
-
-    start_date = models.CharField(max_length=256, null=True, blank=True, help_text=_("The start date of the Radiocarbon."))
-    end_date = models.CharField(max_length=256, null=True, blank=True, help_text=_("The end date of the Radiocarbon."))
 
     c14_age = models.IntegerField(null=True, blank=True, verbose_name=_(
         "c14_age"), help_text=_("The radiocarbion age"))
@@ -1112,9 +1109,9 @@ class Metalwork(abstract.AbstractBaseModel):
         "Accession Number"), help_text=_("The accession number of the object."))
     accession_certain = models.BooleanField(blank=True, verbose_name=_("Accession Number Certainty"), help_text=_(
         "Check if the accession number is certain and does not need review later."), default=True)
-    museum = models.ManyToManyField(MuseumMeta, blank=True, verbose_name=_(
+    museum = models.ManyToManyField(MuseumMeta, verbose_name=_(
         "Museum"), help_text=_("The museum that holds or recorded the object."))
-    collection = models.ManyToManyField(MuseumCollection, blank=True, verbose_name=_(
+    collection = models.ManyToManyField(MuseumCollection, verbose_name=_(
         "Collection"), help_text=_("The title of the museum or personal collection."))
     museum_certain = models.BooleanField(blank=True, verbose_name=_("Museum/Collection Certainty"), help_text=_(
         "Check if the museum/collection is certain and does not need review later."), default=True)
@@ -1138,11 +1135,11 @@ class Metalwork(abstract.AbstractBaseModel):
         "Context Detail"), help_text=_("The detailed context of the find. E.g., a specific layer or feature."))
     context_detail_certain = models.BooleanField(blank=True, verbose_name=_("Context Detail Certainty"), help_text=_(
         "Check if the context detail is certain and does not need review later."), default=True)
-    context_keywords = models.ManyToManyField(ContextKeywords, blank=True, verbose_name=_(
+    context_keywords = models.ManyToManyField(ContextKeywords, verbose_name=_(
         "Context Keywords"), help_text=_("Keywords that describe the context of the find."))
     multiperiod = models.BooleanField(blank=True, verbose_name=_("Multiperiod"), help_text=_(
         "Check if the site is associated with multiple periods."))
-    dating = models.ManyToManyField(Period, blank=True, verbose_name=_(
+    dating = models.ManyToManyField(Period, verbose_name=_(
         "Period(s) of activity"), help_text=_("The period(s) of activity of the site."))
     date_string = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Original Dating Text"), help_text=_("The dating text from the original file."))
@@ -1158,9 +1155,9 @@ class Metalwork(abstract.AbstractBaseModel):
         "Radiocarbon StD"), help_text=_("The radiocarbon standard deviation of the object."))
     comments = models.TextField(null=True, blank=True, verbose_name=_(
         "Comments"), help_text=_("General comments about the entry."))
-    certain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, blank=True, related_name=('certain_context_descriptors_subcategories'), verbose_name=_(
+    certain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('certain_context_descriptors_subcategories'), blank=True, verbose_name=_(
         "Related Finds/Materials - Certain"), help_text=_("Objects, etc. that were found at the site and do not need review later. Relates to presence/absence fields in original dataset."))
-    uncertain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, blank=True, related_name=('uncertain_context_descriptors_subcategories'), verbose_name=_(
+    uncertain_context_descriptors = models.ManyToManyField(ContextFindsSubcategories, related_name=('uncertain_context_descriptors_subcategories'), blank=True, verbose_name=_(
         "Related Finds/Materials - Possible"), help_text=_("Objects, etc. that were found at the site and need review later. Relates to presence/absence fields in original dataset."))
 
     def __str__(self) -> str:
@@ -1181,7 +1178,7 @@ class ObjectCount(models.Model):
             "Metalwork Object"), help_text=_("The corresponding metalwork object."))
     object = models.ForeignKey(
         ObjectDescription, on_delete=models.CASCADE, null=True, blank=True)
-    material = models.ManyToManyField(ObjectMaterials, blank=True, verbose_name=_(
+    material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
         "material"), help_text=_("The material(s) of the object."))
     count = models.IntegerField(null=True, blank=True, verbose_name=_(
         "Number of objects"), help_text=_("The number of objects of this type with the same entry number, literature number, and accession number."))
@@ -1225,11 +1222,11 @@ class IndividualObjects(abstract.AbstractBaseModel):
         'Variant (pre-translation)'), help_text=_('The variant text before translation to English.'))
     count = models.IntegerField(null=True, blank=True, verbose_name=_(
         "Count"), help_text=_("The number of objects."))
-    material = models.ManyToManyField(ObjectMaterials, blank=True, verbose_name=_(
+    material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
         "Material"), help_text=_("The material of the object."))
     material_original = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         'Material (pre-translation)'), help_text=_('The material text before translation to English.'))
-    period = models.ManyToManyField(Period, blank=True, verbose_name=_(
+    period = models.ManyToManyField(Period, verbose_name=_(
         "Period"), help_text=_("The period of the object."))
     period_original = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         'Period (pre-translation)'), help_text=_('The period text before translation to English.'))
