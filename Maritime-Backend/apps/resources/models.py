@@ -587,38 +587,38 @@ class LogBoats(abstract.AbstractBaseModel):
         verbose_name_plural = _("Log Boats")
 
 
-# class LandingPoints(abstract.AbstractBaseModel):
+class LandingPoints(abstract.AbstractBaseModel):
 
-#     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-#         "Site"), help_text=_("The site (general location) in which the landing site is located."))
-#     period = models.ManyToManyField(Period, verbose_name=_(
-#         "Period(s) of Activity"), help_text=_("The period(s) of activity at the landing site."))
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+        "Site"), help_text=_("The site (general location) in which the landing site is located."))
+    period = models.ManyToManyField(Period, verbose_name=_(
+        "Period(s) of Activity"), help_text=_("The period(s) of activity at the landing site."))
 
-#     related_finds = models.ManyToManyField(Material, null=True, blank=True, verbose_name=_(
-#         "Related Sites/Material"), help_text=_("The related sites/finds and supporting material."))
-#     reason = models.TextField(null=True, blank=True, verbose_name=_(
-#         "Rationale"), help_text=_("The rationale for selecting the site as a landing site."))
-#     geographic = models.TextField(null=True, blank=True, verbose_name=_(
-#         "Geographic Significance"), help_text=_("The geographic of the landing."))
-#     start_date = models.IntegerField(null=True, blank=True, verbose_name=_("Start Date"), help_text=_("The start date of activity at the site as an integer.  Use a negative integer for BC dates."))
-#     end_date = models.IntegerField(null=True, blank=True, verbose_name=_("End Date"), help_text=_("The end date of activity at the site as an integer.  Use a negative integer for BC dates."))
+    related_finds = models.ManyToManyField(Material, null=True, blank=True, verbose_name=_(
+        "Related Sites/Material"), help_text=_("The related sites/finds and supporting material."))
+    reason = models.TextField(null=True, blank=True, verbose_name=_(
+        "Rationale"), help_text=_("The rationale for selecting the site as a landing site."))
+    geographic = models.TextField(null=True, blank=True, verbose_name=_(
+        "Geographic Significance"), help_text=_("The geographic of the landing."))
+    start_date = models.IntegerField(null=True, blank=True, verbose_name=_("Start Date"), help_text=_("The start date of activity at the site as an integer.  Use a negative integer for BC dates."))
+    end_date = models.IntegerField(null=True, blank=True, verbose_name=_("End Date"), help_text=_("The end date of activity at the site as an integer.  Use a negative integer for BC dates."))
 
-#     def __str__(self) -> str:
+    def __str__(self) -> str:
         
-#         def periods_list(self):
-#             periods = ','.join([period.name for period in self.period.all()])
+        def periods_list(self):
+            periods = ','.join([period.name for period in self.period.all()])
 
-#         name_str = f" {self.site.name}"
-#         return name_str
+        name_str = f" {self.site.name}"
+        return name_str
 
-#     class Meta:
-#         verbose_name = _("Landing Point")
-#         verbose_name_plural = _("Landing Points")
+    class Meta:
+        verbose_name = _("Landing Point")
+        verbose_name_plural = _("Landing Points")
 
 
 class RelPresentActivityLandingPoints(models.Model):
-    # landing_point = models.ForeignKey(
-    #     LandingPoints, on_delete=models.CASCADE, null=True, blank=True)
+    landing_point = models.ForeignKey(
+        LandingPoints, on_delete=models.CASCADE, null=True, blank=True)
     period_activity = models.ForeignKey(
         PeriodActivity, on_delete=models.CASCADE, null=True, blank=True)
     present_activity = models.BooleanField(null=True, blank=True)
