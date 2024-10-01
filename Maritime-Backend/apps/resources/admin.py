@@ -208,15 +208,15 @@ class LogBoatAdmin(admin.ModelAdmin):
     ordering = ['name']
 
 
-@admin.register(LandingPoints)
-class LandingPointsAdmin(admin.ModelAdmin):
-    list_display = ['site']
-    search_fields = ['site__name', 'period__name']
-    list_filter = ['site']
-    inlines = [
-        RelPeriodActivityLandingPoints,
-    ]
-    filter_horizontal = ['period', 'related_finds']
+# @admin.register(LandingPoints)
+# class LandingPointsAdmin(admin.ModelAdmin):
+#     list_display = ['site']
+#     search_fields = ['site__name', 'period__name']
+#     list_filter = ['site']
+#     inlines = [
+#         RelPeriodActivityLandingPoints,
+#     ]
+#     filter_horizontal = ['period', 'related_finds']
 
 
 @admin.register(NewSamples)
