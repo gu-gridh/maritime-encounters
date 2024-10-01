@@ -216,7 +216,7 @@ class LandingPointsAdmin(admin.ModelAdmin):
     inlines = [
         RelPeriodActivityLandingPoints,
     ]
-    filter_horizontal = ['period', 'related_finds']
+    filter_horizontal = ['period']
 
 
 @admin.register(NewSamples)
