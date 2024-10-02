@@ -107,3 +107,64 @@ class MetalworkSerializer(DynamicDepthSerializer):
     class Meta:
         model = Metalwork
         fields = ['id']+get_fields(Metalwork, exclude=DEFAULT_FIELDS)
+
+
+class RadioCarbonSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+    sample = ExcludeSitePloygonSampleSerializer()
+
+    class Meta:
+        model = Radiocarbon
+        fields = ['id']+get_fields(Radiocarbon, exclude=DEFAULT_FIELDS)
+
+
+class PlankBoatsSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+
+    class Meta:
+        model = PlankBoats
+        fields = ['id']+get_fields(PlankBoats, exclude=DEFAULT_FIELDS)
+
+class LogBoatsSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+
+    class Meta:
+        model = LogBoats
+        fields = ['id']+get_fields(LogBoats, exclude=DEFAULT_FIELDS)
+
+class aDNASerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+
+    class Meta:
+        model = aDNA
+        fields = ['id']+get_fields(aDNA, exclude=DEFAULT_FIELDS)
+
+class IndivdualObjectSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+
+    class Meta:
+        model = IndividualObjects
+        fields = ['id']+get_fields(IndividualObjects, exclude=DEFAULT_FIELDS)
+
+
+class RadiocarbonSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+
+    class Meta:
+        model = Radiocarbon
+        fields = ['id']+get_fields(Radiocarbon, exclude=DEFAULT_FIELDS)
+
+
+class LandingPointsSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+
+    class Meta:
+        model = LandingPoints
+        fields = ['id']+get_fields(LandingPoints, exclude=DEFAULT_FIELDS)
+
+class NewSamplesSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+
+    class Meta:
+        model = NewSamples
+        fields = ['id']+get_fields(NewSamples, exclude=DEFAULT_FIELDS)

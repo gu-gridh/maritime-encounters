@@ -13,7 +13,10 @@ router.register(rf'{endpoint}/site_coordinates', views.SiteCoordinatesViewSet, b
 router.register(rf'{endpoint}/metal_analysis', views.MetalAnalysisViewSet, basename='metal analsyis')
 router.register(rf'{endpoint}/metalwork', views.MetalworkViewSet, basename='metalwork')
 
+router.register(rf'{endpoint}/site_resources', views.SiteResourcesViewSet, basename='site resources')
+
 urlpatterns = [
+    
     path('', include(router.urls)),
 
     # Automatically generated views
