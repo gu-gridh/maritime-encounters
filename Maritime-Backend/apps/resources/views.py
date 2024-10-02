@@ -82,6 +82,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
             'metal_analysis': MetalAnalysisSerializer(MetalAnalysis.objects.filter(site=site), many=True).data,
             'landing_points': LandingPointsSerializer(LandingPoints.objects.filter(site=site), many=True).data,
             'new_samples': NewSamplesSerializer(NewSamples.objects.filter(site=site), many=True).data,
+            'metalwork': MetalworkSerializer(Metalwork.objects.filter(location__site=site), many=True).data,
         }
 
         return Response(data, status=status.HTTP_200_OK)
