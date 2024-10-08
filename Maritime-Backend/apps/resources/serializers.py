@@ -101,7 +101,7 @@ class MetalAnalysisSerializer(DynamicDepthSerializer):
 
 
 class MetalworkSerializer(DynamicDepthSerializer):
-    site = ExcludePlolygonSiteGeoSerializer()
+    # site = ExcludePlolygonSiteGeoSerializer()
     sample = ExcludeSitePloygonSampleSerializer()
 
     class Meta:
