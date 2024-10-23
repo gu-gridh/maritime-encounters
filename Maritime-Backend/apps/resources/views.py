@@ -87,3 +87,74 @@ class SiteResourcesViewSet(viewsets.ViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
     
+
+class ResourcesFilteringViewSet(GeoViewSet):
+    serializer_class = serializers.SiteGeoSerializer
+    
+    def dispatch(self, request, *args, **kwargs):
+        mapping = {
+            'plank_boats': models.PlankBoats, 
+            'log_boats': models.LogBoats, 
+            'radiocarbon_dates': models.Radiocarbon, 
+            'individual_samples': models.IndividualObjects, 
+            'dna_samples': models.aDNA, 
+            'metal_analysis': models.MetalAnalysis, 
+            'landing_points': models.LandingPoints, 
+            'new_samples': models.NewSamples, 
+            'metalwork': models.Metalwork
+        }
+        
+        resource_type = request.GET.get('type') 
+        
+        for key, model in mapping.items():
+            if resource_type == key:
+                queryset = model.objects.all()
+                self.queryset = queryset
+                break
+
+        return super(ResourcesFilteringViewSet, self).dispatch(request, *args, **kwargs)
+
+    def get_queryset(self):
+        resource_type = self.request.query_params.get('type')
+        min_year = self.request.query_params.get('min_year')
+        max_year = self.request.query_params.get('max_year')
+
+        queryset = models.Site.objects.all()  # Default queryset
+
+        # Map the resource type to the correct related field
+        resource_mapping = {
+            'plank_boats': 'plankboats',
+            'log_boats': 'logboats',
+            'radiocarbon_dates': 'radiocarbon',
+            'individual_samples': 'individualobjects',
+            'dna_samples': 'adna',
+            'metal_analysis': 'metalanalysis',
+            'landing_points': 'landingpoints',
+            'new_samples': 'newsamples',
+            'metalwork': 'metalwork',
+        }
+
+        if resource_type and resource_type in resource_mapping:
+            related_field = resource_mapping[resource_type]
+            queryset = queryset.filter(**{f"{related_field}__isnull": False})
+
+        if min_year and max_year:
+            queryset = queryset.filter(
+                plankboats__year__gte=min_year,  # Example of filtering for `plankboats`
+                plankboats__year__lte=max_year
+            )
+
+        elif min_year:
+            queryset = queryset.filter(plankboats__year__gte=min_year)
+
+        elif max_year:
+            queryset = queryset.filter(plankboats__year__lte=max_year)
+
+        return queryset
+
+
+    filterset_fields = get_fields(
+        models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
+    )
+    bbox_filter_field = 'coordinates'
+    bbox_filter_include_overlapping = True
