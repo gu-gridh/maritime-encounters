@@ -89,7 +89,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
     
 
 class ResourcesFilteringViewSet(GeoViewSet):
-    serializer_class = serializers.SiteGeoSerializer
+    serializer_class = serializers.SiteCoordinatesSerializer
     
     def dispatch(self, request, *args, **kwargs):
         mapping = {
@@ -101,7 +101,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'metal_analysis': models.MetalAnalysis, 
             'landing_points': models.LandingPoints, 
             'new_samples': models.NewSamples, 
-            'metalwork': models.Metalwork
+            # 'metalwork': models.Metalwork
         }
         
         resource_type = request.GET.get('type') 
@@ -119,39 +119,27 @@ class ResourcesFilteringViewSet(GeoViewSet):
         min_year = self.request.query_params.get('min_year')
         max_year = self.request.query_params.get('max_year')
 
-        queryset = models.Site.objects.all()  # Default queryset
+        if resource_type:
+            queryset = models.Site.objects.filter(id__in=list(
+                models.Site.objects.filter(resources__type=resource_type).values_list('id', flat=True)
+            ))
 
-        # Map the resource type to the correct related field
-        resource_mapping = {
-            'plank_boats': 'plankboats',
-            'log_boats': 'logboats',
-            'radiocarbon_dates': 'radiocarbon',
-            'individual_samples': 'individualobjects',
-            'dna_samples': 'adna',
-            'metal_analysis': 'metalanalysis',
-            'landing_points': 'landingpoints',
-            'new_samples': 'newsamples',
-            'metalwork': 'metalwork',
-        }
+            if min_year and max_year:
+                queryset = queryset.filter(
+                    resources__year__gte=min_year,
+                    resources__year__lte=max_year
+                )
 
-        if resource_type and resource_type in resource_mapping:
-            related_field = resource_mapping[resource_type]
-            queryset = queryset.filter(**{f"{related_field}__isnull": False})
+            elif min_year:
+                queryset = queryset.filter(resources__year__gte=min_year)
 
-        if min_year and max_year:
-            queryset = queryset.filter(
-                plankboats__year__gte=min_year,  # Example of filtering for `plankboats`
-                plankboats__year__lte=max_year
-            )
+            elif max_year:
+                queryset = queryset.filter(resources__year__lte=max_year)
 
-        elif min_year:
-            queryset = queryset.filter(plankboats__year__gte=min_year)
-
-        elif max_year:
-            queryset = queryset.filter(plankboats__year__lte=max_year)
+        else:
+            queryset = models.Site.objects.all()
 
         return queryset
-
 
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
