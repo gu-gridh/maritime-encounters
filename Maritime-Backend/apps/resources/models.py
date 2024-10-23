@@ -594,7 +594,7 @@ class LandingPoints(abstract.AbstractBaseModel):
     period = models.ManyToManyField(Period, verbose_name=_(
         "Period(s) of Activity"), help_text=_("The period(s) of activity at the landing site."))
 
-    related_finds = models.ManyToManyField(Material, null=True, blank=True, verbose_name=_(
+    related_finds = models.ManyToManyField(Material, blank=True, verbose_name=_(
         "Related Sites/Material"), help_text=_("The related sites/finds and supporting material."))
     reason = models.TextField(null=True, blank=True, verbose_name=_(
         "Rationale"), help_text=_("The rationale for selecting the site as a landing site."))
@@ -852,6 +852,9 @@ class IsotopesBio(abstract.AbstractBaseModel):
         "notes"), help_text=_("The notes of the Isotopes Bio."))
     sample_number = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "sample_number"), help_text=_("The sample number of the Isotopes Bio."))
+
+    period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, 
+                               verbose_name=_("period"), help_text=_("The period of the Isotopes Bio."))
 
     reference = models.TextField(null=True, blank=True, verbose_name=_(
         "reference"), help_text=_("The reference of the Isotopes Bio."))
@@ -1139,7 +1142,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "Context Keywords"), help_text=_("Keywords that describe the context of the find."))
     multiperiod = models.BooleanField(blank=True, verbose_name=_("Multiperiod"), help_text=_(
         "Check if the site is associated with multiple periods."))
-    dating = models.ManyToManyField(Period, verbose_name=_(
+    period = models.ManyToManyField(Period, verbose_name=_(
         "Period(s) of activity"), help_text=_("The period(s) of activity of the site."))
     date_string = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Original Dating Text"), help_text=_("The dating text from the original file."))

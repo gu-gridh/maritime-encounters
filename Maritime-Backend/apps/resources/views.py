@@ -92,6 +92,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
     
     def dispatch(self, request, *args, **kwargs):
+        # Define mapping for resources to models
         mapping = {
             'plank_boats': models.PlankBoats, 
             'log_boats': models.LogBoats, 
@@ -106,6 +107,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
         
         resource_type = request.GET.get('type') 
         
+        # Set the queryset based on resource type
         for key, model in mapping.items():
             if resource_type == key:
                 queryset = model.objects.all()
@@ -119,36 +121,43 @@ class ResourcesFilteringViewSet(GeoViewSet):
         min_year = self.request.query_params.get('min_year')
         max_year = self.request.query_params.get('max_year')
 
-        queryset = models.Site.objects.all()  # Default queryset
+        # Default queryset for `Site`
+        queryset = models.Site.objects.all()
 
-        # Map the resource type to the correct related field
+        # Map the resource type to the actual model
         resource_mapping = {
-            'plank_boats': 'plankboats',
-            'log_boats': 'logboats',
-            'radiocarbon_dates': 'radiocarbon',
-            'individual_samples': 'individualobjects',
-            'dna_samples': 'adna',
-            'metal_analysis': 'metalanalysis',
-            'landing_points': 'landingpoints',
-            'new_samples': 'newsamples',
-            # 'metalwork': 'metalwork',
+            'plank_boats': models.PlankBoats,
+            'log_boats': models.LogBoats,
+            'radiocarbon_dates': models.Radiocarbon,
+            'individual_samples': models.IndividualObjects,
+            'dna_samples': models.aDNA,
+            'metal_analysis': models.MetalAnalysis,
+            'landing_points': models.LandingPoints,
+            'new_samples': models.NewSamples,
+            # 'metalwork': models.Metalwork,
         }
 
+        # If resource_type is provided, filter based on it
         if resource_type and resource_type in resource_mapping:
-            related_field = resource_mapping[resource_type]
-            queryset = queryset.filter(**{f"{related_field}__isnull": False})
+            resource_model = resource_mapping[resource_type]
+            resource_queryset = resource_model.objects.all()
 
-        if min_year and max_year:
-            queryset = queryset.filter(
-                plankboats__year__gte=min_year,  # Example of filtering for `plankboats`
-                plankboats__year__lte=max_year
-            )
+            # Apply period filtering to the resources
+            if min_year and max_year:
+                resource_queryset = resource_queryset.filter(
+                    Q(Q(period__start_date__gte=min_year) | Q(period__end_date__gte=max_year))  
+                    & (Q(period__end_date__lte=max_year) | Q(period__start_date__lte=max_year))
+                )
+            elif min_year:
+                resource_queryset = resource_queryset.filter(Q(period__start_date__gte=min_year)
+                                                             | Q(period__end_date__gte=min_year))
+            elif max_year:
+                resource_queryset = resource_queryset.filter(Q(period__end_date__lte=max_year)
+                                                             | Q(period__start_date__lte=max_year))
 
-        elif min_year:
-            queryset = queryset.filter(plankboats__year__gte=min_year)
-
-        elif max_year:
-            queryset = queryset.filter(plankboats__year__lte=max_year)
+            # Get the related site IDs from the filtered resources
+            site_ids = resource_queryset.values_list('site_id', flat=True)
+            queryset = queryset.filter(id__in=site_ids)
 
         return queryset
 
