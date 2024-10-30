@@ -6,7 +6,7 @@ from rest_framework import status
 from . import models, serializers
 from django.db.models import Q
 from maritime.abstract.views import DynamicDepthViewSet, GeoViewSet
-from maritime.abstract.models import get_fields, DEFAULT_FIELDS
+from maritime.abstract.models import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
 from django.views.decorators.csrf import csrf_exempt
 from django.contrib.gis.geos import Polygon
 from django.contrib.gis.gdal.envelope import Envelope
@@ -56,7 +56,7 @@ class MetalAnalysisViewSet(DynamicDepthViewSet):
 class MetalworkViewSet(DynamicDepthViewSet):
     serializer_class = serializers.MetalworkSerializer
     queryset = models.Metalwork.objects.all()
-    filterset_fields = get_fields(models.Metalwork, exclude=DEFAULT_FIELDS+['orig_coords'])
+    filterset_fields = get_fields(models.Metalwork, exclude=DEFAULT_EXCLUDE+DEFAULT_FIELDS+['orig_coords'])
     search_fields = ['site__name', 'entry_number']
 
 

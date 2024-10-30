@@ -22,8 +22,8 @@ urlpatterns = [
 
     # Automatically generated views
     *utils.get_model_urls('resources', endpoint, 
-        exclude=['site', 'metal_analysis']),
+        exclude=['site', 'metal_analysis', 'metalwork']),
 
-    *utils.get_model_urls('resources', f'{endpoint}', exclude=['site', 'metal_analysis']),
+    *utils.get_model_urls('resources', f'{endpoint}', exclude=['site', 'metal_analysis', 'metalwork']),
     *documentation
 ]
