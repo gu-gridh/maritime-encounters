@@ -145,9 +145,8 @@ class ResourcesFilteringViewSet(GeoViewSet):
             # Apply period filtering to the resources
             if min_year and max_year:
                 resource_queryset = resource_queryset.filter(
-                    Q(Q(period__start_date__gte=min_year) | Q(period__end_date__gte=max_year))  
-                    & (Q(period__end_date__lte=max_year) | Q(period__start_date__lte=max_year))
-                )
+                    Q(period__start_date__gte=min_year) & Q(period__end_date__lte=max_year)
+                    )
             elif min_year:
                 resource_queryset = resource_queryset.filter(Q(period__start_date__gte=min_year)
                                                              | Q(period__end_date__gte=min_year))
