@@ -1118,6 +1118,9 @@ class Metalwork(abstract.AbstractBaseModel):
         "Collection"), help_text=_("The title of the museum or personal collection."))
     museum_certain = models.BooleanField(blank=True, verbose_name=_("Museum/Collection Certainty"), help_text=_(
         "Check if the museum/collection is certain and does not need review later."), default=True)
+    # This one needs to be changed to site model
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Sites"), help_text=_(
+        "The site in which the object was found."))
     location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Location"), help_text=_("The location of the object."))
     location_certain = models.BooleanField(blank=True, verbose_name=_(

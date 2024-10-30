@@ -102,7 +102,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'metal_analysis': models.MetalAnalysis, 
             'landing_points': models.LandingPoints, 
             'new_samples': models.NewSamples, 
-            # 'metalwork': models.Metalwork
+            'metalwork': models.Metalwork
         }
         
         resource_type = request.GET.get('type') 
@@ -134,7 +134,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'metal_analysis': models.MetalAnalysis,
             'landing_points': models.LandingPoints,
             'new_samples': models.NewSamples,
-            # 'metalwork': models.Metalwork,
+            'metalwork': models.Metalwork,
         }
 
         # If resource_type is provided, filter based on it
@@ -156,8 +156,12 @@ class ResourcesFilteringViewSet(GeoViewSet):
                                                              | Q(period__start_date__lte=max_year))
 
             # Get the related site IDs from the filtered resources
-            site_ids = resource_queryset.values_list('site_id', flat=True)
-            queryset = queryset.filter(id__in=site_ids)
+            try:
+                site_ids = resource_queryset.values_list('site_id', flat=True)
+                queryset = queryset.filter(id__in=site_ids)
+            except:
+                location_site_ids = resource_queryset.values_list('location__site_id', flat=True)
+                queryset = queryset.filter(id__in=location_site_ids)
 
         return queryset
 

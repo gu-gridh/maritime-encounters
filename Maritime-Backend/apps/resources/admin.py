@@ -401,18 +401,18 @@ class RelObjectCountAdmin(admin.TabularInline):
 @admin.register(Metalwork)
 class MetalworkAdmin(admin.ModelAdmin):
     list_display = ['entry_num', 'literature_num', 'accession_num',
-                    'location', 'main_context', 'find_context', 'context_detail']
+                    'location', 'main_context', 'find_context', 'context_detail', 'site']
     search_fields = ['entry_num__entry_number', 'literature_num__literature_number', 'accession_num__accession_number', 'collection__collection',
                      'location__location_name', 'main_context__text', 'find_context__text', 'context_detail__text', 'period__name', 'period__phase__text']
     list_filter = ['entry_num', 'literature_num', 'accession_num', 'collection',
-                   'location', 'main_context', 'find_context', 'context_detail', 'period']
+                   'site', 'location', 'main_context', 'find_context', 'context_detail', 'period']
     ordering = ['entry_num']
     inlines = [
         RelObjectCountAdmin
     ]
     filter_horizontal = ['context_keywords', 'period', 'context_keywords',
                          'certain_context_descriptors', 'uncertain_context_descriptors', 'museum', 'collection']
-    autocomplete_fields = ['entry_num', 'literature_num', 'accession_num','location', 'main_context', 'find_context', 'context_detail']
+    autocomplete_fields = ['entry_num', 'literature_num', 'accession_num','location', 'main_context', 'find_context', 'context_detail', 'site']
 
 
 @admin.register(Form)
