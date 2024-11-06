@@ -1127,7 +1127,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "Location Certainty"), help_text=_("The certainty of the coordinate."), default=True)
     coord_system = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Coordinate System"), help_text=_("The EPSG code of the original coordinate system."))
-    orig_coords = ArrayField(models.CharField(), size=2, null=True, blank=True, verbose_name=_(
+    orig_coords = ArrayField(models.CharField(max_length=256), size=2, null=True, blank=True, verbose_name=_(
         "Original Coordinates"), help_text=_("The original coordinates that were converted to lat/long.  Include if you are unsure of the accuracy of the conversion."))
     main_context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Main Context"), help_text=_("The site or excavation context."))
@@ -1157,7 +1157,7 @@ class Metalwork(abstract.AbstractBaseModel):
         "Radiocarbon Date"), help_text=_("The radiocarbon date of the object."))
     radiocarbon_years = models.CharField(max_length=256, blank=True, null=True, verbose_name=_(
         "Radiocarbon Year(s)"), help_text=_("The radiocarbon year(s) of the object."))
-    radiocarbon_std = models.CharField(null=True, blank=True, verbose_name=_(
+    radiocarbon_std = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Radiocarbon StD"), help_text=_("The radiocarbon standard deviation of the object."))
     comments = models.TextField(null=True, blank=True, verbose_name=_(
         "Comments"), help_text=_("General comments about the entry."))
