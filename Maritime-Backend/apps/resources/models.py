@@ -723,6 +723,22 @@ class Radiocarbon(abstract.AbstractBaseModel):
         verbose_name_plural = _("Radiocarbons")
 
 
+class LISource(abstract.AbstractBaseModel):
+    name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "sitename"), help_text=_("Free-form, non-indexed site name of the site."))
+    # Location
+    coordinates = models.PointField(null=True, blank=True, verbose_name=_(
+        "Coordinates"), help_text=_("Mid-point coordinates of the site."))
+
+    def __str__(self) -> str:
+
+        name_str = f"{self.name}"
+        return name_str
+
+    class Meta:
+        verbose_name = _("LI Source")
+        verbose_name_plural = _("LI Sources")
+
 class MetalAnalysis(abstract.AbstractBaseModel):
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "site"), help_text=_("The site in which the metal is located."))
@@ -741,7 +757,9 @@ class MetalAnalysis(abstract.AbstractBaseModel):
         "typology"), help_text=_("The typology of the metal."))
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "period"), help_text=_("The period of the metal."))
-
+    LIconsistency = models.ForeignKey(LISources, on_delete=models.CASCADE, null=True,blank=True,verbose_name=_("LI Consistent - Region"),help_text=_("Region or location the Lead Isotopes are consistent with wthin 1 analytical error."))
+    LIoriginal = models.TextField(null=True, blank=True, verbose_name=_(
+        "LI Consistency - Text"), help_text=_("The original text in 'LI consistent with - within 1 analytical error' field used for geocoding."))
     def __str__(self) -> str:
         name_str = f"{self.museum_entry}-{self.context}"
         return name_str
