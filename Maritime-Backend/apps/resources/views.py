@@ -138,7 +138,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
         }
 
         # If resource_type is provided, filter based on it
-        if resource_type and resource_type in resource_mapping:
+        if resource_type in resource_mapping:
             resource_model = resource_mapping[resource_type]
             resource_queryset = resource_model.objects.all()
 
@@ -155,12 +155,10 @@ class ResourcesFilteringViewSet(GeoViewSet):
                                                              | Q(period__start_date__lte=max_year))
 
             # Get the related site IDs from the filtered resources
-            try:
-                site_ids = resource_queryset.values_list('site_id', flat=True)
-                queryset = queryset.filter(id__in=site_ids)
-            except:
-                location_site_ids = resource_queryset.values_list('location__site_id', flat=True)
-                queryset = queryset.filter(id__in=location_site_ids)
+          
+            site_ids = resource_queryset.values_list('site_id', flat=True)
+            queryset = queryset.filter(id__in=site_ids)
+  
 
         return queryset
 
