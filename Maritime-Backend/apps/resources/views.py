@@ -148,11 +148,9 @@ class ResourcesFilteringViewSet(GeoViewSet):
                     Q(period__start_date__gte=min_year) & Q(period__end_date__lte=max_year)
                     )
             elif min_year:
-                resource_queryset = resource_queryset.filter(Q(period__start_date__gte=min_year)
-                                                             | Q(period__end_date__gte=min_year))
+                resource_queryset = resource_queryset.filter(period__start_date__gte=min_year)
             elif max_year:
-                resource_queryset = resource_queryset.filter(Q(period__end_date__lte=max_year)
-                                                             | Q(period__start_date__lte=max_year))
+                resource_queryset = resource_queryset.filter(period__end_date__lte=max_year)
 
             # Get the related site IDs from the filtered resources
           
