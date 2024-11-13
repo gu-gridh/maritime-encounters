@@ -199,9 +199,9 @@ class Period(abstract.AbstractBaseModel):
         "name"), help_text=_("The name of the period."))
     phase = models.ForeignKey(Phase, on_delete=models.CASCADE, null=True, blank=True,
                               related_name='period_phase', verbose_name=_("phase"), help_text=_("The phase of the period."))
-    start_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+    start_date = models.IntegerField(null=True, blank=True, verbose_name=_(
         "start_date"), help_text=_("The start date of the period."))
-    end_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+    end_date = models.IntegerField(null=True, blank=True, verbose_name=_(
         "end_date"), help_text=_("The end date of the period."))
 
     def __str__(self) -> str:

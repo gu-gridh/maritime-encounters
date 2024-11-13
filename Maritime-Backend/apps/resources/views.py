@@ -121,6 +121,9 @@ class ResourcesFilteringViewSet(GeoViewSet):
         min_year = self.request.query_params.get('min_year')
         max_year = self.request.query_params.get('max_year')
 
+        min_year = int(min_year) if min_year else None
+        max_year = int(max_year) if max_year else None
+        
         # Default queryset for `Site`
         queryset = models.Site.objects.all()
 
