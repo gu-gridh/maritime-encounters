@@ -136,7 +136,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'dna_samples': models.aDNA,
             'metal_analysis': models.MetalAnalysis,
             'landing_points': models.LandingPoints,
-            'new_samples': models.NewSamples,
+            # 'new_samples': models.NewSamples,
             'metalwork': models.Metalwork,
         }
 

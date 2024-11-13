@@ -642,6 +642,7 @@ class NewSamples(abstract.AbstractBaseModel):
         "Pictures"), help_text=_("The pictures of the metal."))
     sampler = models.ForeignKey(Sampler, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "sampler"), help_text=_("The sampler of the metal."))
+    
     date = models.DateField(null=True, blank=True, verbose_name=_(
         "date"), help_text=_("The date of the metal."))
     note = models.TextField(null=True, blank=True, verbose_name=_(
@@ -800,7 +801,8 @@ class aDNA(abstract.AbstractBaseModel):
         "skeletal_code"), help_text=_("The skeletal code of the aDNA."))
     skeletal_element = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "skeletal_element"), help_text=_("The skeletal element of the aDNA."))
-
+    period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+        "period"), help_text=_("The period of the aDNA."))
     year_date = models.IntegerField(null=True, blank=True, verbose_name=_(
         "year_date"), help_text=_("The year date of the aDNA."))
     dating_method = models.ForeignKey(DatingMethod, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
