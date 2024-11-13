@@ -233,6 +233,15 @@ class RadiocarbonAdmin(admin.ModelAdmin):
     list_filter = ['site', 'period']
 
 
+
+@admin.register(LISource)
+class LISourceAdmin(admin.ModelAdmin):
+    list_display = ['name']
+    search_fields = ['name']
+    list_filter = ['name']
+    ordering = ['name']
+
+
 @admin.register(MetalAnalysis)
 class MetalAnalysisAdmin(admin.ModelAdmin):
     list_display = ['site', 'museum_entry', 'context']
@@ -242,6 +251,7 @@ class MetalAnalysisAdmin(admin.ModelAdmin):
         RelMetalElementAdmin,
         RelMetalIsotopAdmin,
     ]
+    filter_horizontal = ['LIconsistency']
     autocomplete_fields = ['context', 'object_description',
                            'site', 'museum_entry', 'sample', 'period']
 
