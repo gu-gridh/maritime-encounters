@@ -147,17 +147,29 @@ class ResourcesFilteringViewSet(GeoViewSet):
                 resource_queryset = resource_queryset.filter(
                     Q(period__start_date__gte=min_year) & Q(period__end_date__lte=max_year)
                     )
-            elif min_year:
+            if min_year:
                 resource_queryset = resource_queryset.filter(period__start_date__gte=min_year)
-            elif max_year:
+            if max_year:
                 resource_queryset = resource_queryset.filter(period__end_date__lte=max_year)
+        
+        else:
+            for key, model in resource_mapping.items():
+                resource_queryset = model.objects.all()
+                if min_year and max_year:
+                    resource_queryset = resource_queryset.filter(
+                        Q(period__start_date__gte=min_year) & Q(period__end_date__lte=max_year)
+                        )
+                if min_year:
+                    resource_queryset = resource_queryset.filter(period__start_date__gte=min_year)
+                if max_year:
+                    resource_queryset = resource_queryset.filter(period__end_date__lte=max_year)
 
             # Get the related site IDs from the filtered resources
-          
+        
+        if resource_type:  
             queryset = models.Site.objects.filter(id__in=resource_queryset.values_list('site_id'))
   
         return queryset
-
 
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
