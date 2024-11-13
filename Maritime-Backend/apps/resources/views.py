@@ -156,7 +156,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
 
             # Get the related site IDs from the filtered resources
           
-            queryset = models.Site.objects.filter(id__in=resource_queryset.values_list('site_id', flat=True))
+            queryset = models.Site.objects.filter(id__in=resource_queryset.values_list('site_id'))
   
         return queryset
 
