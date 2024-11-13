@@ -90,31 +90,6 @@ class SiteResourcesViewSet(viewsets.ViewSet):
 
 class ResourcesFilteringViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
-    
-    def dispatch(self, request, *args, **kwargs):
-        # Define mapping for resources to models
-        mapping = {
-            'plank_boats': models.PlankBoats, 
-            'log_boats': models.LogBoats, 
-            'radiocarbon_dates': models.Radiocarbon, 
-            'individual_samples': models.IndividualObjects, 
-            'dna_samples': models.aDNA, 
-            'metal_analysis': models.MetalAnalysis, 
-            'landing_points': models.LandingPoints, 
-            'new_samples': models.NewSamples, 
-            'metalwork': models.Metalwork
-        }
-        
-        resource_type = request.GET.get('type') 
-        
-        # Set the queryset based on resource type
-        for key, model in mapping.items():
-            if resource_type == key:
-                queryset = model.objects.all()
-                self.queryset = queryset
-                break
-
-        return super(ResourcesFilteringViewSet, self).dispatch(request, *args, **kwargs)
 
     def get_queryset(self):
         resource_type = self.request.query_params.get('type')
@@ -123,8 +98,6 @@ class ResourcesFilteringViewSet(GeoViewSet):
 
         min_year = int(min_year) if min_year else None
         max_year = int(max_year) if max_year else None
-        
-        # Default queryset for `Site`
         queryset = models.Site.objects.all()
 
         # Map the resource type to the actual model
@@ -140,36 +113,28 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'metalwork': models.Metalwork,
         }
 
+        # Define the date filter if necessary
+        date_filter = Q()
+        if min_year:
+            date_filter &= Q(period__start_date__gte=min_year)
+        if max_year:
+            date_filter &= Q(period__end_date__lte=max_year)
+
+
         # If resource_type is provided, filter based on it
         if resource_type in resource_mapping:
             resource_model = resource_mapping[resource_type]
             resource_queryset = resource_model.objects.all()
-
-            # Apply period filtering to the resources
-            if min_year and max_year:
-                resource_queryset = resource_queryset.filter(
-                    Q(period__start_date__gte=min_year) & Q(period__end_date__lte=max_year)
-                    )
-            if min_year:
-                resource_queryset = resource_queryset.filter(period__start_date__gte=min_year)
-            if max_year:
-                resource_queryset = resource_queryset.filter(period__end_date__lte=max_year)
+            resource_queryset = resource_model.objects.filter(date_filter)
         
         else:
-            for key, model in resource_mapping.items():
-                resource_queryset = model.objects.all()
-                if min_year and max_year:
-                    resource_queryset = resource_queryset.filter(
-                        Q(period__start_date__gte=min_year) & Q(period__end_date__lte=max_year)
-                        )
-                if min_year:
-                    resource_queryset = resource_queryset.filter(period__start_date__gte=min_year)
-                if max_year:
-                    resource_queryset = resource_queryset.filter(period__end_date__lte=max_year)
-
+            # Loop through each model and gather site IDs that match the date filter
+            for model in resource_mapping.values():
+                resource_queryset = model.objects.filter(date_filter)
+                    
             # Get the related site IDs from the filtered resources
         
-        if resource_type:  
+        if resource_queryset:  
             queryset = models.Site.objects.filter(id__in=resource_queryset.values_list('site_id'))
   
         return queryset
