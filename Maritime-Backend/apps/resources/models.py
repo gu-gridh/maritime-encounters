@@ -591,8 +591,8 @@ class LandingPoints(abstract.AbstractBaseModel):
 
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Site"), help_text=_("The site (general location) in which the landing site is located."))
-    period = models.ManyToManyField(Period, verbose_name=_(
-        "Period(s) of Activity"), help_text=_("The period(s) of activity at the landing site."))
+    period = models.ManyToManyField(Period, blank=True, verbose_name=_(
+        "Period(s) of Activity"),help_text=_("The period(s) of activity at the landing site."))
 
     related_finds = models.ManyToManyField(Material, blank=True, verbose_name=_(
         "Related Sites/Material"), help_text=_("The related sites/finds and supporting material."))
@@ -668,7 +668,7 @@ class Radiocarbon(abstract.AbstractBaseModel):
         "site"), help_text=_("The site in which the date is located."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "sample"), help_text=_("The sample of the Radiocarbon."))
-    site_type = models.ManyToManyField(SiteType, verbose_name=_(
+    site_type = models.ManyToManyField(SiteType, blank=True, verbose_name=_(
         "site_type"), help_text=_("The site type."))
     lab_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "lab_id"), help_text=_("The lab id of the sample."))
@@ -758,7 +758,7 @@ class MetalAnalysis(abstract.AbstractBaseModel):
         "typology"), help_text=_("The typology of the metal."))
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "period"), help_text=_("The period of the metal."))
-    LIconsistency = models.ManyToManyField(LISource, verbose_name=_("LI Consistent - Region"),help_text=_("Region or location the Lead Isotopes are consistent with wthin 1 analytical error."))
+    LIconsistency = models.ManyToManyField(LISource, blank=True, verbose_name=_("LI Consistent - Region"),help_text=_("Region or location the Lead Isotopes are consistent with wthin 1 analytical error."))
     LIoriginal = models.TextField(null=True, blank=True, verbose_name=_(
         "LI Consistency - Text"), help_text=_("The original text in 'LI consistent with - within 1 analytical error' field used for geocoding."))
     def __str__(self) -> str:
@@ -1132,9 +1132,9 @@ class Metalwork(abstract.AbstractBaseModel):
         "Accession Number"), help_text=_("The accession number of the object."))
     accession_certain = models.BooleanField(blank=True, verbose_name=_("Accession Number Certainty"), help_text=_(
         "Check if the accession number is certain and does not need review later."), default=True)
-    museum = models.ManyToManyField(MuseumMeta, verbose_name=_(
+    museum = models.ManyToManyField(MuseumMeta, blank=True, verbose_name=_(
         "Museum"), help_text=_("The museum that holds or recorded the object."))
-    collection = models.ManyToManyField(MuseumCollection, verbose_name=_(
+    collection = models.ManyToManyField(MuseumCollection, blank=True, verbose_name=_(
         "Collection"), help_text=_("The title of the museum or personal collection."))
     museum_certain = models.BooleanField(blank=True, verbose_name=_("Museum/Collection Certainty"), help_text=_(
         "Check if the museum/collection is certain and does not need review later."), default=True)
