@@ -14,6 +14,7 @@ router.register(rf'{endpoint}/metal_analysis', views.MetalAnalysisViewSet, basen
 router.register(rf'{endpoint}/metalwork', views.MetalworkViewSet, basename='metalwork')
 
 router.register(rf'{endpoint}/site_resources', views.SiteResourcesViewSet, basename='site resources')
+router.register(rf'{endpoint}/order_periods', views.SearchPeriodsNames, basename='sort periods by their name')
 router.register(rf'{endpoint}/search', views.ResourcesFilteringViewSet, basename='Filtering resources based on different criteria')
 
 urlpatterns = [

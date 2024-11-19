@@ -91,6 +91,12 @@ class ExcludeSitePloygonSampleSerializer(DynamicDepthSerializer):
         fields = ['id']+get_fields(NewSamples, exclude=DEFAULT_FIELDS)
 
 
+class PeriodSerializer(DynamicDepthSerializer):
+
+    class Meta:
+        model = Period
+        fields = ['id']+get_fields(Period, exclude=DEFAULT_FIELDS)
+
 class MetalAnalysisSerializer(DynamicDepthSerializer):
     site = ExcludePlolygonSiteGeoSerializer()
     sample = ExcludeSitePloygonSampleSerializer()

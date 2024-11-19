@@ -86,7 +86,13 @@ class SiteResourcesViewSet(viewsets.ViewSet):
         }
 
         return Response(data, status=status.HTTP_200_OK)
-    
+
+
+class SearchPeriodsNames(DynamicDepthViewSet):
+    serializer_class = serializers.PeriodSerializer
+    queryset = models.Period.objects.all().order_by('name')
+    filterset_fields = get_fields(models.Period, exclude=DEFAULT_FIELDS)
+
 
 class ResourcesFilteringViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
