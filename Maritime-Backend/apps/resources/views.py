@@ -105,8 +105,6 @@ class ResourcesFilteringViewSet(GeoViewSet):
 
         min_year = int(min_year) if min_year else None
         max_year = int(max_year) if max_year else None
-
-        queryset = models.Site.objects.all()
         
         # Map the resource type to the actual model
         resource_mapping = {
@@ -136,14 +134,15 @@ class ResourcesFilteringViewSet(GeoViewSet):
             resource_model = resource_mapping[resource_type]
             resource_queryset = resource_model.objects.filter(date_filter)
             queryset = models.Site.objects.filter(id__in=resource_queryset.values_list('site_id'))
-
-        print(queryset)
-
-        if min_year or max_year or period_name:
-            for key, model in resource_mapping.items():
-                resource_queryset = model.objects.all()
-                resource_queryset = model.objects.filter(date_filter)
-            queryset = models.Site.objects.filter(id__in=resource_queryset.values_list('site_id'))
+        else:
+            if min_year or max_year or period_name:
+                for key, model in resource_mapping.items():
+                    resource_queryset = model.objects.all()
+                    resource_queryset = model.objects.filter(date_filter)
+                queryset = models.Site.objects.filter(id__in=resource_queryset.values_list('site_id'))
+            else:
+                queryset = models.Site.objects.all()
+        
 
   
         return queryset
