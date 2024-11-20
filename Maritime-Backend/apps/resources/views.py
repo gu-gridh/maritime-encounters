@@ -127,17 +127,21 @@ class ResourcesFilteringViewSet(GeoViewSet):
         if not (resource_type or min_year or max_year or period_name):
             return sites
 
+        # If the date filter is the default, return all sites
+        if min_year == -2450 and max_year == 50:
+            return sites
+        
         # Construct the date filter
         date_filter = Q()
         if min_year:
-            date_filter &= (Q(period__start_date__gte=min_year) | Q(period__start_date__isnull=True))
+            date_filter &= Q(period__start_date__gte=min_year) 
         if max_year:
-            date_filter &= Q(period__end_date__lte=max_year) | Q(period__end_date__isnull=True)
+            date_filter &= Q(period__end_date__lte=max_year) 
         if period_name:
             date_filter &= Q(period__name=period_name)
-
+        
         # Initialize an empty queryset for filtering
-        filtered_sites = models.Site.objects.none()
+        filtered_sites = models.Site.objects.none() 
 
         # Handle filtering for a specific resource type
         if resource_type in resource_mapping:
