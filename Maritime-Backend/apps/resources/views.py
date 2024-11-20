@@ -130,9 +130,9 @@ class ResourcesFilteringViewSet(GeoViewSet):
         # Construct the date filter
         date_filter = Q()
         if min_year:
-            date_filter &= Q(period__start_date__gte=min_year)
+            date_filter &= (Q(period__start_date__gte=min_year) | Q(period__start_date__isnull=True))
         if max_year:
-            date_filter &= Q(period__end_date__lte=max_year)
+            date_filter &= Q(period__end_date__lte=max_year) | Q(period__end_date__isnull=True)
         if period_name:
             date_filter &= Q(period__name=period_name)
 
