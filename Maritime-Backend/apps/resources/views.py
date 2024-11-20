@@ -98,11 +98,15 @@ class ResourcesFilteringViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
 
     def get_queryset(self):
+        sites = models.Site.objects.all()
+
+        # Retrieve query parameters
         resource_type = self.request.query_params.get('type')
         min_year = self.request.query_params.get('min_year')
         max_year = self.request.query_params.get('max_year')
         period_name = self.request.query_params.get('period_name')
 
+        # Convert years to integers if provided
         min_year = int(min_year) if min_year else None
         max_year = int(max_year) if max_year else None
         
@@ -128,24 +132,26 @@ class ResourcesFilteringViewSet(GeoViewSet):
         if period_name:
             date_filter &= Q(period__name=period_name)
 
+        # Initialize an empty queryset for filtering
+        filtered_sites = models.Site.objects.none()
 
         # If resource_type is provided, filter based on it
         if resource_type in resource_mapping:
             resource_model = resource_mapping[resource_type]
             resource_queryset = resource_model.objects.filter(date_filter)
-            queryset = models.Site.objects.filter(id__in=resource_queryset.values_list('site_id'))
-        else:
-            if min_year or max_year or period_name:
-                for key, model in resource_mapping.items():
-                    resource_queryset = model.objects.all()
-                    resource_queryset = model.objects.filter(date_filter)
-                queryset = models.Site.objects.filter(id__in=resource_queryset.values_list('site_id'))
-            else:
-                queryset = models.Site.objects.all()
-        
+            filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
 
-  
-        return queryset
+
+        # Handle filtering for all resource types when no specific type is given
+        elif min_year or max_year or period_name:
+            for resource_model in resource_mapping.values():
+                resource_queryset = resource_model.objects.filter(date_filter)
+                filtered_sites = filtered_sites.union(
+                    sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
+                )
+
+        # Return the filtered queryset
+        return filtered_sites
 
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
