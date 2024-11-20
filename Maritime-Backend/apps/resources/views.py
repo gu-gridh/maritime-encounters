@@ -123,7 +123,11 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'metalwork': models.Metalwork,
         }
 
-        # Define the date filter if necessary
+        # If no filters are provided, return all sites
+        if not (resource_type or min_year or max_year or period_name):
+            return sites
+
+        # Construct the date filter
         date_filter = Q()
         if min_year:
             date_filter &= Q(period__start_date__gte=min_year)
@@ -135,15 +139,14 @@ class ResourcesFilteringViewSet(GeoViewSet):
         # Initialize an empty queryset for filtering
         filtered_sites = models.Site.objects.none()
 
-        # If resource_type is provided, filter based on it
+        # Handle filtering for a specific resource type
         if resource_type in resource_mapping:
             resource_model = resource_mapping[resource_type]
             resource_queryset = resource_model.objects.filter(date_filter)
             filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
 
-
         # Handle filtering for all resource types when no specific type is given
-        elif min_year or max_year or period_name:
+        else:
             for resource_model in resource_mapping.values():
                 resource_queryset = resource_model.objects.filter(date_filter)
                 filtered_sites = filtered_sites.union(
@@ -153,6 +156,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
         # Return the filtered queryset
         return filtered_sites
 
+    # Fields and filters
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
     )
