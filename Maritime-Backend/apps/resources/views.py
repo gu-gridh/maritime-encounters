@@ -128,7 +128,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             return sites
 
         # If the date filter is the default, return all sites
-        if min_year == -2450 and max_year == 50:
+        if min_year == -2450 and max_year == 50 and not resource_type:
             return sites
         
         # Construct the date filter
