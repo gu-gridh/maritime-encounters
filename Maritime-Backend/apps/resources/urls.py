@@ -13,13 +13,18 @@ router.register(rf'{endpoint}/site_coordinates', views.SiteCoordinatesViewSet, b
 router.register(rf'{endpoint}/metal_analysis', views.MetalAnalysisViewSet, basename='metal analsyis')
 router.register(rf'{endpoint}/metalwork', views.MetalworkViewSet, basename='metalwork')
 
+router.register(rf'{endpoint}/site_resources', views.SiteResourcesViewSet, basename='site resources')
+router.register(rf'{endpoint}/order_periods', views.SearchPeriodsNames, basename='sort periods by their name')
+router.register(rf'{endpoint}/search', views.ResourcesFilteringViewSet, basename='Filtering resources based on different criteria')
+
 urlpatterns = [
+    
     path('', include(router.urls)),
 
     # Automatically generated views
     *utils.get_model_urls('resources', endpoint, 
-        exclude=['site', 'metal_analysis']),
+        exclude=['site', 'metal_analysis', 'metalwork']),
 
-    *utils.get_model_urls('resources', f'{endpoint}', exclude=['site', 'metal_analysis']),
+    *utils.get_model_urls('resources', f'{endpoint}', exclude=['site', 'metal_analysis', 'metalwork']),
     *documentation
 ]
