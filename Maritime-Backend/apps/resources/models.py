@@ -665,28 +665,32 @@ class NewSamples(abstract.AbstractBaseModel):
 class Radiocarbon(abstract.AbstractBaseModel):
 
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "site"), help_text=_("The site in which the date is located."))
+        "Site"), help_text=_("The site the radiocarbon sample belongs to."))
     sample = models.ForeignKey(NewSamples, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "sample"), help_text=_("The sample of the Radiocarbon."))
+        "Sample"), help_text=_("The sample id of the radiocarbon sample."))
     site_type = models.ManyToManyField(SiteType, blank=True, verbose_name=_(
-        "site_type"), help_text=_("The site type."))
+        "Site Type"), help_text=_("The site type."))
     lab_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "lab_id"), help_text=_("The lab id of the sample."))
+        "Lab ID"), help_text=_("The lab id of the sample."))
 
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "period"), help_text=_("The period of the Radiocarbon."))
+        "Period"), help_text=_("The period the c14 date matches, with phase if applicable.  Choose the period name according to the geographic region of the site."))
 
     c14_age = models.IntegerField(null=True, blank=True, verbose_name=_(
-        "c14_age"), help_text=_("The radiocarbion age"))
+        "c14 Date"), help_text=_("The radiocarbion age"))
     c14_std = models.IntegerField(null=True, blank=True, verbose_name=_(
         "c14_std"), help_text=_("The radiocarbion deviation"))
+    start_date = models.IntegerField(null=True, blank=True, verbose_name=_(
+        "Sample Start Date"), help_text=_("The start date based on c14 results in BC/AD.  Use '-' to indicate a BC date."))
+    end_date = models.IntegerField(null=True, blank=True, verbose_name=_(
+        "Sample End Date"), help_text=_("The end date based on c14 results in BC/AD.  Use '-' to indicate a BC date."))
     density = models.FloatField(null=True, blank=True, verbose_name=_(
-        "density"), help_text=_("The quality measure of the measurement)."))
+        "Density"), help_text=_("The quality measure of the measurement)."))
 
     material = models.ForeignKey(Material, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "material"), help_text=_("The material of the Radiocarbon."))
+        "Material"), help_text=_("The material of the Radiocarbon."))
     species = models.ForeignKey(Species, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "species"), help_text=_("The species of the Radiocarbon."))
+        "Species"), help_text=_("The species of the Radiocarbon."))
 
     d13c = models.FloatField(null=True, blank=True, verbose_name=_(
         "d13c"), help_text=_("The delta 13c of the sample."))
@@ -694,25 +698,25 @@ class Radiocarbon(abstract.AbstractBaseModel):
         "d15n"), help_text=_("The d15n of the sample."))
 
     feature = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "feature"), help_text=_("The feature of the Radiocarbon."))
+        "Feature"), help_text=_("The feature of the Radiocarbon."))
 
     percentage_of_Carbon = models.FloatField(null=True, blank=True, verbose_name=_(
-        "percentage_of_Carbon"), help_text=_("The percentage of Carbon of the sample."))
+        "Percentage of Carbon"), help_text=_("The percentage of Carbon of the sample."))
     Carbon_ratio_to_Nitrogen = models.FloatField(null=True, blank=True, verbose_name=_(
-        "percentage_of_Nitrogen"), help_text=_("The percentage of the Carbon to Nitrogen."))
+        "Percentage of Nitrogen"), help_text=_("The percentage of the Carbon to Nitrogen."))
     percentage_of_Yield = models.FloatField(null=True, blank=True, verbose_name=_(
         "percentage_of_Yield"), help_text=_("The percentage of the Yield of the sample."))
     Carbon_to_nitrogen_ratio = models.ForeignKey(
         Carbon_Nitrogen_Ratio, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("C/N"), help_text=_("The presence of C/N."))
     marine_reservoir = models.FloatField(null=True, blank=True, verbose_name=_(
-        "marine_reservoir"), help_text=_("The marine reservoir of the Radiocarbon."))
+        "Marine Reservoir"), help_text=_("The marine reservoir of the sample."))
 
     notes = models.TextField(null=True, blank=True, verbose_name=_(
-        "notes"), help_text=_("The notes of the Radiocarbon."))
+        "Notes"), help_text=_("Notes on the sample or date"))
     reference = models.TextField(null=True, blank=True, verbose_name=_(
-        "reference"), help_text=_("The reference of the Radiocarbon."))
+        "References"), help_text=_("Reference(s) for the sample"))
     source_database = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "source_database"), help_text=_("The source database of the Radiocarbon."))
+        "Source Database"), help_text=_("Database the c14 date was collected from"))
 
     def __str__(self) -> str:
 
