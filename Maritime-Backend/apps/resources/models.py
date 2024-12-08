@@ -196,13 +196,13 @@ class Phase(abstract.AbstractTagModel):
 class Period(abstract.AbstractBaseModel):
     # Represents the period of the site
     name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "name"), help_text=_("The name of the period."))
+        "name"), help_text=_("The name of the period. Consider including the geographic region in the period name, e.g. Nordic Bronze Age."))
     phase = models.ForeignKey(Phase, on_delete=models.CASCADE, null=True, blank=True,
                               related_name='period_phase', verbose_name=_("phase"), help_text=_("The phase of the period."))
     start_date = models.IntegerField(null=True, blank=True, verbose_name=_(
-        "start_date"), help_text=_("The start date of the period."))
+        "start_date"), help_text=_("The start date of the period in BC/AD. Use '-' to indicate a BC date."))
     end_date = models.IntegerField(null=True, blank=True, verbose_name=_(
-        "end_date"), help_text=_("The end date of the period."))
+        "end_date"), help_text=_("The end date of the periodin BC/AD. Use '-' to indicate a BC date."))
 
     def __str__(self) -> str:
         if self.phase:
@@ -283,7 +283,7 @@ class Cleat(abstract.AbstractBaseModel):
         "boatcapacity"), help_text=_("The capacity of the boat."))
     cleat_width = models.FloatField(null=True, blank=True, verbose_name=_(
         "boatweight"), help_text=_("The weight of the boat."))
-    cleat_heigth = models.IntegerField(null=True, blank=True, verbose_name=_(
+    cleat_height = models.IntegerField(null=True, blank=True, verbose_name=_(
         "boatcrew"), help_text=_("The crew of the boat."))
 
     def __str__(self) -> str:
@@ -489,7 +489,7 @@ class PlankBoats(abstract.AbstractBaseModel):
         "longestlength"), help_text=_("The longest  length of the boat."))
     size_trees = models.FloatField(null=True, blank=True, verbose_name=_(
         "sizetrees"), help_text=_("The size trees of the boat."))
-    tootlmarks = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+    toolmarks = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "tootlmarks"), help_text=_("The tootl marks of the boat."))
     individual_lashings = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "individuallashings"), help_text=_("The individual lashings of the boat."))
@@ -686,38 +686,33 @@ class Radiocarbon(abstract.AbstractBaseModel):
         "Sample End Date"), help_text=_("The end date based on c14 results in BC/AD.  Use '-' to indicate a BC date."))
     density = models.FloatField(null=True, blank=True, verbose_name=_(
         "Density"), help_text=_("The quality measure of the measurement)."))
-
     material = models.ForeignKey(Material, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Material"), help_text=_("The material of the Radiocarbon."))
     species = models.ForeignKey(Species, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Species"), help_text=_("The species of the Radiocarbon."))
-
     d13c = models.FloatField(null=True, blank=True, verbose_name=_(
         "d13c"), help_text=_("The delta 13c of the sample."))
     d15n = models.FloatField(null=True, blank=True, verbose_name=_(
         "d15n"), help_text=_("The d15n of the sample."))
-
     feature = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Feature"), help_text=_("The feature of the Radiocarbon."))
-
-    percentage_of_Carbon = models.FloatField(null=True, blank=True, verbose_name=_(
-        "Percentage of Carbon"), help_text=_("The percentage of Carbon of the sample."))
-    Carbon_ratio_to_Nitrogen = models.FloatField(null=True, blank=True, verbose_name=_(
-        "Percentage of Nitrogen"), help_text=_("The percentage of the Carbon to Nitrogen."))
-    percentage_of_Yield = models.FloatField(null=True, blank=True, verbose_name=_(
-        "percentage_of_Yield"), help_text=_("The percentage of the Yield of the sample."))
-    Carbon_to_nitrogen_ratio = models.ForeignKey(
-        Carbon_Nitrogen_Ratio, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("C/N"), help_text=_("The presence of C/N."))
     marine_reservoir = models.FloatField(null=True, blank=True, verbose_name=_(
         "Marine Reservoir"), help_text=_("The marine reservoir of the sample."))
-
     notes = models.TextField(null=True, blank=True, verbose_name=_(
         "Notes"), help_text=_("Notes on the sample or date"))
     reference = models.TextField(null=True, blank=True, verbose_name=_(
         "References"), help_text=_("Reference(s) for the sample"))
     source_database = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Source Database"), help_text=_("Database the c14 date was collected from"))
-
+    percentage_of_Carbon = models.FloatField(null=True, blank=True, verbose_name=_(
+        "percentage_of_Carbon"), help_text=_("The percentage of Carbon of the sample."))
+    Carbon_ratio_to_Nitrogen = models.FloatField(null=True, blank=True, verbose_name=_(
+        "percentage_of_Nitrogen"), help_text=_("The percentage of the Carbon to Nitrogen."))
+    percentage_of_Yield = models.FloatField(null=True, blank=True, verbose_name=_(
+        "percentage_of_Yield"), help_text=_("The percentage of the Yield of the sample."))
+    Carbon_to_nitrogen_ratio = models.ForeignKey(
+        Carbon_Nitrogen_Ratio, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("C/N"), help_text=_("The presence of C/N."))
+    
     def __str__(self) -> str:
 
         name_str = f"{self.site.name} - {self.lab_id}"
@@ -730,10 +725,9 @@ class Radiocarbon(abstract.AbstractBaseModel):
 
 class LISource(abstract.AbstractBaseModel):
     name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "sitename"), help_text=_("Free-form, non-indexed site name of the site."))
+        "Region Name"), help_text=_("Free-form, non-indexed name of the region."))
     # Location
-    coordinates = models.PointField(null=True, blank=True, verbose_name=_(
-        "Coordinates"), help_text=_("Mid-point coordinates of the site."))
+    coordinates = models.PolygonField(verbose_name=_("Geometry"), blank=True, null=True, help_text=_("Simplified polygon extent of the region of interest"))
 
     def __str__(self) -> str:
 
@@ -751,17 +745,17 @@ class MetalAnalysis(abstract.AbstractBaseModel):
         "sample"), help_text=_("The sample of the metal."))
 
     museum_entry = models.ForeignKey("AccessionNum", on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "museum entries"), help_text=_("The AMA of the metal."))
+        "museum entries"), help_text=_("The museum or collection accession number of the metal object, if applicable."))
     context = models.ForeignKey(Context, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "context"), help_text=_("The context of the metal."))
+        "context"), help_text=_("A short description of the context the metal object was found in."))
     object_description = models.ForeignKey(ObjectDescription, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "object_description"), help_text=_("The object description of the metal."))
+        "object_description"), help_text=_("A keyword to describe the metal object"))
     general_typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "general_typology"), help_text=_("The general typology of the metal."))
+        "general_typology"), help_text=_("The general typology of the metal object."))
     typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "typology"), help_text=_("The typology of the metal."))
+        "typology"), help_text=_("The typology of the metal object."))
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "period"), help_text=_("The period of the metal."))
+        "period"), help_text=_("The period of the metal object."))
     LIconsistency = models.ManyToManyField(LISource, blank=True, verbose_name=_("LI Consistent - Region"),help_text=_("Region or location the Lead Isotopes are consistent with wthin 1 analytical error."))
     LIoriginal = models.TextField(null=True, blank=True, verbose_name=_(
         "LI Consistency - Text"), help_text=_("The original text in 'LI consistent with - within 1 analytical error' field used for geocoding."))
@@ -1209,7 +1203,7 @@ class ObjectCount(models.Model):
     object = models.ForeignKey(
         ObjectDescription, on_delete=models.CASCADE, null=True, blank=True)
     material = models.ManyToManyField(ObjectMaterials, verbose_name=_(
-        "material"), help_text=_("The material(s) of the object."))
+        "Material"), help_text=_("The material(s) of the object."))
     count = models.IntegerField(null=True, blank=True, verbose_name=_(
         "Number of objects"), help_text=_("The number of objects of this type with the same entry number, literature number, and accession number."))
     certainty = models.BooleanField(blank=True, verbose_name=_("Count Certainty"), help_text=_(
@@ -1264,10 +1258,10 @@ class IndividualObjects(abstract.AbstractBaseModel):
         "Original Coords"), help_text=_("The original coordinates of the object."))
     orig_crs = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Original CRS"), help_text=_("The original CRS of the object."))
-    # start_date = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
-    #     "Start Date"), help_text=_("The start date of the object."))
-    # end_date = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
-    #     "End Date"), help_text=_("The end date of the object."))
+    start_date = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
+        "Start Date"), help_text=_("The start date of the object,if available."))
+    end_date = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
+        "End Date"), help_text=_("The end date of the object, if available."))
     dating_original = models.CharField(max_length=256,null=True,blank=True,verbose_name=_("Dating (pre-translation)"), help_text=_("The original dating string before translation and processing."))
     object_id = models.ForeignKey(ObjectIds, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Object ID"), help_text=_("The ID of the object in the relevant national database."))
