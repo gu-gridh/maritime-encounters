@@ -117,7 +117,7 @@ class ObjectDescriptionAdmin(admin.ModelAdmin):
 @admin.register(Cleat)
 class CleatAdmin(admin.ModelAdmin):
     list_display = ['cleat_number', 'cleat_length',
-                    'cleat_width', 'cleat_heigth']
+                    'cleat_width']
     search_fields = ['cleat_number']
     list_filter = ['cleat_number']
     ordering = ['cleat_number']
