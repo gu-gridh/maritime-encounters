@@ -17,11 +17,11 @@ django.setup()
 from apps.geography.models import *
 from apps.resources.models import *  # Replace 'your_app' with the name of your Django app
 
-# Path to your CSV file
-csv_file_path = ''
+# # Path to your CSV file
+# csv_file_path = ''
 
-# Load the CSV data
-df = pd.read_csv(csv_file_path)
+# # Load the CSV data
+# df = pd.read_csv(csv_file_path)
 
 def load_data():
     # Import data into ADM levels
@@ -157,3 +157,7 @@ def delete_data():
     duplicate_sites.delete()
 
     print("Data and related sites deleted successfully")
+
+
+# Call the function to delete the data
+# delete_data()
