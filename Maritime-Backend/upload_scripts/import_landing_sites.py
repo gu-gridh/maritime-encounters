@@ -96,7 +96,7 @@ def upload_data(data):
             site_name = row.Site
         else:
             site_name = f"{adm2.name}, {adm2.ADM1.name}"
-        site_obj=Site.objects.update_or_create(
+        site_obj=Site.objects.get_or_create(
             name=site_name,
             defaults={
                 'coordinates':point,
