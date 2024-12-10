@@ -130,9 +130,6 @@ def load_data(path):
             d13c= row.delta_c13 if not pd.isnull(row.delta_c13) else None,
 
             feature= row.feature if not pd.isnull(row.feature) else None,
-        
-            start_date = row.start if not pd.isnull(row.start) else None,
-            end_date = row.end if not pd.isnull(row.end) else None,
 
             notes=row.notes if not pd.isnull(row.notes) else None,
             reference=row.reference_1 if not pd.isnull(row.reference_1) else None,
@@ -189,3 +186,5 @@ def delete_empty_sites():
     unreferenced_sites.delete()
 
     print("Empty sites deleted successfully")
+
+delete_empty_sites()
