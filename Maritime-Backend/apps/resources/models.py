@@ -600,7 +600,7 @@ class DateRanges(abstract.AbstractTagModel):
         verbose_name = _("Date Range")
         verbose_name_plural = _("Date Ranges")
 
-class Subprojects(models.AbstractTagModel):
+class Subprojects(abstract.AbstractTagModel):
     def __str__(self) -> str:
         return self.text
 
