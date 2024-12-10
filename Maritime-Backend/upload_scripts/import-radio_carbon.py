@@ -186,5 +186,3 @@ def delete_empty_sites():
     unreferenced_sites.delete()
 
     print("Empty sites deleted successfully")
-
-delete_empty_sites()
