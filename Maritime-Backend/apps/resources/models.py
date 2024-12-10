@@ -586,6 +586,30 @@ class LogBoats(abstract.AbstractBaseModel):
         verbose_name = _("Log Boat")
         verbose_name_plural = _("Log Boats")
 
+class DateRanges(abstract.AbstractTagModel):
+    start_date = models.IntegerField(null=True, blank=True, verbose_name=_("Start Date"), help_text=_("The start date of the date range of interest.  Use a negative integer for BC dates."))
+    end_date = models.IntegerField(null=True, blank=True, verbose_name=_("End Date"), help_text=_("The end date of the date range of interest.  Use a negative integer for BC dates."))
+    
+    def __str__(self) -> str:
+        return f"{self.start_date} - {self.end_date}"
+
+    def __repr__(self) -> str:
+        return str(f"{self.start_date} - {self.end_date}")
+
+    class Meta:
+        verbose_name = _("Date Range")
+        verbose_name_plural = _("Date Ranges")
+
+class Subprojects(models.AbstractTagModel):
+    def __str__(self) -> str:
+        return self.text
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    class Meta:
+        verbose_name = _("Subproject")
+        verbose_name_plural = _("Subprojects")
 
 class LandingPoints(abstract.AbstractBaseModel):
 
@@ -602,6 +626,10 @@ class LandingPoints(abstract.AbstractBaseModel):
         "Geographic Significance"), help_text=_("The geographic of the landing."))
     start_date = models.IntegerField(null=True, blank=True, verbose_name=_("Start Date"), help_text=_("The start date of activity at the site as an integer.  Use a negative integer for BC dates."))
     end_date = models.IntegerField(null=True, blank=True, verbose_name=_("End Date"), help_text=_("The end date of activity at the site as an integer.  Use a negative integer for BC dates."))
+    active_dates = models.ManyToManyField(DateRanges, blank=True, verbose_name=_("Date Ranges with Activity"), help_text=_("Select the defined date ranges of interest when there is activity at the site."))
+    source= models.TextField(null=True, blank=True, verbose_name=_(
+        "Source"), help_text=_("The individual, database, paper, etc. the point came from"))
+    subproject = models.ManyToManyField(Subprojects, blank=True, verbose_name=_("Subprojects"), help_text=_("Select the subproject(s) this landing site is related to."))
 
     def __str__(self) -> str:
         
