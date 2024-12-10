@@ -15,7 +15,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maritime.settings')  # Replace 'your_project' with your project's name
 django.setup()
 
-from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4
+from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, Province,Parish
 from apps.resources.models import *
 
 # LandingPoints.objects.all().delete()
@@ -90,6 +90,15 @@ def upload_data(data):
                 adm2 = ADM2.objects.get(geometry__contains=point)
             except:
                 adm2 = None
+            try:
+                province = Province.objects.get(geometry__contains=point)
+            except:
+                province = None
+            try:
+                parish = Parish.objects.get(geometry__contains=point)
+            except:
+                parish = None
+                
         if row.Place != None:        
             site_name = row.Place
         elif row.Site != None:
@@ -98,14 +107,14 @@ def upload_data(data):
             site_name = f"{adm2.name}, {adm2.ADM1.name}"
         site_obj=Site.objects.get_or_create(
             name=site_name,
-            defaults={
-                'coordinates':point,
-                'ADM0': adm2.ADM1.ADM0 if adm2 != None else None,
-                'ADM1': adm2.ADM1 if adm2 != None else None,
-                'ADM2': adm2,
-                'ADM3': adm3,
-                'ADM4': adm4,
-            }
+            coordinates=point,
+            ADM0 = adm2.ADM1.ADM0 if adm2 != None else None,
+            ADM1 = adm2.ADM1 if adm2 != None else None,
+            ADM2 = adm2,
+            ADM3 = adm3,
+            ADM4 = adm4,
+            Province=province,
+            Parish=parish
         )[0]
         db_object = LandingPoints.objects.get_or_create(
                 site = site_obj,
