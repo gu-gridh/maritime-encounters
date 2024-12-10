@@ -89,6 +89,19 @@ class MaterialAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
+@admin.register(BoatMaterial)
+class BoatMaterialAdmin(admin.ModelAdmin):
+    list_display=['common_name','scientific_name']
+    search_fields=['common_name','scientific_name']
+    list_filter = ['common_name','scientific_name']
+    ordering = ['common_name','scientific_name']
+    
+@admin.register(BoatFeatures)
+class BoatFeaturesAdmin(admin.ModelAdmin):
+    list_display = ['text']
+    search_fields = ['text']
+    list_filter = ['text']
+    ordering = ['text']
 
 @admin.register(Context)
 class ContextAdmin(admin.ModelAdmin):
@@ -191,11 +204,18 @@ class SiteAdmin(admin.ModelAdmin):
         models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}
     }
 
-
+@admin.register(BarkBoats)
+class BarkBoatAdmin(admin.ModelAdmin):
+    list_display = ['name', 'site', 'period', 'location']
+    search_fields = ['name', 'site__name', 'period__name']
+    list_filter = ['name', 'location']
+    ordering = ['name']
+    
+    
 @admin.register(PlankBoats)
 class PlankBoatAdmin(admin.ModelAdmin):
-    list_display = ['name', 'location', 'period', 'location']
-    search_fields = ['name', 'location__location_name', 'period__name']
+    list_display = ['name', 'site', 'period', 'location']
+    search_fields = ['name', 'site__name', 'period__name']
     list_filter = ['name', 'location']
     ordering = ['name']
 
