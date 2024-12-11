@@ -19,62 +19,12 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, Province,Parish
 from apps.resources.models import *
 
 # LandingPoints.objects.all().delete()
-
-# def upload_sites_noADM(data):
-#     for row in data.itertuples(index=False):
-#         if not pd.isnull(row.Lng) or pd.isnull(row.Lat):
-#             point = Point(row.Lng,row.Lat)
-#         else:
-#             point=None
-#         if point != None:
-#             try:
-#                 adm4 = ADM4.objects.get(geometry__contains=point)
-#             except:
-#                 adm4 = None
-#             try:
-#                 adm3 = ADM3.objects.get(geometry__contains=point)
-#             except:
-#                 adm3 = None
-#             try:
-#                 adm2 = ADM2.objects.get(geometry__contains=point)
-#             except:
-#                 adm2 = None
-#         if row.Place != None:        
-#             site_name = row.Place
-#         elif row.Site != None:
-#             site_name = row.Site
-#         else:
-#             site_name = f"{adm2.name}, {adm2.ADM1.name}"
-#         Site.objects.update_or_create(
-#             name=site_name,
-#             defaults={
-#                 'coordinates':point,
-#                 'ADM0': adm2.ADM1.ADM0 if adm2 != None else None,
-#                 'ADM1': adm2.ADM1 if adm2 != None else None,
-#                 'ADM2': adm2,
-#                 'ADM3': adm3,
-#                 'ADM4': adm4,
-#             }
-#         )
-
-# def calc_date(start,end,period):
-#     if 'Iron Age' not in period:
-#         start_date = (int(start)*-1)
-#         end_date = (int(end)*-1)
-#     else:
-#         start_date = (int(start)*-1)
-#         end_date = int(end)
-#     return start_date, end_date
             
 def upload_data(data):
-    for row in df.itertuples(index=False):
-        # if '-' not in [row.Date_start,row.Date_end]:
-        #     start_date, end_date = calc_date(row.Date_start,row.Date_end,row.Period)
-        # else:
-        #     start_date=None
-        #     end_date=None
-        if not pd.isnull(row.Lng) or pd.isnull(row.Lat):
-            point = Point(row.Lng,row.Lat)
+    for _, row in df.iterrows():
+
+        if not pd.isnull(row.Long) or pd.isnull(row.Lat):
+            point = Point(row.Long,row.Lat)
         else:
             point=None
         if point != None:
@@ -104,7 +54,7 @@ def upload_data(data):
         elif row.Site != None:
             site_name = row.Site
         else:
-            site_name = f"{adm2.name}, {adm2.ADM1.name}"
+            site_name = f"{adm2.name}, {adm2.ADM1.name}" if adm2 != None  else None
         site_obj=Site.objects.get_or_create(
             name=site_name,
             coordinates=point,
@@ -168,7 +118,7 @@ if __name__ == '__main__':
     print(files)
     for file in files:
         name=file.split('/')[-1]
-        df = pd.read_excel(file).replace(np.nan, None).replace('[]', None)
+        df = pd.read_csv(file).replace(np.nan, None).replace('[]', None)
         for col in df.columns:
             if ' ' in col:
                 new_col = col.replace(' ','_')
