@@ -60,6 +60,12 @@ class MetalworkViewSet(DynamicDepthViewSet):
     search_fields = ['site__name', 'entry_number']
 
 
+class LandingPointsViewSet(DynamicDepthViewSet):
+    serializer_class = serializers.LandingPointsSerializer
+    queryset = models.LandingPoints.objects.all()
+    filterset_fields = get_fields(models.LandingPoints, exclude=DEFAULT_FIELDS)
+    search_fields = ['site__name']
+
 class SiteResourcesViewSet(viewsets.ViewSet):
     
     def list(self, request):
@@ -80,7 +86,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
             'individual_samples': IndivdualObjectSerializer(IndividualObjects.objects.filter(site=site), many=True).data,
             'dna_samples': aDNASerializer(aDNA.objects.filter(site=site), many=True).data,
             'metal_analysis': MetalAnalysisSerializer(MetalAnalysis.objects.filter(site=site), many=True).data,
-            'landingpoints': LandingPointsSerializer(LandingPoints.objects.filter(site=site), many=True).data,
+            'landing_points': LandingPointsSerializer(LandingPoints.objects.filter(site=site), many=True).data,
             'new_samples': NewSamplesSerializer(NewSamples.objects.filter(site=site), many=True).data,
             'metalwork': MetalworkSerializer(Metalwork.objects.filter(location__site=site), many=True).data,
         }
@@ -118,7 +124,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'individual_samples': models.IndividualObjects,
             'dna_samples': models.aDNA,
             'metal_analysis': models.MetalAnalysis,
-            'landingpoints': models.LandingPoints,
+            'landing_points': models.LandingPoints,
             # 'new_samples': models.NewSamples,
             'metalwork': models.Metalwork,
         }

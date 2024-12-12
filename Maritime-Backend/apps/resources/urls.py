@@ -12,6 +12,7 @@ router.register(rf'{endpoint}/geojson/site', views.SiteGeoViewSet, basename='sit
 router.register(rf'{endpoint}/site_coordinates', views.SiteCoordinatesViewSet, basename='sites coordinates')
 router.register(rf'{endpoint}/metal_analysis', views.MetalAnalysisViewSet, basename='metal analsyis')
 router.register(rf'{endpoint}/metalwork', views.MetalworkViewSet, basename='metalwork')
+router.register(rf'{endpoint}/landing_points', views.LandingPointsViewSet, basename='landing points')
 
 router.register(rf'{endpoint}/site_resources', views.SiteResourcesViewSet, basename='site resources')
 router.register(rf'{endpoint}/order_periods', views.SearchPeriodsNames, basename='sort periods by their name')
