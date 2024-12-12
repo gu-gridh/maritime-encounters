@@ -80,7 +80,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
             'individual_samples': IndivdualObjectSerializer(IndividualObjects.objects.filter(site=site), many=True).data,
             'dna_samples': aDNASerializer(aDNA.objects.filter(site=site), many=True).data,
             'metal_analysis': MetalAnalysisSerializer(MetalAnalysis.objects.filter(site=site), many=True).data,
-            'landing_points': LandingPointsSerializer(LandingPoints.objects.filter(site=site), many=True).data,
+            'landingpoints': LandingPointsSerializer(LandingPoints.objects.filter(site=site), many=True).data,
             'new_samples': NewSamplesSerializer(NewSamples.objects.filter(site=site), many=True).data,
             'metalwork': MetalworkSerializer(Metalwork.objects.filter(location__site=site), many=True).data,
         }
