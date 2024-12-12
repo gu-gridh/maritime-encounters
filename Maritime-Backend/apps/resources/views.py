@@ -11,9 +11,7 @@ from django.views.decorators.csrf import csrf_exempt
 from django.contrib.gis.geos import Polygon
 from django.contrib.gis.gdal.envelope import Envelope
 from rest_framework.views import APIView
-import django_filters
-from django_filters import FilterSet
-from django.contrib.gis.db.models import PointField
+
 
 class SiteViewSet(DynamicDepthViewSet):
     serializer_class = serializers.SiteGeoSerializer
@@ -101,21 +99,9 @@ class SearchPeriodsNames(DynamicDepthViewSet):
     queryset = models.Period.objects.all().order_by('name')
     filterset_fields = get_fields(models.Period, exclude=DEFAULT_FIELDS)
 
-class SiteFilterSet(FilterSet):
-    class Meta:
-        model = models.Site
-        fields = {
-            'coordinates': ['exact', 'contains', 'within'],  # Add GIS-specific lookups as needed
-        }
-        filter_overrides = {
-            PointField: {
-                'filter_class': django_filters.CharFilter,  # Or a more specific filter for GIS
-            },
-        }
 
 class ResourcesFilteringViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
-    filterset_class = SiteFilterSet  # Use the customized filterset
 
     def get_queryset(self):
         sites = models.Site.objects.all()
@@ -129,52 +115,80 @@ class ResourcesFilteringViewSet(GeoViewSet):
         # Convert years to integers if provided
         min_year = int(min_year) if min_year else None
         max_year = int(max_year) if max_year else None
-
-        # Map resource type to models and date fields
+        
+        # Map the resource type to the actual model
         resource_mapping = {
-            'plank_boats': (models.PlankBoats, 'start_date', 'end_date'),
-            'log_boats': (models.LogBoats, 'start_date', 'end_date'),
-            'radiocarbon_dates': (models.Radiocarbon, 'period__start_date', 'period__end_date'),
-            'individual_samples': (models.IndividualObjects, 'period__start_date', 'period__end_date'),
-            'dna_samples': (models.aDNA, 'start_date', 'end_date'),
-            'metal_analysis': (models.MetalAnalysis, 'start_date', 'end_date'),
-            'landing_points': (models.LandingPoints, 'start_date', 'end_date'),
-            'metalwork': (models.Metalwork, 'period__start_date', 'period__end_date'),
+            'plank_boats': models.PlankBoats,
+            'log_boats': models.LogBoats,
+            'radiocarbon_dates': models.Radiocarbon,
+            'individual_samples': models.IndividualObjects,
+            'dna_samples': models.aDNA,
+            'metal_analysis': models.MetalAnalysis,
+            'landing_points': models.LandingPoints,
+            # 'new_samples': models.NewSamples,
+            'metalwork': models.Metalwork,
         }
 
         # If no filters are provided, return all sites
         if not (resource_type or min_year or max_year or period_name):
             return sites
 
+        # If the date filter is the default, return all sites
+        if min_year == -2450 and max_year == 50 and not resource_type:
+            return sites
+        
+        date_filter = Q()
+        if min_year:
+            date_filter &= Q(start_date__gte=min_year)
+        if max_year:
+            date_filter &= Q(end_date__lte=max_year)
+        if period_name:
+            date_filter &= Q(period__name=period_name)
+
+        # Construct the date filter
+        date_filter_period = Q()
+
+        if min_year:
+            date_filter_period &= Q(period__start_date__gte=min_year) 
+        if max_year:
+            date_filter_period &= Q(period__end_date__lte=max_year) 
+        if period_name:
+            date_filter_period &= Q(period__name=period_name)
+        
         # Initialize an empty queryset for filtering
-        filtered_sites = models.Site.objects.none()
+        filtered_sites = models.Site.objects.none() 
 
-        # Build a helper to apply date filters
-        def build_date_filter(model, start_field, end_field):
-            date_filter = Q()
-            if min_year:
-                date_filter &= Q(**{f'{start_field}__gte': min_year})
-            if max_year:
-                date_filter &= Q(**{f'{end_field}__lte': max_year})
-            if period_name:
-                date_filter &= Q(period__name=period_name)
-            return model.objects.filter(date_filter)
-
-        # Filter for specific resource type
+        # Handle filtering for a specific resource type
         if resource_type in resource_mapping:
-            resource_model, start_field, end_field = resource_mapping[resource_type]
-            resource_queryset = build_date_filter(resource_model, start_field, end_field)
-            filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
+            resource_model = resource_mapping[resource_type]
+            if  'start_year' in resource_type or 'end_year' in resource_type:
+                resource_queryset = resource_model.objects.filter(date_filter)
+                filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
+            if 'start_year' not in resource_type and 'end_year' not in resource_type:
+                resource_queryset = resource_model.objects.filter(date_filter_period)
+                filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
 
-        # Filter across all resource types when no specific type is provided
+                
+        # Handle filtering for all resource types when no specific type is given
         else:
-            for resource_model, start_field, end_field in resource_mapping.values():
-                resource_queryset = build_date_filter(resource_model, start_field, end_field)
-                filtered_sites = filtered_sites.union(
-                    sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
-                )
+            for resource_model in resource_mapping.values():
+                if 'start_year' in resource_model or 'end_year' in resource_model:
+                    resource_queryset = resource_model.objects.filter(date_filter)
+                    filtered_sites = filtered_sites.union(
+                        sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
+                    )
+                if 'start_year' not in resource_model and 'end_year' not in resource_model:
+                    resource_queryset = resource_model.objects.filter(date_filter_period)
+                    filtered_sites = filtered_sites.union(
+                        sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
+                    )
 
         # Return the filtered queryset
         return filtered_sites
 
-
+    # Fields and filters
+    filterset_fields = get_fields(
+        models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
+    )
+    bbox_filter_field = 'coordinates'
+    bbox_filter_include_overlapping = True
