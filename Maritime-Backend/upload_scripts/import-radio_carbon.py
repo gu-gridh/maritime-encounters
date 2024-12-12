@@ -56,7 +56,7 @@ def load_data(path):
             except Parish.DoesNotExist:
                 pass
         # Determine site name
-        site_name = f"{adm2.name}, {adm2.ADM1.name}" if adm2 else 'Unknown Site'
+        site_name = row.site if not pd.isnull(row.site) else  "{adm2.name}, {adm2.ADM1.name}" if adm2 else 'Unknown Site'
         # Create or get site object
         site_obj, _ = Site.objects.get_or_create(
             name=site_name,

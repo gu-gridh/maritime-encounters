@@ -27,12 +27,16 @@ urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
 ]
 
+
 apps = [path('', include(f"apps.{app['name']}.urls")) for app in settings.APPS_LOCAL]
 
 urlpatterns += i18n_patterns(
     # Add first page's url for the project.
     # path('', ),
     path('admin/', admin.site.urls), 
+    path('api/', include("apps.resources.urls")),
+    path('api/geography/', include("apps.geography.urls")),
+
     *apps,
     prefix_default_language=False
 )
