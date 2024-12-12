@@ -34,8 +34,8 @@ urlpatterns += i18n_patterns(
     # Add first page's url for the project.
     # path('', ),
     path('admin/', admin.site.urls), 
-    # path('api/', include("apps.resources.urls")),
-    # path('api/geography/', include("apps.geography.urls")),
+    path('api/', include("apps.resources.urls")),
+    path('api/geography/', include("apps.geography.urls")),
 
     *apps,
     prefix_default_language=False
