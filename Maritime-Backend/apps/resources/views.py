@@ -115,17 +115,18 @@ class ResourcesFilteringViewSet(GeoViewSet):
         # Convert years to integers if provided
         min_year = int(min_year) if min_year else None
         max_year = int(max_year) if max_year else None
-
-        # Map the resource type to the actual model and date fields
+        
+        # Map the resource type to the actual model
         resource_mapping = {
-            'plank_boats': (models.PlankBoats, 'start_date', 'end_date'),
-            'log_boats': (models.LogBoats, 'start_date', 'end_date'),
-            'radiocarbon_dates': (models.Radiocarbon, 'period__start_date', 'period__end_date'),
-            'individual_samples': (models.IndividualObjects, 'period__start_date', 'period__end_date'),
-            'dna_samples': (models.aDNA, 'start_date', 'end_date'),
-            'metal_analysis': (models.MetalAnalysis, 'start_date', 'end_date'),
-            'landing_points': (models.LandingPoints, 'start_date', 'end_date'),
-            'metalwork': (models.Metalwork, 'start_date', 'end_date'),
+            'plank_boats': models.PlankBoats,
+            'log_boats': models.LogBoats,
+            'radiocarbon_dates': models.Radiocarbon,
+            'individual_samples': models.IndividualObjects,
+            'dna_samples': models.aDNA,
+            'metal_analysis': models.MetalAnalysis,
+            'landing_points': models.LandingPoints,
+            # 'new_samples': models.NewSamples,
+            'metalwork': models.Metalwork,
         }
 
         # If no filters are provided, return all sites
@@ -135,28 +136,28 @@ class ResourcesFilteringViewSet(GeoViewSet):
         # If the date filter is the default, return all sites
         if min_year == -2450 and max_year == 50 and not resource_type:
             return sites
-
+        
         # Construct the date filter
         date_filter = Q()
         if min_year:
-            date_filter &= Q(**{f'{resource_mapping[resource_type][1]}__gte': min_year})
+            date_filter &= (Q(period__start_date__gte=min_year) )
         if max_year:
-            date_filter &= Q(**{f'{resource_mapping[resource_type][2]}__lte': max_year})
+            date_filter &= Q(period__end_date__lte=max_year) 
         if period_name:
             date_filter &= Q(period__name=period_name)
-
+        
         # Initialize an empty queryset for filtering
-        filtered_sites = models.Site.objects.none()
+        filtered_sites = models.Site.objects.none() 
 
         # Handle filtering for a specific resource type
         if resource_type in resource_mapping:
-            resource_model, start_field, end_field = resource_mapping[resource_type]
+            resource_model = resource_mapping[resource_type]
             resource_queryset = resource_model.objects.filter(date_filter)
             filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
 
         # Handle filtering for all resource types when no specific type is given
         else:
-            for resource_model, start_field, end_field in resource_mapping.values():
+            for resource_model in resource_mapping.values():
                 resource_queryset = resource_model.objects.filter(date_filter)
                 filtered_sites = filtered_sites.union(
                     sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
