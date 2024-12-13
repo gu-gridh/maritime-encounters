@@ -125,7 +125,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'dna_samples': models.aDNA,
             'metal_analysis': models.MetalAnalysis,
             'landing_points': models.LandingPoints,
-            # 'new_samples': models.NewSamples,
+            'new_samples': models.NewSamples,
             'metalwork': models.Metalwork,
         }
 
@@ -164,7 +164,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             resource_model = resource_mapping[resource_type]
             resource_model = resource_mapping.get(resource_type)
             model_fields = [field.name for field in resource_model._meta.get_fields()]
-            
+
             if  'start_date' in model_fields or 'end_date' in model_fields:
                 resource_queryset = resource_model.objects.filter(date_filter)
                 filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
