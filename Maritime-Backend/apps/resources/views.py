@@ -168,9 +168,13 @@ class ResourcesFilteringViewSet(GeoViewSet):
             if  'start_date' in model_fields or 'end_date' in model_fields:
                 resource_queryset = resource_model.objects.filter(date_filter)
                 filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
-            else:
+            if 'period' in model_fields:
                 resource_queryset = resource_model.objects.filter(date_filter_period)
                 filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
+            else:
+                resource_queryset = resource_model.objects.all()
+                filtered_sites = sites.filter(id__in=resource_queryset.values_list('site_id', flat=True)
+                )
 
                 
         # Handle filtering for all resource types when no specific type is given
@@ -181,8 +185,13 @@ class ResourcesFilteringViewSet(GeoViewSet):
                     filtered_sites = filtered_sites.union(
                         sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
                     )
-                else:
+                if 'period' in resource_model:
                     resource_queryset = resource_model.objects.filter(date_filter_period)
+                    filtered_sites = filtered_sites.union(
+                        sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
+                    )
+                else:
+                    resource_queryset = resource_model.objects.all()
                     filtered_sites = filtered_sites.union(
                         sites.filter(id__in=resource_queryset.values_list('site_id', flat=True))
                     )
