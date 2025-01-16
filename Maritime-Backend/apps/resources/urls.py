@@ -11,7 +11,7 @@ router.register(rf'{endpoint}/site', views.SiteViewSet, basename='site')
 router.register(rf'{endpoint}/geojson/site', views.SiteGeoViewSet, basename='site as geojson')
 router.register(rf'{endpoint}/site_coordinates', views.SiteCoordinatesViewSet, basename='sites coordinates')
 router.register(rf'{endpoint}/metal_analysis', views.MetalAnalysisViewSet, basename='metal analsyis')
-router.register(rf'{endpoint}/metalwork', views.MetalworkViewSet, basename='metalwork')
+# router.register(rf'{endpoint}/metalwork', views.MetalworkViewSet, basename='metalwork')
 router.register(rf'{endpoint}/landing_points', views.LandingPointsViewSet, basename='landing points')
 
 router.register(rf'{endpoint}/site_resources', views.SiteResourcesViewSet, basename='site resources')
