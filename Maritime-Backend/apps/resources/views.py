@@ -16,11 +16,17 @@ from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
 
 class ProtectedAPIView(APIView):
-    permission_classes = [IsAuthenticated]  # Only authenticated users can access
+    permission_classes = []  # Only authenticated users can access
 
     def get(self, request):
-        return Response({'message': 'This is a protected API'})
-    
+        token_key = request.headers.get('Authorization').split(' ')[1]  # Extract token
+        try:
+            token = Token.objects.get(key=token_key)
+            print(token.user)  # Check the associated user
+            return Response({'message': 'This is a protected API'})
+        except Token.DoesNotExist:
+            return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
+        
 class TokenLoginView(APIView):
     permission_classes = []  
 
@@ -43,7 +49,8 @@ class SiteViewSet(DynamicDepthViewSet):
     search_fields = ['placename']
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+    authentication_classes = [TokenAuthentication]  # Add this line
+    permission_classes = [IsAuthenticated]
 
 class SiteCoordinatesViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
@@ -52,6 +59,7 @@ class SiteCoordinatesViewSet(GeoViewSet):
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
+    authentication_classes = [TokenAuthentication]  # Add this line
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class SiteGeoViewSet(GeoViewSet):
@@ -64,6 +72,7 @@ class SiteGeoViewSet(GeoViewSet):
     search_fields = ['placename', 'name']
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
+    authentication_classes = [TokenAuthentication]  # Add this line
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class MetalAnalysisViewSet(DynamicDepthViewSet):
@@ -71,6 +80,7 @@ class MetalAnalysisViewSet(DynamicDepthViewSet):
     queryset = models.MetalAnalysis.objects.all()
     filterset_fields = get_fields(models.MetalAnalysis, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
+    authentication_classes = [TokenAuthentication]  # Add this line
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class MetalworkViewSet(DynamicDepthViewSet):
@@ -78,6 +88,7 @@ class MetalworkViewSet(DynamicDepthViewSet):
     queryset = models.Metalwork.objects.all()
     filterset_fields = get_fields(models.Metalwork, exclude=DEFAULT_EXCLUDE+DEFAULT_FIELDS+['orig_coords'])
     search_fields = ['site__name', 'entry_number']
+    authentication_classes = [TokenAuthentication]  # Add this line
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class LandingPointsViewSet(DynamicDepthViewSet):
@@ -85,6 +96,7 @@ class LandingPointsViewSet(DynamicDepthViewSet):
     queryset = models.LandingPoints.objects.all()
     filterset_fields = get_fields(models.LandingPoints, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
+    authentication_classes = [TokenAuthentication]  # Add this line
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class SiteResourcesViewSet(viewsets.ViewSet):
@@ -123,6 +135,7 @@ class SearchPeriodsNames(DynamicDepthViewSet):
     serializer_class = serializers.PeriodSerializer
     queryset = models.Period.objects.all().order_by('name')
     filterset_fields = get_fields(models.Period, exclude=DEFAULT_FIELDS)
+    authentication_classes = [TokenAuthentication]  # Add this line
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 
@@ -213,5 +226,6 @@ class ResourcesFilteringViewSet(GeoViewSet):
     )
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
+    authentication_classes = [TokenAuthentication]  # Add this line
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
