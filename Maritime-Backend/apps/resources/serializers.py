@@ -4,10 +4,24 @@ from . import models
 from maritime.utils import get_fields, DEFAULT_FIELDS
 from .models import *
 from apps.geography.models import *
+from rest_framework import serializers
+
+
+class UserSerializer(serializers.ModelSerializer):
+    password = serializers.CharField(write_only=True)
+
+    class Meta:
+        model = CustomUser
+        fields = ('username', 'email', 'password')
+
+    def create(self, validated_data):
+        user = CustomUser(username=validated_data['username'], email=validated_data['email'])
+        user.set_password(validated_data['password'])
+        user.save()
+        return user
+
 
 # ADMs serializers: We need to exclude PolygonField from the serializer to make it faster
-
-
 class ExcludePloygonFieldADM0Serializer(DynamicDepthSerializer):
     class Meta:
         model = ADM0

@@ -7,6 +7,7 @@ router = routers.DefaultRouter()
 endpoint = utils.build_app_endpoint("resources")
 documentation = utils.build_app_api_documentation("resources", endpoint)
 
+
 router.register(rf'{endpoint}/site', views.SiteViewSet, basename='site')
 router.register(rf'{endpoint}/geojson/site', views.SiteGeoViewSet, basename='site as geojson')
 router.register(rf'{endpoint}/site_coordinates', views.SiteCoordinatesViewSet, basename='sites coordinates')
@@ -19,7 +20,7 @@ router.register(rf'{endpoint}/order_periods', views.SearchPeriodsNames, basename
 router.register(rf'{endpoint}/search', views.ResourcesFilteringViewSet, basename='Filtering resources based on different criteria')
 
 urlpatterns = [
-    
+    path('login/', views.UserLoginView.as_view(), name='user-login'),
     path('', include(router.urls)),
 
     # Automatically generated views

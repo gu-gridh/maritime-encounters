@@ -3,8 +3,35 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.gis.db import models
 import apps.geography.models as geography
 from django.contrib.postgres.fields import ArrayField
+from django.contrib.auth.models import AbstractUser, Group, Permission
 
 
+class CustomUser(AbstractUser):
+    # Override groups and user_permissions with unique related_name
+    groups = models.ManyToManyField(
+        Group,
+        related_name="customuser_set",  # Unique related_name to avoid clash
+        blank=True,
+        help_text="The groups this user belongs to.",
+        verbose_name="groups",
+    )
+    user_permissions = models.ManyToManyField(
+        Permission,
+        related_name="customuser_set",  # Unique related_name to avoid clash
+        blank=True,
+        help_text="Specific permissions for this user.",
+        verbose_name="user permissions",
+    )
+
+    def __str__(self) -> str:
+        return self.username
+    
+    class Meta:
+        verbose_name = _("Custom User")
+        verbose_name_plural = _("Custom Users")
+
+
+        
 class Location(abstract.AbstractBaseModel):
     # Represents the location of the site
     site = models.ForeignKey('Site', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(

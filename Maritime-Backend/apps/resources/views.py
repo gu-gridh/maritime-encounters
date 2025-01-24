@@ -7,12 +7,42 @@ from . import models, serializers
 from django.db.models import Q
 from maritime.abstract.views import DynamicDepthViewSet, GeoViewSet
 from maritime.abstract.models import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.gis.geos import Polygon
-from django.contrib.gis.gdal.envelope import Envelope
+
+
+from django.http import HttpResponseForbidden
+from rest_framework import generics, permissions
 from rest_framework.views import APIView
+from rest_framework.authtoken.models import Token
+from django.contrib.auth import authenticate
+from rest_framework.authentication import TokenAuthentication
+from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import BasePermission
 
+class UserLoginView(APIView):
+    permission_classes = [permissions.AllowAny]
 
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+        if user:
+            token, _ = Token.objects.get_or_create(user=user)
+            return Response({'token': token.key})
+        else:
+            return Response({'error': 'Invalid credentials'}, status=401)
+                                                                                                                        
+class ProtectedAPIView(APIView):
+    authentication_classes = [TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        return Response({"message": "You are authenticated!"})
+
+# class IsAdminUser(BasePermission):
+#     def has_permission(self, request, view):
+#         return request.user and request.user.is_staff
+    
+    
 class SiteViewSet(DynamicDepthViewSet):
     serializer_class = serializers.SiteGeoSerializer
     queryset = models.Site.objects.all()
