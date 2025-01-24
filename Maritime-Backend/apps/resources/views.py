@@ -13,6 +13,7 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
+from rest_framework.authentication import TokenAuthentication
 
 class ProtectedAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Only authenticated users can access
@@ -21,8 +22,8 @@ class ProtectedAPIView(APIView):
         return Response({'message': 'This is a protected API'})
     
 class TokenLoginView(APIView):
-    permission_classes = []  # Public access for login
-
+    permission_classes = [TokenAuthentication]  
+    
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
@@ -33,7 +34,6 @@ class TokenLoginView(APIView):
             return Response({'token': token.key})
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    
 class SiteViewSet(DynamicDepthViewSet):
     serializer_class = serializers.SiteGeoSerializer
     queryset = models.Site.objects.all()
@@ -54,7 +54,6 @@ class SiteCoordinatesViewSet(GeoViewSet):
     bbox_filter_include_overlapping = True
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
-
 class SiteGeoViewSet(GeoViewSet):
 
     serializer_class = serializers.SiteGeoSerializer
@@ -67,8 +66,6 @@ class SiteGeoViewSet(GeoViewSet):
     bbox_filter_include_overlapping = True
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
-
-
 class MetalAnalysisViewSet(DynamicDepthViewSet):
     serializer_class = serializers.MetalAnalysisSerializer
     queryset = models.MetalAnalysis.objects.all()
@@ -76,16 +73,12 @@ class MetalAnalysisViewSet(DynamicDepthViewSet):
     search_fields = ['site__name']
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
-
-
 class MetalworkViewSet(DynamicDepthViewSet):
     serializer_class = serializers.MetalworkSerializer
     queryset = models.Metalwork.objects.all()
     filterset_fields = get_fields(models.Metalwork, exclude=DEFAULT_EXCLUDE+DEFAULT_FIELDS+['orig_coords'])
     search_fields = ['site__name', 'entry_number']
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
-
-
 
 class LandingPointsViewSet(DynamicDepthViewSet):
     serializer_class = serializers.LandingPointsSerializer
