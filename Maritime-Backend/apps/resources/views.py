@@ -9,34 +9,18 @@ from maritime.abstract.views import DynamicDepthViewSet, GeoViewSet
 from maritime.abstract.models import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
 
 from rest_framework.response import Response
-from django.http import HttpResponseForbidden
-from rest_framework import generics, permissions
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from django.contrib.auth import authenticate, login
+from django.contrib.auth import authenticate
 
 class ProtectedAPIView(APIView):
     permission_classes = [IsAuthenticated]  # Only authenticated users can access
 
     def get(self, request):
         return Response({'message': 'This is a protected API'})
-
-class UserLoginView(APIView):
-    permission_classes = []  # Public access for login
-
-    def post(self, request):
-        username = request.data.get('username')
-        password = request.data.get('password')
-        user = authenticate(username=username, password=password)
-
-        if user:
-            login(request, user)  # Creates a session
-            return Response({'message': 'Login successful'})
-        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
-
-
+    
 class TokenLoginView(APIView):
     permission_classes = []  # Public access for login
 
@@ -60,7 +44,7 @@ class SiteViewSet(DynamicDepthViewSet):
     search_fields = ['placename']
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class SiteCoordinatesViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
@@ -69,7 +53,7 @@ class SiteCoordinatesViewSet(GeoViewSet):
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-    
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 
 class SiteGeoViewSet(GeoViewSet):
@@ -82,6 +66,8 @@ class SiteGeoViewSet(GeoViewSet):
     search_fields = ['placename', 'name']
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+
 
 
 class MetalAnalysisViewSet(DynamicDepthViewSet):
@@ -89,6 +75,8 @@ class MetalAnalysisViewSet(DynamicDepthViewSet):
     queryset = models.MetalAnalysis.objects.all()
     filterset_fields = get_fields(models.MetalAnalysis, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+
 
 
 class MetalworkViewSet(DynamicDepthViewSet):
@@ -96,6 +84,8 @@ class MetalworkViewSet(DynamicDepthViewSet):
     queryset = models.Metalwork.objects.all()
     filterset_fields = get_fields(models.Metalwork, exclude=DEFAULT_EXCLUDE+DEFAULT_FIELDS+['orig_coords'])
     search_fields = ['site__name', 'entry_number']
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+
 
 
 class LandingPointsViewSet(DynamicDepthViewSet):
@@ -103,6 +93,8 @@ class LandingPointsViewSet(DynamicDepthViewSet):
     queryset = models.LandingPoints.objects.all()
     filterset_fields = get_fields(models.LandingPoints, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+
 
 class SiteResourcesViewSet(viewsets.ViewSet):
     
@@ -136,6 +128,7 @@ class SearchPeriodsNames(DynamicDepthViewSet):
     serializer_class = serializers.PeriodSerializer
     queryset = models.Period.objects.all().order_by('name')
     filterset_fields = get_fields(models.Period, exclude=DEFAULT_FIELDS)
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 
 class ResourcesFilteringViewSet(GeoViewSet):
@@ -225,3 +218,5 @@ class ResourcesFilteringViewSet(GeoViewSet):
     )
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+
