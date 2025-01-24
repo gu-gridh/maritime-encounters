@@ -100,6 +100,8 @@ class LandingPointsViewSet(DynamicDepthViewSet):
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class SiteResourcesViewSet(viewsets.ViewSet):
+    authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
+    
     def get_permissions(self):
         if self.action == 'list':
             return [IsAuthenticated()]  # Require authentication for 'list' action
@@ -129,7 +131,6 @@ class SiteResourcesViewSet(viewsets.ViewSet):
         }
 
         return Response(data, status=status.HTTP_200_OK)
-
 
 class SearchPeriodsNames(DynamicDepthViewSet):
     serializer_class = serializers.PeriodSerializer
