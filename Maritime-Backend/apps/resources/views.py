@@ -22,8 +22,8 @@ class ProtectedAPIView(APIView):
         return Response({'message': 'This is a protected API'})
     
 class TokenLoginView(APIView):
-    permission_classes = [TokenAuthentication]  
-    
+    permission_classes = []  
+
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
