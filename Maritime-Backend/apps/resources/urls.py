@@ -21,8 +21,6 @@ router.register(rf'{endpoint}/search', views.ResourcesFilteringViewSet, basename
 
 urlpatterns = [
     path('login/', views.TokenLoginView.as_view(), name='user-login'),
-    path('api/token/verify/', views.ProtectedAPIView.as_view(), name='token_verify'),  # optional if needed
-
     path('', include(router.urls)),
 
     # Automatically generated views
