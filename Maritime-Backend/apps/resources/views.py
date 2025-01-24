@@ -11,8 +11,7 @@ from maritime.abstract.models import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
-from rest_framework.authentication import TokenAuthentication
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 
 class ProtectedAPIView(APIView):
@@ -95,8 +94,11 @@ class LandingPointsViewSet(DynamicDepthViewSet):
     search_fields = ['site__name']
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
-
 class SiteResourcesViewSet(viewsets.ViewSet):
+    def get_permissions(self):
+        if self.action == 'list':
+            return [IsAuthenticated()]  # Require authentication for 'list' action
+        return [AllowAny()]  # Allow any access for other actions (if any)
     
     def list(self, request):
         site_id = request.GET.get("site_id")
