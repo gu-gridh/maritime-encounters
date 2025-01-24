@@ -8,40 +8,48 @@ from django.db.models import Q
 from maritime.abstract.views import DynamicDepthViewSet, GeoViewSet
 from maritime.abstract.models import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
 
-
+from rest_framework.response import Response
 from django.http import HttpResponseForbidden
 from rest_framework import generics, permissions
 from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
-from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
 from rest_framework.permissions import IsAuthenticated
-from rest_framework.permissions import BasePermission
+from django.contrib.auth import authenticate, login
+
+class ProtectedAPIView(APIView):
+    permission_classes = [IsAuthenticated]  # Only authenticated users can access
+
+    def get(self, request):
+        return Response({'message': 'This is a protected API'})
 
 class UserLoginView(APIView):
-    permission_classes = [permissions.AllowAny]
+    permission_classes = []  # Public access for login
 
     def post(self, request):
         username = request.data.get('username')
         password = request.data.get('password')
         user = authenticate(username=username, password=password)
+
         if user:
-            token, _ = Token.objects.get_or_create(user=user)
+            login(request, user)  # Creates a session
+            return Response({'message': 'Login successful'})
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+
+class TokenLoginView(APIView):
+    permission_classes = []  # Public access for login
+
+    def post(self, request):
+        username = request.data.get('username')
+        password = request.data.get('password')
+        user = authenticate(username=username, password=password)
+
+        if user:
+            token, created = Token.objects.get_or_create(user=user)
             return Response({'token': token.key})
-        else:
-            return Response({'error': 'Invalid credentials'}, status=401)
-                                                                                                                        
-class ProtectedAPIView(APIView):
-    authentication_classes = [TokenAuthentication]
-    permission_classes = [IsAuthenticated]
+        return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
-    def get(self, request):
-        return Response({"message": "You are authenticated!"})
-
-# class IsAdminUser(BasePermission):
-#     def has_permission(self, request, view):
-#         return request.user and request.user.is_staff
-    
     
 class SiteViewSet(DynamicDepthViewSet):
     serializer_class = serializers.SiteGeoSerializer

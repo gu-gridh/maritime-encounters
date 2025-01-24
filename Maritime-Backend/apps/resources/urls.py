@@ -20,7 +20,7 @@ router.register(rf'{endpoint}/order_periods', views.SearchPeriodsNames, basename
 router.register(rf'{endpoint}/search', views.ResourcesFilteringViewSet, basename='Filtering resources based on different criteria')
 
 urlpatterns = [
-    path('login/', views.UserLoginView.as_view(), name='user-login'),
+    path('login/', views.TokenLoginView.as_view(), name='user-login'),
     path('', include(router.urls)),
 
     # Automatically generated views

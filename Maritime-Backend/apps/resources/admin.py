@@ -8,13 +8,6 @@ from django.contrib.admin import EmptyFieldListFilter
 from django.conf import settings
 import mapwidgets
 
-@admin.register(CustomUser)
-class LoginAdmin(admin.ModelAdmin):
-    list_display = ['username', 'email', 'is_active']
-    search_fields = ['username', 'email']
-    list_filter = ['is_active']
-    ordering = ['username']
-
 class SiteFilter(AutocompleteFilter):
     title = _('Site')  # display title
     field_name = 'site'  # name of the foreign key field
