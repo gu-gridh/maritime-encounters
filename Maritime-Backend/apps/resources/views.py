@@ -234,16 +234,16 @@ class ResourcesFilteringViewSet(GeoViewSet):
     authentication_classes = [TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
-#Viweset to download data for selected area based on parameters and bounding box in search function
+# Viweset to download data for selected area based on parameters and bounding box in search function
 # Data should provided in csv and json format
 # We can provide a  parameter to select the type of data to downloadfrom io import BytesIO
 class DownloadViewSet(viewsets.ViewSet):
-    authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
+    # authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
     
-    def get_permissions(self):
-        if self.action == 'list':
-            return [IsAuthenticated()]  # Require authentication for 'list' action
-        return [AllowAny()]  # Allow any access for other actions (if any)
+    # def get_permissions(self):
+    #     if self.action == 'list':
+    #         return [IsAuthenticated()]  # Require authentication for 'list' action
+    #     return [AllowAny()]  # Allow any access for other actions (if any)
 
     def list(self, request):
         resource_type = request.GET.get('type')
