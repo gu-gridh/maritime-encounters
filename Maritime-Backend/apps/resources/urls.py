@@ -17,7 +17,13 @@ router.register(rf'{endpoint}/landing_points', views.LandingPointsViewSet, basen
 
 router.register(rf'{endpoint}/site_resources', views.SiteResourcesViewSet, basename='site resources')
 router.register(rf'{endpoint}/order_periods', views.SearchPeriodsNames, basename='sort periods by their name')
+
+# Api urls to download data both in csv and json format
+router.register(rf'{endpoint}/data', views.DownloadViewSet, basename='Download data in csv and json format')
+
+# Api urls to filter resources based on different criteria
 router.register(rf'{endpoint}/search', views.ResourcesFilteringViewSet, basename='Filtering resources based on different criteria')
+
 
 urlpatterns = [
     path('login/', views.TokenLoginView.as_view(), name='user-login'),
