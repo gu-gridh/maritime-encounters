@@ -19,6 +19,8 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
 
+from django.contrib.gis.geos import Polygon
+
 class ProtectedAPIView(APIView):
     permission_classes = []  # Only authenticated users can access
 
@@ -250,7 +252,7 @@ class DownloadViewSet(viewsets.ViewSet):
         output_format = request.GET.get('download_format', 'json')
         min_year = request.GET.get('min_year')
         max_year = request.GET.get('max_year')
-        bbox = request.GET.get('bbox')
+        bbox = request.GET.get('in_bbox')
 
         min_year = int(min_year) if min_year else None
         max_year = int(max_year) if max_year else None
@@ -275,11 +277,9 @@ class DownloadViewSet(viewsets.ViewSet):
 
             # Apply filters
             if bbox:
-                try:
-                    min_x, min_y, max_x, max_y = map(float, bbox.split(','))
-                    queryset = queryset.filter(coordinates__contained_in=((min_x, min_y), (max_x, max_y)))
-                except ValueError:
-                    return Response({'error': 'Invalid bbox format. Use min_x,min_y,max_x,max_y'}, status=400)
+                min_x, min_y, max_x, max_y = map(float, bbox.split(','))
+                bbox_polygon = Polygon.from_bbox((min_x, min_y, max_x, max_y))
+                queryset = queryset.filter(site__coordinates__within=bbox_polygon)  # Correct lookup for GeoDjango
 
             date_filter = Q()
             if min_year:
@@ -317,7 +317,7 @@ class DownloadViewSet(viewsets.ViewSet):
         Exports multiple CSV files for each model in the dataset.
         """
         if not data:
-            return Response({'error': 'No data available for export'}, status=400)
+            return Response({}, status=400)
 
         # Create a ZIP file in memory
         zip_buffer = io.BytesIO()
