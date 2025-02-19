@@ -125,8 +125,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
             return Response({"error": "Site not found."}, status=status.HTTP_404_NOT_FOUND)
         
         data = {
-            'plank_boats': PlankBoatsSerializer(PlankBoats.objects.filter(site=site), many=True).data,
-            'log_boats': LogBoatsSerializer(LogBoats.objects.filter(site=site), many=True).data,
+            'boats': BoatSerializer(Boat.objects.filter(site=site), many=True).data,
             'radiocarbon_dates': RadiocarbonSerializer(Radiocarbon.objects.filter(site=site), many=True).data,
             'individual_samples': IndivdualObjectSerializer(IndividualObjects.objects.filter(site=site), many=True).data,
             'dna_samples': aDNASerializer(aDNA.objects.filter(site=site), many=True).data,
@@ -240,12 +239,12 @@ class ResourcesFilteringViewSet(GeoViewSet):
 # Data should provided in csv and json format
 # We can provide a  parameter to select the type of data to downloadfrom io import BytesIO
 class DownloadViewSet(viewsets.ViewSet):
-    # authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
+    authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
     
-    # def get_permissions(self):
-    #     if self.action == 'list':
-    #         return [IsAuthenticated()]  # Require authentication for 'list' action
-    #     return [AllowAny()]  # Allow any access for other actions (if any)
+    def get_permissions(self):
+        if self.action == 'list':
+            return [IsAuthenticated()]  # Require authentication for 'list' action
+        return [AllowAny()]  # Allow any access for other actions (if any)
 
     def list(self, request):
         resource_type = request.GET.get('type')
@@ -345,3 +344,8 @@ class DownloadViewSet(viewsets.ViewSet):
         response = HttpResponse(zip_buffer.read(), content_type="application/zip")
         response['Content-Disposition'] = 'attachment; filename="exported_data.zip"'
         return response
+    
+
+class BoatsViewSet(viewsets.ModelViewSet):
+    queryset = Boat.objects.all()
+    serializer_class = BoatSerializer

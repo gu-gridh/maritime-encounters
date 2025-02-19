@@ -73,14 +73,6 @@ class SpeciesAdmin(admin.ModelAdmin):
     ordering = ['text']
 
 
-@admin.register(Shape)
-class ShapeAdmin(admin.ModelAdmin):
-    list_display = ['text']
-    search_fields = ['text']
-    list_filter = ['text']
-    ordering = ['text']
-
-
 @admin.register(Material)
 class MaterialAdmin(admin.ModelAdmin):
     list_display = ['text']
@@ -203,28 +195,29 @@ class SiteAdmin(admin.ModelAdmin):
         models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}
     }
 
-@admin.register(BarkBoats)
-class BarkBoatAdmin(admin.ModelAdmin):
-    list_display = ['name', 'site', 'period', 'location']
-    search_fields = ['name', 'site__name', 'period__name']
-    list_filter = ['name', 'location']
-    ordering = ['name']
-    
-    
-@admin.register(PlankBoats)
-class PlankBoatAdmin(admin.ModelAdmin):
-    list_display = ['name', 'site', 'period', 'location']
-    search_fields = ['name', 'site__name', 'period__name']
-    list_filter = ['name', 'location']
-    ordering = ['name']
+
+@admin.register(Fastening)
+class FasteningAdmin(admin.ModelAdmin):
+    list_display = ['text']
+    search_fields = ['text']
+    list_filter = ['text']
+    ordering = ['text']
 
 
-@admin.register(LogBoats)
-class LogBoatAdmin(admin.ModelAdmin):
-    list_display = ['name', 'site', 'period']
-    search_fields = ['name', 'period__name', 'site__name']
-    list_filter = ['name']
-    ordering = ['name']
+@admin.register(Shape)
+class ShapeAdmin(admin.ModelAdmin):
+    list_display = ['text']
+    search_fields = ['text']
+    list_filter = ['text']
+    ordering = ['text']
+
+@admin.register(Boat)
+class BoatsAdmin(admin.ModelAdmin):
+    list_display = ['site', 'name']
+    search_fields = ['site__name', 'boat_name']
+    list_filter = ['site']
+    ordering = ['site']
+    autocomplete_fields = ['site', 'shape_holes', 'fastening_type', 'period', 'bow', 'stern', 'hull', 'basal']
 
 
 @admin.register(LandingPoints)
