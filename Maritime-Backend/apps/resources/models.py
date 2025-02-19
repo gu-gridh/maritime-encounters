@@ -1320,7 +1320,9 @@ class IndividualObjects(abstract.AbstractBaseModel):
         "End Date"), help_text=_("The end date of the object, if available."))
     dating_original = models.CharField(max_length=256,null=True,blank=True,verbose_name=_("Dating (pre-translation)"), help_text=_("The original dating string before translation and processing."))
     id_national_database = models.ForeignKey(ObjectIds, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "Object ID"), help_text=_("The ID of the object in the relevant national database."))
+        "Object ID"), help_text=_("The ID of the object in the relevant national database.")) #keep for now, may be needed for Norwegian data
+    references = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
+        "References"), help_text=_("The citation of reference texts for the object,if available."))
 
     def __str__(self) -> str:
         if self.museum:
