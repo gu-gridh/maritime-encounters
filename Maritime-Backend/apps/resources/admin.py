@@ -468,7 +468,7 @@ class ObjectIdsAdmin(admin.ModelAdmin):
 class IndividualObjectsAdmin(admin.ModelAdmin):
     list_display = ['site','accession_number']
     search_fields = ['site__name', 'object_id__art_id',
-                     'form__name', 'variant__name', 'period__name', 'start_date', 'end_date']
+                     'form__name', 'variant__name', 'period__name', 'start_date', 'end_date', 'context']
     ordering = ['site']
     filter_horizontal = ['material','period']
     autocomplete_fields = ['site', 'accession_number',

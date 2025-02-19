@@ -1308,6 +1308,8 @@ class IndividualObjects(abstract.AbstractBaseModel):
         "Period"), help_text=_("The period of the object."))
     period_original = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         'Period (pre-translation)'), help_text=_('The period text before translation to English.'))
+    context = models.ForeignKey(ContextKeywords, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+        "Context"), help_text=_("The detailed context of the find. E.g., a specific layer or feature."))
     orig_coords = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Original Coords"), help_text=_("The original coordinates of the object."))
     orig_crs = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
@@ -1317,14 +1319,14 @@ class IndividualObjects(abstract.AbstractBaseModel):
     end_date = models.CharField(max_length=256,null=True, blank=True, verbose_name=_(
         "End Date"), help_text=_("The end date of the object, if available."))
     dating_original = models.CharField(max_length=256,null=True,blank=True,verbose_name=_("Dating (pre-translation)"), help_text=_("The original dating string before translation and processing."))
-    object_id = models.ForeignKey(ObjectIds, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+    id_national_database = models.ForeignKey(ObjectIds, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
         "Object ID"), help_text=_("The ID of the object in the relevant national database."))
 
     def __str__(self) -> str:
-        if self.accession_number:
-            return self.accession_number.accession_number
+        if self.museum:
+            return self.museum.museum
         else:
-            return 'Item missing accession number'
+            return 'Item missing museum name'
 
     class Meta:
         verbose_name = _("Individual Find")
