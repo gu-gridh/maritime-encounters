@@ -161,7 +161,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
 
         resource_mapping = {
             # 'plank_boats': models.PlankBoats,
-            'log_boats': models.LogBoats,
+            # 'log_boats': models.LogBoats,
             'radiocarbon_dates': models.Radiocarbon,
             'individual_samples': models.IndividualObjects,
             'dna_samples': models.aDNA,
@@ -258,7 +258,7 @@ class DownloadViewSet(viewsets.ViewSet):
 
         resource_mapping = {
             # 'plank_boats': models.PlankBoats,
-            'log_boats': models.LogBoats,
+            # 'log_boats': models.LogBoats,
             'radiocarbon_dates': models.Radiocarbon,
             'individual_samples': models.IndividualObjects,
             'dna_samples': models.aDNA,
