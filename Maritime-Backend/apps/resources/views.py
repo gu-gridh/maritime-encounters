@@ -132,7 +132,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
             'metal_analysis': MetalAnalysisSerializer(MetalAnalysis.objects.filter(site=site), many=True).data,
             'landing_points': LandingPointsSerializer(LandingPoints.objects.filter(site=site), many=True).data,
             'new_samples': NewSamplesSerializer(NewSamples.objects.filter(site=site), many=True).data,
-            'metalwork': MetalworkSerializer(Metalwork.objects.filter(location__site=site), many=True).data,
+            # 'metalwork': MetalworkSerializer(Metalwork.objects.filter(location__site=site), many=True).data,
         }
 
         return Response(data, status=status.HTTP_200_OK)
@@ -168,7 +168,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'metal_analysis': models.MetalAnalysis,
             'landing_points': models.LandingPoints,
             'new_samples': models.NewSamples,
-            'metalwork': models.Metalwork,
+            # 'metalwork': models.Metalwork,
         }
 
         if not (resource_type or min_year or max_year or period_name):
@@ -265,7 +265,7 @@ class DownloadViewSet(viewsets.ViewSet):
             'metal_analysis': models.MetalAnalysis,
             'landing_points': models.LandingPoints,
             'new_samples': models.NewSamples,
-            'metalwork': models.Metalwork,
+            # 'metalwork': models.Metalwork,
         }
 
         selected_models = [resource_mapping[resource_type]] if resource_type in resource_mapping else resource_mapping.values()
