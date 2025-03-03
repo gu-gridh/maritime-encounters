@@ -146,7 +146,7 @@ def import_individuals(data):
         
 
         # Creating the object
-        individual_object = IndividualObjects.objects.get_or_create(
+        individual_object = IndividualObjects.objects.update_or_create(
             site=site_obj,
             accession_number=accession_num,
             museum=museum,
@@ -161,7 +161,7 @@ def import_individuals(data):
             context=context,
             orig_coords=f"{row.Lat}, {row.Lng}" if point else None,
             start_date=row.Start_date,
-            end_date=row.End_date if not pd.notna(row.End_date) else None,
+            end_date=row.End_date,
             dating_original=row.Period,
             references = row.References if 'References' in row_names else None,
         )[0]
