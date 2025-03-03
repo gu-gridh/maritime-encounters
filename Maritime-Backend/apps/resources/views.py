@@ -312,12 +312,12 @@ class DownloadViewSet(viewsets.ViewSet):
 
         return Response({'error': 'Invalid format'}, status=400)
 
-    def export_csv(self, data):
+    def export_csv(self, data, request):
         """
         Exports multiple CSV files for each model in the dataset.
         """
-        if not data:
-            return Response({}, status=400)
+        if not request.user.is_authenticated:
+            return Response({'error': 'Authentication required'}, status=403)
 
         # Create a ZIP file in memory
         zip_buffer = io.BytesIO()
