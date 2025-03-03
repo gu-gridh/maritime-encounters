@@ -18,7 +18,7 @@ from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication
-
+from rest_framework.decorators import action
 from django.contrib.gis.geos import Polygon
 
 class ProtectedAPIView(APIView):
@@ -243,8 +243,16 @@ class DownloadViewSet(viewsets.ViewSet):
     authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
     
     def get_permissions(self):
+        """
+        Determine the permissions required for different actions.
+
+        Returns:
+            list: A list of permission classes. If the action is 'list' or 'export_csv',
+                  it returns a list containing IsAuthenticated permission. For other actions,
+                  it returns a list containing AllowAny permission.
+        """
         if self.action in ['list', 'export_csv']:
-            return [IsAuthenticated()]  # Require authentication for 'list' action
+            return [IsAuthenticated()]  # Require authentication for 'list' and 'export_csv' actions
         return [AllowAny()]  # Allow any access for other actions (if any)
     
     def list(self, request):
@@ -311,7 +319,8 @@ class DownloadViewSet(viewsets.ViewSet):
             return self.export_csv(queryset_list)
 
         return Response({'error': 'Invalid format'}, status=400)
-
+    
+    @action(detail=False, methods=['get'])
     def export_csv(self, data, request):
         """
         Exports multiple CSV files for each model in the dataset.

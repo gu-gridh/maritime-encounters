@@ -3,7 +3,6 @@ from django.contrib.gis import admin
 from django.utils.translation import gettext_lazy as _
 from admin_auto_filters.filters import AutocompleteFilter
 import mapwidgets
-from django.contrib import admin
 
 class SiteFilter(AutocompleteFilter):
     title = _('Site')  # display title
