@@ -320,7 +320,6 @@ class DownloadViewSet(viewsets.ViewSet):
 
         return Response({'error': 'Invalid format'}, status=400)
     
-    @action(detail=False, methods=['get'])
     def export_csv(self, data, request):
         """
         Exports multiple CSV files for each model in the dataset.
