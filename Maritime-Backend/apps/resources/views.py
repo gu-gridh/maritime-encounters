@@ -316,16 +316,18 @@ class DownloadViewSet(viewsets.ViewSet):
 
         # Return separate CSV files per model
         if output_format == 'csv':
-            return self.export_csv(queryset_list, request)
+            return self.export_csv(queryset_list)
 
         return Response({'error': 'Invalid format'}, status=400)
     
-    def export_csv(self, data, request):
+    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
+    def export_csv(self, data):
+
         """
         Exports multiple CSV files for each model in the dataset.
         """
-        if not request.user.is_authenticated:
-            return Response({'error': 'Authentication required'}, status=403)
+        if not data:
+            return Response({}, status=400)
 
         # Create a ZIP file in memory
         zip_buffer = io.BytesIO()
