@@ -316,7 +316,7 @@ class DownloadViewSet(viewsets.ViewSet):
 
         # Return separate CSV files per model
         if output_format == 'csv':
-            return self.export_csv(queryset_list)
+            return self.export_csv(queryset_list, request)
 
         return Response({'error': 'Invalid format'}, status=400)
     
