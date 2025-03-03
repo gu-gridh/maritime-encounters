@@ -240,14 +240,13 @@ class ResourcesFilteringViewSet(GeoViewSet):
 # We can provide a  parameter to select the type of data to downloadfrom io import BytesIO
 class DownloadViewSet(viewsets.ViewSet):
 
-    # First add authentication to the viewset
     authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
-
+    
     def get_permissions(self):
-        if self.action == 'list':
+        if self.action in ['list', 'export_csv']:
             return [IsAuthenticated()]  # Require authentication for 'list' action
-        return [AllowAny()]
-
+        return [AllowAny()]  # Allow any access for other actions (if any)
+    
     def list(self, request):
         resource_type = request.GET.get('type')
         output_format = request.GET.get('download_format', 'json')

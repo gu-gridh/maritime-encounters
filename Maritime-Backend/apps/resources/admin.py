@@ -1,12 +1,9 @@
 from .models import *
-from django.utils.html import format_html
 from django.contrib.gis import admin
 from django.utils.translation import gettext_lazy as _
-from maritime.utils import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
 from admin_auto_filters.filters import AutocompleteFilter
-from django.contrib.admin import EmptyFieldListFilter
-from django.conf import settings
 import mapwidgets
+from django.contrib import admin
 
 class SiteFilter(AutocompleteFilter):
     title = _('Site')  # display title
