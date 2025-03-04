@@ -110,7 +110,7 @@ def import_individuals(data):
         # Object Category and Description
         obj_cat = []
         try:
-            categories = row.Object_category.split(",") if not pd.isnull(row.Object_type) else []
+            categories = row.Object_category.split(",") if not pd.isnull(row.Object_category) else []
             for category in categories:
                 category_obj = ObjectCategories.objects.get_or_create(text=category.strip())[0]
                 obj_cat.append(category_obj)
@@ -127,7 +127,7 @@ def import_individuals(data):
             object_description = None
 
         try:
-            sub_categories = ObjectSubcategories.objects.get_or_create(subcategory=row.Object_category)[0] if not pd.isnull(row.Object_category) else None
+            sub_categories = ObjectSubcategories.objects.get_or_create(subcategory=row.Object_subcategory)[0] if not pd.isnull(row.Object_subcategory) else None
             object_description = ObjectDescription.objects.get_or_create(
                 subcategory=sub_categories
             )[0]
