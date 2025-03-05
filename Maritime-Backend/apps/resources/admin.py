@@ -207,13 +207,38 @@ class ShapeAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
+
+@admin.register(BarkBoat)
+class BarkBoatAdmin(admin.ModelAdmin):
+    list_display = ['poss_tools']
+    autocomplete_fields = ['shape_holes', 'fastening_type']
+
+
+@admin.register(LogBoat)
+class LogBoatAdmin(admin.ModelAdmin):
+    list_display = ['burnt_mark']
+    autocomplete_fields = ['bow', 'stern', 'hull', 'basal']
+
+class BarkBoatBuilding(admin.TabularInline):
+    model = BarkBoatType
+    extra = 1
+
+class LogBoatBuilding(admin.TabularInline):
+    model = LogBoatType
+    extra = 1
 @admin.register(Boat)
 class BoatsAdmin(admin.ModelAdmin):
-    list_display = ['site', 'name']
-    search_fields = ['site__name', 'boat_name']
-    list_filter = ['site']
+    list_display = ['site', 'name', 'type']
+    search_fields = ['site__name', 'boat_name', 'type']
+    list_filter = ['site', 'type']
     ordering = ['site']
-    autocomplete_fields = ['site', 'shape_holes', 'fastening_type', 'period', 'bow', 'stern', 'hull', 'basal']
+    autocomplete_fields = ['site', 'period', 'hull']
+    inlines = [
+        BarkBoatBuilding,
+        LogBoatBuilding
+    ]
+
+
 
 
 @admin.register(LandingPoints)
