@@ -102,11 +102,14 @@ def import_individuals(data):
                 materials_obj.append(material_obj)
         
         # Museum and Accession Number
-        museum = MuseumMeta.objects.get_or_create(museum=row.Museum)[0] if not pd.isnull(row.Museum) else None
-        accession_num = AccessionNum.objects.get_or_create(
-            accession_number=row.ID_national_database if 'ID_national_database' in row_names else None
-        )[0]
-
+        try: 
+            museum = MuseumMeta.objects.get_or_create(museum=row.Museum)[0] if not pd.isnull(row.Museum) else None
+            accession_num = AccessionNum.objects.get_or_create(
+                accession_number=row.ID_national_database if 'ID_national_database' in row_names else None
+            )[0]
+        except:
+            accession_num = None
+            museum = None
         # Object Category and Description
         obj_cat = []
         try:
@@ -149,7 +152,7 @@ def import_individuals(data):
         individual_object = IndividualObjects.objects.update_or_create(
             site=site_obj,
             accession_number=accession_num,
-            museum=museum,
+            museum=museum ,
             object_type=object_description,
             type_original=row.Object_type if 'Object_type' in row_names else None,
             form=form,
