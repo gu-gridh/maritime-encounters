@@ -504,20 +504,22 @@ class DateRanges(abstract.AbstractTagModel):
 
 # Boat model
 
-class RadiocarbonDating(models.Model):
-    sample_id = models.CharField(max_length=100, unique=True)
-    lab = models.CharField(max_length=255)
-    calibrated_date_range = models.CharField(max_length=255)
+class CalibratedDate(abstract.AbstractBaseModel):
+    sample = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "Region Name"), help_text=_("Free-form, non-indexed name of the region."))
+    dating_method = models.ForeignKey(DatingMethod, on_delete=models.CASCADE, related_name='dating_method_type',
+                                      null=True, blank=True, verbose_name=_("dating_method"), help_text=_("The dating method of the House."))
+    date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "Region Name"), help_text=_("Free-form, non-indexed name of the region."))
     
-    def __str__(self):
-        return f"Sample {self.sample_id} for {self.boat}"
+    def __str__(self) -> str:
 
-    def __repr__(self):
-        return str(f"Sample {self.sample_id} for {self.boat}")
-    
+        name_str = f"{self.sample}"
+        return name_str
+
     class Meta:
-        verbose_name = _("Radiocarbon Dating")
-        verbose_name_plural = _("Radiocarbon Dating")
+        verbose_name = _("Calibrated Date")
+        verbose_name_plural = _("Calibrated Dates")
 
 class BoatComponent(models.Model):
     PART_TYPE_CHOICES = [
@@ -566,7 +568,7 @@ class Boat(abstract.AbstractBaseModel):
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, 
                               verbose_name=_("Period"), help_text=_("The period the vessel dates to."))
     # Radio Carbon Dating
-    carbonated_date = models.ManyToManyField(RadiocarbonDating, blank=True, verbose_name=_("Radiocarbon Dating"),
+    carbonated_date = models.ManyToManyField(CalibratedDate, blank=True, verbose_name=_("Radiocarbon Dating"),
                                             help_text=_("Radiocarbon dating of the vessel"))
     
     #Reconstruction
