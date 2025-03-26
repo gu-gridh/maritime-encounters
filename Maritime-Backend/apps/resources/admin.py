@@ -207,39 +207,27 @@ class ShapeAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
+@admin.register(BoatComponent)
+class BoatComponentAdmin(admin.ModelAdmin):
+    list_display = ['part_type']
+    search_fields = ['part_type']
+    list_filter = ['part_type'] 
+    ordering = ['part_type']
 
-@admin.register(BarkBoat)
-class BarkBoatAdmin(admin.ModelAdmin):
-    list_display = ['poss_tools']
-    autocomplete_fields = ['shape_holes', 'fastening_type']
-
-
-@admin.register(LogBoat)
-class LogBoatAdmin(admin.ModelAdmin):
-    list_display = ['burnt_mark']
-    autocomplete_fields = ['bow', 'stern', 'hull', 'basal']
-
-class BarkBoatBuilding(admin.TabularInline):
-    model = BarkBoatType
+class RelBoatComponent(admin.TabularInline):
+    model = BoatRelComponent
     extra = 1
 
-class LogBoatBuilding(admin.TabularInline):
-    model = LogBoatType
-    extra = 1
 @admin.register(Boat)
 class BoatsAdmin(admin.ModelAdmin):
-    list_display = ['site', 'name', 'type']
-    search_fields = ['site__name', 'boat_name', 'type']
-    list_filter = ['site', 'type']
+    list_display = ['site', 'vessel_name', 'vessel_type']
+    search_fields = ['site__name', 'vessel_name', 'vessel_type']
+    list_filter = ['site', 'vessel_type']
     ordering = ['site']
-    autocomplete_fields = ['site', 'period', 'hull']
+    autocomplete_fields = ['site', 'period', ]
     inlines = [
-        BarkBoatBuilding,
-        LogBoatBuilding
+        RelBoatComponent
     ]
-
-
-
 
 @admin.register(LandingPoints)
 class LandingPointsAdmin(admin.ModelAdmin):

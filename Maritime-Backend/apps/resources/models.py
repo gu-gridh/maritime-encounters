@@ -521,6 +521,9 @@ class CalibratedDate(abstract.AbstractBaseModel):
         verbose_name = _("Calibrated Date")
         verbose_name_plural = _("Calibrated Dates")
 
+
+
+
 class BoatComponent(models.Model):
     PART_TYPE_CHOICES = [
         ('hull', _('Hull')), ('thwarts', _('Thwarts')), ('frames', _('Frames/Ribs')), ('bottom_side_strakes', _('Bottom Side Strakes')),
@@ -561,8 +564,7 @@ class Boat(abstract.AbstractBaseModel):
                              verbose_name=_("Site"), help_text=_("The site where the vessel was found."))
     location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, 
                                  verbose_name=_("Site Description"), help_text=_("Description of the site location"))
-    dating_range = models.ForeignKey(DateRanges, on_delete=models.CASCADE, null=True, blank=True,
-                                        verbose_name=_("Dating Range"), help_text=_("The dating range of the vessel"))
+
     description = models.TextField(null=True, blank=True, verbose_name=_("Vessel Description"), 
                                    help_text=_("A description of the boat find"))
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, 
@@ -1093,8 +1095,8 @@ class LNHouses(abstract.AbstractBaseModel):
         "number_BA_houses"), help_text=_("The number of BA houses of the House."))
     features = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "features"), help_text=_("The features of the House."))
-    dating_method = models.ForeignKey(DatingMethod, on_delete=models.CASCADE, related_name='dating_method_type',
-                                      null=True, blank=True, verbose_name=_("dating_method"), help_text=_("The dating method of the House."))
+    # dating_method = models.ForeignKey(DatingMethod, on_delete=models.CASCADE, related_name='dating_method_type',
+    #                                   null=True, blank=True, verbose_name=_("dating_method"), help_text=_("The dating method of the House."))
     feature_house_K1 = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "feature_house_K1"), help_text=_("The feature house K1 of the House."))
     context_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
@@ -1117,8 +1119,8 @@ class LNHouses(abstract.AbstractBaseModel):
         "earliest_period_typology"), help_text=_("The earliest period typology of the House."))
     latest_period_typology = models.ForeignKey(Period, on_delete=models.CASCADE, related_name='latest_period_typology_time', null=True, blank=True, verbose_name=_(
         "latest_period_typology"), help_text=_("The latest period typology of the House."))
-    prefered_dating_method = models.ForeignKey(DatingMethod, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "prefered_dating_method"), help_text=_("The prefered dating method of the House."))
+    # prefered_dating_method = models.ForeignKey(DatingMethod, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+    #     "prefered_dating_method"), help_text=_("The prefered dating method of the House."))
     dating_typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "dating_typology"), help_text=_("The dating typology of the House."))
     dating_14C = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
