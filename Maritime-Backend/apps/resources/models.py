@@ -624,7 +624,17 @@ class Boat(abstract.AbstractBaseModel):
                                 help_text=_("The comments of the boat."))
     references = models.TextField(null=True, blank=True, verbose_name=_("references"), 
                                 help_text=_("The references of the boat."))
-
+    
+    def __str__(self) -> str:
+        name_str = f"{self.vessel_name} - {self.vessel_type}"
+        return name_str
+    
+    def __repr__(self) -> str:
+        return str(f"{self.vessel_name} - {self.vessel_type}")
+    
+    class Meta:
+        verbose_name = _("Boat")
+        verbose_name_plural = _("Boats")
 
 class BoatRelComponent(models.Model):
     boat = models.ForeignKey(Boat, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Boat"), help_text=_("The boat the type is related to."))
