@@ -450,157 +450,6 @@ class Site(abstract.AbstractBaseModel):
         verbose_name_plural = _("Sites")
 
 
-
-class BarkBoat(models.Model):
-    # Bark Boat fields
-    thwarts = models.ManyToManyField(BoatMaterial, related_name='thwarts_material', blank=True, verbose_name=_("Thwarts Material"), help_text=_("Material of the thwarts"))
-    frames = models.ManyToManyField(BoatMaterial, related_name='frames_material', blank=True, verbose_name=_("Frames/Ribs Material"), help_text=_("Material of the frames/ribs"))
-    bottom_side_strakes = models.ManyToManyField(BoatMaterial, related_name='bottom_side_strakes_shape', blank=True, verbose_name=_("Bottom Side Strakes Material"), help_text=_("Material of the bottom side strakes"))
-    bss_description = models.TextField(null=True, blank=True, verbose_name=_("Bottom Side Strakes Description"), help_text=_("Description of the bottom side strakes"))
-    outer_bottom_plank = models.ManyToManyField(BoatMaterial, related_name='outer_bottom_plank_shape', blank=True, verbose_name=_("Outer Bottom Plank Material"), help_text=_("Material of the outer bottom plank"))
-    obp_description = models.TextField(null=True, blank=True, verbose_name=_("Outer Bottom Plank Description"), help_text=_("Description of the outer bottom plank"))
-    keep_plank = models.ManyToManyField(BoatMaterial, related_name='keel_plank_shape', blank=True, verbose_name=_("Keel Plank Material"), help_text=_("Material of the keel plank"))
-    kp_description = models.TextField(null=True, blank=True, verbose_name=_("Keel Plank Description"), help_text=_("Description of the keel plank"))
-    caulking = models.ManyToManyField(BoatMaterial, related_name='caulking_material', blank=True, verbose_name=_("Caulking Material"), help_text=_("Material of the caulking"))
-    integ_cleat = models.BooleanField(null=True,default=False, verbose_name=_("Integral Cleats"), help_text=_("Indicate presence or absence of integral cleats"))
-    integ_cleat_dist = models.CharField(max_length=256, null=True,blank=True,verbose_name=_("Integral Cleat Distance"), help_text = _("Distance between integral cleats in cm"))
-    integ_cleat_num =models.CharField(max_length=256, null=True,blank=True,verbose_name=_("Integral Cleat Number"), help_text = _("Number of integral cleats"))
-    shape_holes = models.ForeignKey(Shape, on_delete=models.CASCADE, related_name='holes_shape',
-                                    null=True, blank=True, verbose_name=_("Sewing Holes"), help_text=_("The size and shape of any sewing holes"))
-    sealing_lath = models.CharField(max_length=256, null=True,blank=True,verbose_name=_("Sewing Laths"), help_text = _("Description of sewing laths"))
-    rail_plough = models.CharField(max_length=256, null=True,blank=True,verbose_name=_("Rail/Plough"), help_text = _("Description of the rail/plough"))
-    tree_nails = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "Tree Nails"), help_text=_("Description of the tree nail(s)"))
-    keel_bend_bool = models.BooleanField(null=True,default=False, verbose_name=_("Keel Plank Bending"), help_text=_("Indicate presence or absence of evidence of bending/twisting of the keel plank"))
-    keel_bending = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "Keel Plank Evidence"), help_text=_("Describe evidence of bending/twisting of keel plank")) 
-    outer_bend_bool = models.BooleanField(null=True,default=False, verbose_name=_("Outer Bottom Plank Bending"), help_text=_("Indicate presence or absence of evidence of bending/twisting of the outer bottom plank"))
-    outer_bending = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "Outer Bottom Plank Evidence"), help_text=_("Describe evidence of bending/twisting of the outer bottom plank"))
-    low_bend_bool = models.BooleanField(null=True,default=False, verbose_name=_("Lower Side Strake Bending"), help_text=_("Indicate presence or absence of evidence of bending/twisting of the lower side strake"))
-    low_bending = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "Lower Side Strake Evidence"), help_text=_("Describe evidence of bending/twisting of the outer bottom plank"))
-    long_shape_bool = models.BooleanField(null=True,default=False, verbose_name=_("Longitudinal Shape Bending"), help_text=_("Indicate presence or absence of evidence of bending/twisting of the longitudinal shape"))
-    long_shape_bending = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "Longitudinal Shape Evidence"), help_text=_("Describe evidence of bending/twisting of the longitudinal shape"))
-    poss_tools = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Possible Tools"), help_text=_("List any possible tools including their size"))
-    
-    fastening_type = models.ForeignKey(Fastening, on_delete=models.CASCADE, related_name='fastening_type',
-                                    null=True, blank=True, verbose_name=_("Fastening Method"), help_text=_("The fastening type/method used"))
-    special_features = models.ManyToManyField(BoatFeatures, blank=True, verbose_name=_("Special Features"), help_text=_("Any special features of the boat not described above"))
-    comments = models.TextField(null=True, blank=True, verbose_name=_("comments"), help_text=_("The comments of the boat."))
-
-
-    def __str__(self) -> str:
-        name_str = f"{self.id}"
-        return name_str
-    
-    def __repr__(self) -> str:
-        return str(f"{self.id}")
-    
-    class Meta:
-        verbose_name = _("Bark Boat")
-        verbose_name_plural = _("Bark Boats")
-
-class LogBoat(models.Model):
-    # Log Boat fields
-    bow = models.ForeignKey(Shape, on_delete=models.CASCADE, related_name='bow_shape', null=True,
-                            blank=True, verbose_name=_("bowshape"), help_text=_("The bow shape of the logboat."))
-    stern = models.ForeignKey(Shape, on_delete=models.CASCADE, related_name='stern_shape', null=True,
-                              blank=True, verbose_name=_("sternshape"), help_text=_("The stern shape of the logboat."))
-    hull = models.ForeignKey(Shape, on_delete=models.CASCADE, related_name='hull_shape', null=True,
-                             blank=True, verbose_name=_("hullshape"), help_text=_("The hull shape of the logboat."))
-    basal = models.ForeignKey(Shape, on_delete=models.CASCADE, related_name='basel_shape',
-                              null=True, blank=True, verbose_name=_("basal"), help_text=_("The basal of the logboat."))
-
-    transerve_ridges = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("transerveridges"), help_text=_("The transerve ridges of the logboat."))
-    other_features = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("otherfeatures"), help_text=_("The other features of the logboat."))
-    repair = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("repair"), help_text=_("The repair of the logboat."))
-    burnt_mark = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("burntmark"), help_text=_("The burnt mark of the logboat."))
-    other_material = models.ManyToManyField(Material, blank=True, verbose_name=_("othermaterial"), help_text=_("The other material of the logboat."))
-    
-    def __str__(self) -> str:
-        name_str = f"{self.id}"
-        return name_str
-    
-    def __repr__(self) -> str:
-        return str(f"{self.id}")
-    
-    class Meta:
-        verbose_name = _("Log Boat")
-        verbose_name_plural = _("Log Boats")
-
-class Boat(abstract.AbstractBaseModel):
-    BOAT_TYPE_CHOICES = [
-        ('bark', _('Bark Boat')),
-        ('plank', _('Plank Boat')),
-        ('log', _('Log Boat')),
-    ]
-    
-    # Common Fields
-    name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Boat Name"), help_text=_("Name of the vessel"))
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Site"), help_text=_("The site where the vessel was found."))
-    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Site Description"), help_text=_("Description of the site location"))
-    national_id = models.URLField(null=True, blank=True, verbose_name=_("National ID Link"), help_text=_("Link to the site in the national heritage register"))
-    description = models.TextField(null=True, blank=True, verbose_name=_("Vessel Description"), help_text=_("A description of the boat find"))
-    preservation = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Preservation"), help_text=_("State of preservation"))
-
-    period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Period"), help_text=_("The period the vessel dates to."))
-    start_date = models.IntegerField(null=True, blank=True, verbose_name=_("Start Date"), help_text=_("Start date (negative for BC dates)"))
-    end_date = models.IntegerField(null=True, blank=True, verbose_name=_("End Date"), help_text=_("End date (negative for BC dates)"))
-    c14_lab = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("C14 Lab"), help_text=_("Lab ID for radiocarbon dating"))
-    c14_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("C14 Date"), help_text=_("Radiocarbon date(s)"))
-    dendro_lab = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Dendro Lab"), help_text=_("Lab ID for dendrochronology"))
-    dendro_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Dendro Date"), help_text=_("Dendrochronology date(s)"))
-
-    est_length = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Estimated Length"), help_text=_("Estimated length in metres"))
-    est_width = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Estimated Width"), help_text=_("Estimated width in metres"))
-    est_height = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Estimated Height"), help_text=_("Estimated height in metres"))
-    
-    meas_length = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Recorded Length"), help_text=_("Recorded length in metres"))
-    meas_width = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Recorded Width"), help_text=_("Recorded width in metres"))
-    meas_height = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Recorded Height"), help_text=_("Recorded height in metres"))
-    
-    reconstruction = models.BooleanField(null=True, default=False, verbose_name=_("Reconstructed"), help_text=_("Indicate if the vessel has been reconstructed"))
-    recon_description = models.TextField(null=True, blank=True, verbose_name=_("Reconstruction Description"), help_text=_("Description of reconstruction attempts"))
-    recon_length = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Reconstruction Length"), help_text=_("Reconstructed length in metres"))
-    recon_width = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Reconstruction Width"), help_text=_("Reconstructed width in metres"))
-    recon_height = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Reconstruction Height"), help_text=_("Reconstructed height in metres"))
-    
-    size_trees = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Tree Size"), help_text=_("Size of tree(s) used in the vessel"))
-    hull = models.ManyToManyField(BoatMaterial, related_name='bark_hull_material', blank=True, verbose_name=_("Hull Material (Bark)"), help_text=_("Hull material for Bark Boats"))
-    type = models.CharField(max_length=10, choices=BOAT_TYPE_CHOICES, verbose_name=_("Boat Type"), help_text=_("Type of the boat"))
-
-
-    def __str__(self) -> str:
-        
-        name_str = f"{self.name}"
-        return name_str
-    
-    def __repr__(self) -> str:
-        return str(f"{self.name}")
-
-    class Meta:
-        verbose_name = _("Boat")
-        verbose_name_plural = _("Boats")
-
-
-class BarkBoatType(models.Model):
-    boat = models.ForeignKey(Boat, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Boat"), help_text=_("The boat the type is related to."))
-    bark_type = models.ForeignKey(BarkBoat, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Bark Boat Type"), help_text=_("The type of bark boat."))
-    toolmarks = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Toolmarks"), help_text=_("Description of any toolmarks"))
-    notes = models.TextField(null=True, blank=True, verbose_name=_("notes"), help_text=_("The notes of the boat."))
-    references = models.TextField(null=True, blank=True, verbose_name=_("references"), help_text=_("The references of the boat."))
-
-
-class LogBoatType(models.Model):
-    boat = models.ForeignKey(Boat, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Boat"), help_text=_("The boat the type is related to."))
-    log_type = models.ForeignKey(LogBoat, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Log Boat Type"), help_text=_("The type of log boat."))
-    toolmarks = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Toolmarks"), help_text=_("Description of any toolmarks"))
-    notes = models.TextField(null=True, blank=True, verbose_name=_("notes"), help_text=_("The notes of the boat."))
-    references = models.TextField(null=True, blank=True, verbose_name=_("references"), help_text=_("The references of the boat."))
-
-
 class DateRanges(abstract.AbstractTagModel):
     start_date = models.IntegerField(null=True, blank=True, verbose_name=_("Start Date"), help_text=_("The start date of the date range of interest.  Use a negative integer for BC dates."))
     end_date = models.IntegerField(null=True, blank=True, verbose_name=_("End Date"), help_text=_("The end date of the date range of interest.  Use a negative integer for BC dates."))
@@ -614,6 +463,310 @@ class DateRanges(abstract.AbstractTagModel):
     class Meta:
         verbose_name = _("Date Range")
         verbose_name_plural = _("Date Ranges")
+
+
+# These are the column names from excel sheet for boat building data
+# ["Vessel Type", "Vessel Name", "Vessel Start Date", "Vessel End Date",
+# "14C Lab", "14C Date",
+# "Site Name", "Site Description", "Lat", "Long",
+# "Period", "Phase", "Period Start Date", "Period End Date",
+# "Vessel Description",
+# "Hull Length Est", "Hull Width Est", "Hull Height Est", "Hull Length Actual", "Hull Width Actual", "Hull Height Actual",
+# "Reconstruction Bool", "Reconstruction Details",
+# "Thickness (cm)", "Thickness Measured",
+# "Length of Longest Plank",
+# "Size of Trees",
+# "Hull Finish", "Hull Material",
+# "Frames or Ribs Material",
+# "Thwarts Material",
+# "Plank Fastenings Material", "Bottom Side Strakes Material", "Outer Bottom Plank Material", "Keel Plank Material",
+# "Caulking Material",
+# "Integral Cleat Bool", "Integral Cleats Distance", "Integral Cleats Number", "CleatHoles SewingHoles Size",
+# "Sealing Laths",
+# "Rail Plough",
+# "Tree Nails",
+# "Keel Plank Evidence Bending Twisting Bool", "Keel Plank Evidence Bending Twisting Text",
+# "Outer Bottom Plank Evidence Bending Twisting Bool", "Outer Bottom Plank Evidence Bending Twisting Text",
+# "Lowest Side Strake Evidence Bending Twisting Bool", "Lowest Side Strake Evidence Bending Twisting Text",
+# "Longitudinal Shape Evidence Bending Twisting Bool", "Longitudinal Shape Evidence Bending Twisting Text",
+# "Evidence of Propulsion",
+# "Loose Transom", "Hewn-out Ridges", "Step Aft",
+# "Platform Aft", "Platform Fore",
+# "Propulsion", "Stern Hole",
+# "Mast Feature",
+# "Tool Marks", "Potential Tools",
+# "Fastening Method", "Special Features", "Comments", "References", "National Register" ]
+
+
+
+# These are the column names from excel sheet for bark boat data, log boat data and Plank boat data
+# Build models for boats
+
+# Boat model
+
+class RadiocarbonDating(models.Model):
+    sample_id = models.CharField(max_length=100, unique=True)
+    lab = models.CharField(max_length=255)
+    calibrated_date_range = models.CharField(max_length=255)
+    
+    def __str__(self):
+        return f"Sample {self.sample_id} for {self.boat}"
+
+    def __repr__(self):
+        return str(f"Sample {self.sample_id} for {self.boat}")
+    
+    class Meta:
+        verbose_name = _("Radiocarbon Dating")
+        verbose_name_plural = _("Radiocarbon Dating")
+
+class BoatComponent(models.Model):
+    PART_TYPE_CHOICES = [
+        ('hull', _('Hull')), ('thwarts', _('Thwarts')), ('frames', _('Frames/Ribs')), ('bottom_side_strakes', _('Bottom Side Strakes')),
+        ('outer_bottom_plank', _('Outer Bottom Plank')), ('keep_plank', _('Keel Plank')), ('caulking', _('Caulking'))]
+    
+    part_type = models.CharField(max_length=255, choices=PART_TYPE_CHOICES, verbose_name=_("Part Type"))
+    material = models.ManyToManyField(BoatMaterial, related_name='material', blank=True, verbose_name=_("Material"), help_text=_("Material of the part"))
+    description = models.TextField(null=True, blank=True, verbose_name=_("Description"), help_text=_("Description of the part"))
+    length_est = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Estimated Length"), help_text=_("Estimated length in metres"))
+    width_est = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Estimated Width"), help_text=_("Estimated width in metres"))
+    height_est = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Estimated Height"), help_text=_("Estimated height in metres"))
+    length_meas = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Measured Length"), help_text=_("Measured length in metres"))
+    width_meas = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Measured Width"), help_text=_("Measured width in metres"))
+    height_meas = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Measured Height"), help_text=_("Measured height in metres"))
+    integral_bool = models.BooleanField(null=True, default=False, verbose_name=_("Integral Cleats"), help_text=_("Indicate presence or absence of integral cleats"))
+    integral_dist = models.CharField(max_length=255, null=True, blank=True, verbose_name=_("Integral Cleat Distance"), help_text=_("Distance between integral cleats in cm"))
+
+    def __str__(self):
+        return f"{self.part_type}"
+    
+    def __repr__(self):
+        return str(f"{self.part_type}")
+    
+    class Meta:
+        verbose_name = _("Boat Component")
+        verbose_name_plural = _("Boat Components")
+
+
+class Boat(abstract.AbstractBaseModel):
+    BOAT_TYPE_CHOICES = [
+        ('bark', _('Bark Boat')), ('plank', _('Plank Boat')), ('log', _('Log Boat'))]
+    # Common Fields
+    vessel_name = models.CharField(max_length=256, null=True, blank=True, 
+                                   verbose_name=_("Vessel Name"), help_text=_("Name of the vessel"))
+    vessel_type = models.CharField(max_length=256, null=True, blank=True, 
+                                   verbose_name=_("Vessel Type"), help_text=_("Type of the vessel"))
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, 
+                             verbose_name=_("Site"), help_text=_("The site where the vessel was found."))
+    location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, 
+                                 verbose_name=_("Site Description"), help_text=_("Description of the site location"))
+    dating_range = models.ForeignKey(DateRanges, on_delete=models.CASCADE, null=True, blank=True,
+                                        verbose_name=_("Dating Range"), help_text=_("The dating range of the vessel"))
+    description = models.TextField(null=True, blank=True, verbose_name=_("Vessel Description"), 
+                                   help_text=_("A description of the boat find"))
+    period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, 
+                              verbose_name=_("Period"), help_text=_("The period the vessel dates to."))
+    # Radio Carbon Dating
+    carbonated_date = models.ManyToManyField(RadiocarbonDating, blank=True, verbose_name=_("Radiocarbon Dating"),
+                                            help_text=_("Radiocarbon dating of the vessel"))
+    
+    #Reconstruction
+    reconstruction = models.BooleanField(null=True, default=False, verbose_name=_("Reconstructed"),
+                                            help_text=_("Indicate if the vessel has been reconstructed"))
+    recon_description = models.TextField(null=True, blank=True, verbose_name=_("Reconstruction Description"),
+                                            help_text=_("Description of reconstruction attempts"))
+
+    # Estimated Measurements
+    thickness = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Thickness"),
+                                help_text=_("Thickness of the vessel in cm"))
+    thickness_measured = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Thickness Measured"),
+                                help_text=_("Measured thickness of the vessel in cm"))
+
+    sealing_lath = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Sewing Laths"),
+                                help_text=_("Description of sewing laths"))
+    rail_plough = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Rail/Plough"),
+                                help_text=_("Description of the rail/plough"))
+    tree_nails = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Tree Nails"),
+                                help_text=_("Description of the tree nail(s)"))
+    
+    # evidence of bending/twisting
+    evidence_of_propulsion = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Evidence of Propulsion"),
+                                help_text=_("Description of evidence of propulsion"))
+    loose_transom = models.BooleanField(null=True, default=False, verbose_name=_("Loose Transom"),
+                                help_text=_("Indicate presence or absence of a loose transom"))
+    hewn_out_ridges = models.BooleanField(null=True, default=False, verbose_name=_("Hewn-out Ridges"),
+                                help_text=_("Indicate presence or absence of hewn-out ridges"))
+    step_aft = models.BooleanField(null=True, default=False, verbose_name=_("Step Aft"),
+                                help_text=_("Indicate presence or absence of a step aft"))
+    platform_aft = models.BooleanField(null=True, default=False, verbose_name=_("Platform Aft"),
+                                help_text=_("Indicate presence or absence of a platform aft"))
+    platform_fore = models.BooleanField(null=True, default=False, verbose_name=_("Platform Fore"),
+                                help_text=_("Indicate presence or absence of a platform fore"))
+    propulsion = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Propulsion"),
+                                help_text=_("Description of the propulsion"))
+    mast_feature = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Mast Feature"),
+                                help_text=_("Description of the mast feature"))
+    tool_marks = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Tool Marks"),
+                                help_text=_("Description of the tool marks"))
+    potential_tools = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Potential Tools"),
+                                help_text=_("Description of the potential tools"))
+    fastening_method = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Fastening Method"),
+                                help_text=_("Description of the fastening method"))
+    special_features = models.ManyToManyField(BoatFeatures, related_name='special_features', blank=True, verbose_name=_("Special Features"),
+                                help_text=_("Special features of the vessel"))
+    # More information about the vessel
+    national_id = models.URLField(null=True, blank=True, verbose_name=_("National ID Link"),
+                                    help_text=_("Link to the site in the national heritage register"))
+    comments = models.TextField(null=True, blank=True, verbose_name=_("comments"),
+                                help_text=_("The comments of the boat."))
+    references = models.TextField(null=True, blank=True, verbose_name=_("references"), 
+                                help_text=_("The references of the boat."))
+
+
+class BoatRelComponent(models.Model):
+    boat = models.ForeignKey(Boat, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Boat"), help_text=_("The boat the type is related to."))
+    component = models.ForeignKey(BoatComponent, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Component"), help_text=_("The component of the boat."))
+
+
+# class Boat(abstract.AbstractBaseModel):
+#     BOAT_TYPE_CHOICES = [
+#         ('bark', _('Bark Boat')),
+#         ('plank', _('Plank Boat')),
+#         ('log', _('Log Boat')),
+#     ]
+    
+#     # Common Fields
+#     name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Boat Name"), help_text=_("Name of the vessel"))
+#     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Site"), help_text=_("The site where the vessel was found."))
+#     location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Site Description"), help_text=_("Description of the site location"))
+#     national_id = models.URLField(null=True, blank=True, verbose_name=_("National ID Link"), help_text=_("Link to the site in the national heritage register"))
+#     description = models.TextField(null=True, blank=True, verbose_name=_("Vessel Description"), help_text=_("A description of the boat find"))
+#     preservation = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Preservation"), help_text=_("State of preservation"))
+
+#     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Period"), help_text=_("The period the vessel dates to."))
+#     start_date = models.IntegerField(null=True, blank=True, verbose_name=_("Start Date"), help_text=_("Start date (negative for BC dates)"))
+#     end_date = models.IntegerField(null=True, blank=True, verbose_name=_("End Date"), help_text=_("End date (negative for BC dates)"))
+#     c14_lab = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("C14 Lab"), help_text=_("Lab ID for radiocarbon dating"))
+#     c14_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("C14 Date"), help_text=_("Radiocarbon date(s)"))
+#     dendro_lab = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Dendro Lab"), help_text=_("Lab ID for dendrochronology"))
+#     dendro_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Dendro Date"), help_text=_("Dendrochronology date(s)"))
+
+#     est_length = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Estimated Length"), help_text=_("Estimated length in metres"))
+#     est_width = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Estimated Width"), help_text=_("Estimated width in metres"))
+#     est_height = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Estimated Height"), help_text=_("Estimated height in metres"))
+    
+#     meas_length = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Recorded Length"), help_text=_("Recorded length in metres"))
+#     meas_width = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Recorded Width"), help_text=_("Recorded width in metres"))
+#     meas_height = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Recorded Height"), help_text=_("Recorded height in metres"))
+    
+#     reconstruction = models.BooleanField(null=True, default=False, verbose_name=_("Reconstructed"), help_text=_("Indicate if the vessel has been reconstructed"))
+#     recon_description = models.TextField(null=True, blank=True, verbose_name=_("Reconstruction Description"), help_text=_("Description of reconstruction attempts"))
+#     recon_length = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Reconstruction Length"), help_text=_("Reconstructed length in metres"))
+#     recon_width = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Reconstruction Width"), help_text=_("Reconstructed width in metres"))
+#     recon_height = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Reconstruction Height"), help_text=_("Reconstructed height in metres"))
+    
+#     size_trees = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Tree Size"), help_text=_("Size of tree(s) used in the vessel"))
+#     hull = models.ManyToManyField(BoatMaterial, related_name='bark_hull_material', blank=True, verbose_name=_("Hull Material (Bark)"), help_text=_("Hull material for Bark Boats"))
+#     type = models.CharField(max_length=10, choices=BOAT_TYPE_CHOICES, verbose_name=_("Boat Type"), help_text=_("Type of the boat"))
+#     toolmarks = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Toolmarks"), help_text=_("Description of any toolmarks"))
+#     notes = models.TextField(null=True, blank=True, verbose_name=_("notes"), help_text=_("The notes of the boat."))
+#     references = models.TextField(null=True, blank=True, verbose_name=_("references"), help_text=_("The references of the boat."))
+
+
+#     def __str__(self) -> str:
+        
+#         name_str = f"{self.name}"
+#         return name_str
+    
+#     def __repr__(self) -> str:
+#         return str(f"{self.name}")
+
+#     class Meta:
+#         verbose_name = _("Boat")
+#         verbose_name_plural = _("Boats")
+
+
+
+# class BarkBoat(models.Model):
+#     # Bark Boat fields
+#     boat = models.ForeignKey(Boat, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Boat"), help_text=_("The boat the type is related to."))
+#     thwarts = models.ManyToManyField(BoatMaterial, related_name='thwarts_material', blank=True, verbose_name=_("Thwarts Material"), help_text=_("Material of the thwarts"))
+#     frames = models.ManyToManyField(BoatMaterial, related_name='frames_material', blank=True, verbose_name=_("Frames/Ribs Material"), help_text=_("Material of the frames/ribs"))
+#     bottom_side_strakes = models.ManyToManyField(BoatMaterial, related_name='bottom_side_strakes_shape', blank=True, verbose_name=_("Bottom Side Strakes Material"), help_text=_("Material of the bottom side strakes"))
+#     bss_description = models.TextField(null=True, blank=True, verbose_name=_("Bottom Side Strakes Description"), help_text=_("Description of the bottom side strakes"))
+#     outer_bottom_plank = models.ManyToManyField(BoatMaterial, related_name='outer_bottom_plank_shape', blank=True, verbose_name=_("Outer Bottom Plank Material"), help_text=_("Material of the outer bottom plank"))
+#     obp_description = models.TextField(null=True, blank=True, verbose_name=_("Outer Bottom Plank Description"), help_text=_("Description of the outer bottom plank"))
+#     keep_plank = models.ManyToManyField(BoatMaterial, related_name='keel_plank_shape', blank=True, verbose_name=_("Keel Plank Material"), help_text=_("Material of the keel plank"))
+#     kp_description = models.TextField(null=True, blank=True, verbose_name=_("Keel Plank Description"), help_text=_("Description of the keel plank"))
+#     caulking = models.ManyToManyField(BoatMaterial, related_name='caulking_material', blank=True, verbose_name=_("Caulking Material"), help_text=_("Material of the caulking"))
+#     integ_cleat = models.BooleanField(null=True,default=False, verbose_name=_("Integral Cleats"), help_text=_("Indicate presence or absence of integral cleats"))
+#     integ_cleat_dist = models.CharField(max_length=256, null=True,blank=True,verbose_name=_("Integral Cleat Distance"), help_text = _("Distance between integral cleats in cm"))
+#     integ_cleat_num =models.CharField(max_length=256, null=True,blank=True,verbose_name=_("Integral Cleat Number"), help_text = _("Number of integral cleats"))
+#     shape_holes = models.ForeignKey(Shape, on_delete=models.CASCADE, related_name='holes_shape',
+#                                     null=True, blank=True, verbose_name=_("Sewing Holes"), help_text=_("The size and shape of any sewing holes"))
+#     sealing_lath = models.CharField(max_length=256, null=True,blank=True,verbose_name=_("Sewing Laths"), help_text = _("Description of sewing laths"))
+#     rail_plough = models.CharField(max_length=256, null=True,blank=True,verbose_name=_("Rail/Plough"), help_text = _("Description of the rail/plough"))
+#     tree_nails = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+#         "Tree Nails"), help_text=_("Description of the tree nail(s)"))
+#     keel_bend_bool = models.BooleanField(null=True,default=False, verbose_name=_("Keel Plank Bending"), help_text=_("Indicate presence or absence of evidence of bending/twisting of the keel plank"))
+#     keel_bending = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+#         "Keel Plank Evidence"), help_text=_("Describe evidence of bending/twisting of keel plank")) 
+#     outer_bend_bool = models.BooleanField(null=True,default=False, verbose_name=_("Outer Bottom Plank Bending"), help_text=_("Indicate presence or absence of evidence of bending/twisting of the outer bottom plank"))
+#     outer_bending = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+#         "Outer Bottom Plank Evidence"), help_text=_("Describe evidence of bending/twisting of the outer bottom plank"))
+#     low_bend_bool = models.BooleanField(null=True,default=False, verbose_name=_("Lower Side Strake Bending"), help_text=_("Indicate presence or absence of evidence of bending/twisting of the lower side strake"))
+#     low_bending = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+#         "Lower Side Strake Evidence"), help_text=_("Describe evidence of bending/twisting of the outer bottom plank"))
+#     long_shape_bool = models.BooleanField(null=True,default=False, verbose_name=_("Longitudinal Shape Bending"), help_text=_("Indicate presence or absence of evidence of bending/twisting of the longitudinal shape"))
+#     long_shape_bending = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+#         "Longitudinal Shape Evidence"), help_text=_("Describe evidence of bending/twisting of the longitudinal shape"))
+#     poss_tools = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Possible Tools"), help_text=_("List any possible tools including their size"))
+    
+#     fastening_type = models.ForeignKey(Fastening, on_delete=models.CASCADE, related_name='fastening_type',
+#                                     null=True, blank=True, verbose_name=_("Fastening Method"), help_text=_("The fastening type/method used"))
+#     special_features = models.ManyToManyField(BoatFeatures, blank=True, verbose_name=_("Special Features"), help_text=_("Any special features of the boat not described above"))
+#     comments = models.TextField(null=True, blank=True, verbose_name=_("comments"), help_text=_("The comments of the boat."))
+
+
+#     def __str__(self) -> str:
+#         name_str = f"{self.id}"
+#         return name_str
+    
+#     def __repr__(self) -> str:
+#         return str(f"{self.id}")
+    
+#     class Meta:
+#         verbose_name = _("Bark Boat")
+#         verbose_name_plural = _("Bark Boats")
+
+# class LogBoat(models.Model):
+#     # Log Boat fields
+
+#     boat = models.ForeignKey(Boat, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Boat"), help_text=_("The boat the type is related to."))
+#     bow = models.ForeignKey(Shape, on_delete=models.CASCADE, related_name='bow_shape', null=True,
+#                             blank=True, verbose_name=_("bowshape"), help_text=_("The bow shape of the logboat."))
+#     stern = models.ForeignKey(Shape, on_delete=models.CASCADE, related_name='stern_shape', null=True,
+#                               blank=True, verbose_name=_("sternshape"), help_text=_("The stern shape of the logboat."))
+
+#     basal = models.ForeignKey(Shape, on_delete=models.CASCADE, related_name='basel_shape',
+#                               null=True, blank=True, verbose_name=_("basal"), help_text=_("The basal of the logboat."))
+
+#     transerve_ridges = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("transerveridges"), help_text=_("The transerve ridges of the logboat."))
+#     other_features = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("otherfeatures"), help_text=_("The other features of the logboat."))
+#     repair = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("repair"), help_text=_("The repair of the logboat."))
+#     burnt_mark = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("burntmark"), help_text=_("The burnt mark of the logboat."))
+#     other_material = models.ManyToManyField(Material, blank=True, verbose_name=_("othermaterial"), help_text=_("The other material of the logboat."))
+    
+#     def __str__(self) -> str:
+#         name_str = f"{self.id}"
+#         return name_str
+    
+#     def __repr__(self) -> str:
+#         return str(f"{self.id}")
+    
+#     class Meta:
+#         verbose_name = _("Log Boat")
+#         verbose_name_plural = _("Log Boats")
+    
 
 class Subprojects(abstract.AbstractTagModel):
     def __str__(self) -> str:
