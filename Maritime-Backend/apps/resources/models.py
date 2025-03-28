@@ -338,7 +338,7 @@ class Material(abstract.AbstractTagModel):
         verbose_name = _("Material")
         verbose_name_plural = _("Materials")
 
-class BoatMaterial(abstract.AbstractTagModel):
+class BoatMaterial(abstract.AbstractBaseModel):
     common_name=models.CharField(max_length=256,null=True,blank=True,verbose_name=_("Common Name"), help_text=_("The common name for the wood species"))
     scientific_name = models.CharField(max_length=256,null=True,blank=True,verbose_name=_("Scientific Name"), help_text=_("The scientific name for the wood species"))
     
@@ -511,7 +511,7 @@ class BoatComponent(models.Model):
 
 class Boat(abstract.AbstractBaseModel):
     BOAT_TYPE_CHOICES = [
-        ('bark', _('Bark Boat')), ('plank', _('Plank Boat')), ('log', _('Log Boat'))]
+        ('bark', _('Bark Boat')), ('plank', _('Plank Boat')), ('log', _('Logboat'))]
     # Common Fields
     vessel_name = models.CharField(max_length=256, null=True, blank=True, 
                                    verbose_name=_("Vessel Name"), help_text=_("Name of the vessel"))
