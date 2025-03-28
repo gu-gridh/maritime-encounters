@@ -465,11 +465,13 @@ class DateRanges(abstract.AbstractTagModel):
         verbose_name_plural = _("Date Ranges")
 class CalibratedDate(abstract.AbstractBaseModel):
     sample = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "Region Name"), help_text=_("Free-form, non-indexed name of the region."))
+        "Sample ID"), help_text=_("Sample identifier"))
+    lab = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "Lab ID"), help_text=_("Lab identifier"))
     dating_method = models.ForeignKey(DatingMethod, on_delete=models.CASCADE, related_name='dating_method_type',
                                       null=True, blank=True, verbose_name=_("dating_method"), help_text=_("The dating method of the House."))
     date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "Region Name"), help_text=_("Free-form, non-indexed name of the region."))
+        "Calibrated Date"), help_text=_("Calibrated date, indicate BC/BP and the error range"))
     
     def __str__(self) -> str:
 
@@ -527,8 +529,8 @@ class Boat(abstract.AbstractBaseModel):
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, 
                               verbose_name=_("Period"), help_text=_("The period the vessel dates to."))
     # Radio Carbon Dating
-    carbonated_date = models.ManyToManyField(CalibratedDate, blank=True, verbose_name=_("Radiocarbon Dating"),
-                                            help_text=_("Radiocarbon dating of the vessel"))
+    carbon_date = models.ManyToManyField(CalibratedDate, blank=True, verbose_name=_("Dating"),
+                                            help_text=_("Radiocarbon, dendro, etc. dating of the vessel"))
     
     #Reconstruction
     reconstruction = models.BooleanField(null=True, default=False, verbose_name=_("Reconstructed"),

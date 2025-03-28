@@ -218,6 +218,12 @@ class RelBoatComponent(admin.TabularInline):
     model = BoatRelComponent
     extra = 1
 
+@admin.register(CalibratedDate)
+class RadiocarbonAdmin(admin.ModelAdmin):
+    list_display = ['sample', 'lab', 'dating_method', 'date']
+    search_fields = ['sample', 'lab', 'dating_method', 'date']
+    list_filter = ['sample', 'lab', 'dating_method', 'date']
+
 @admin.register(Boat)
 class BoatsAdmin(admin.ModelAdmin):
     list_display = ['site', 'vessel_name', 'vessel_type']
