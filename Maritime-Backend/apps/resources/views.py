@@ -237,8 +237,8 @@ class ResourcesFilteringViewSet(GeoViewSet):
     )
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-    authentication_classes = [TokenAuthentication]  
-    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+    # authentication_classes = [TokenAuthentication]  
+    # permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 # Viweset to download data for selected area based on parameters and bounding box in search function
 # Data should provided in csv and json format
