@@ -166,8 +166,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
         max_year = int(max_year) if max_year else None
 
         resource_mapping = {
-            # 'plank_boats': models.PlankBoats,
-            # 'log_boats': models.LogBoats,
+            'boats': models.Boat,
             'radiocarbon_dates': models.Radiocarbon,
             'individual_samples': models.IndividualObjects,
             'dna_samples': models.aDNA,
@@ -272,8 +271,7 @@ class DownloadViewSet(viewsets.ViewSet):
         max_year = int(max_year) if max_year else None
 
         resource_mapping = {
-            # 'plank_boats': models.PlankBoats,
-            # 'log_boats': models.LogBoats,
+            'boats': models.Boat,
             'radiocarbon_dates': models.Radiocarbon,
             'individual_samples': models.IndividualObjects,
             'dna_samples': models.aDNA,
