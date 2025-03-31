@@ -126,7 +126,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
         
         data = {
             'boats': BoatSerializer(Boat.objects.filter(site=site), many=True).data,
-            'radiocarbon_dates': RadioCarbonSerializer(Radiocarbon.objects.filter(site=site), many=True).data,
+            'radiocarbon_dates': RadiocarbonSerializer(Radiocarbon.objects.filter(site=site), many=True).data,
             'individual_samples': IndivdualObjectSerializer(IndividualObjects.objects.filter(site=site), many=True).data,
             'dna_samples': aDNASerializer(aDNA.objects.filter(site=site), many=True).data,
             'metal_analysis': MetalAnalysisSerializer(MetalAnalysis.objects.filter(site=site), many=True).data,
