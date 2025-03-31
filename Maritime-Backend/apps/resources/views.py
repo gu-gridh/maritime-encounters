@@ -166,7 +166,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
         max_year = int(max_year) if max_year else None
 
         resource_mapping = {
-            # 'boats': models.Boat,
+            'boats': models.Boat,
             'radiocarbon_dates': models.Radiocarbon,
             'individual_samples': models.IndividualObjects,
             'dna_samples': models.aDNA,
