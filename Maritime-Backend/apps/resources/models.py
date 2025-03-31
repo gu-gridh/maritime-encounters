@@ -517,7 +517,7 @@ class Boat(abstract.AbstractBaseModel):
     # Common Fields
     vessel_name = models.CharField(max_length=256, null=True, blank=True, 
                                    verbose_name=_("Vessel Name"), help_text=_("Name of the vessel"))
-    vessel_type = models.CharField(max_length=256, null=True, blank=True, 
+    vessel_type = models.CharField(max_length=256, null=True, blank=True, choices=BOAT_TYPE_CHOICES,
                                    verbose_name=_("Vessel Type"), help_text=_("Type of the vessel"))
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, 
                              verbose_name=_("Site"), help_text=_("The site where the vessel was found."))
