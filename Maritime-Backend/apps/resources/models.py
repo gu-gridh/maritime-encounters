@@ -912,66 +912,7 @@ class IsotopesBio(abstract.AbstractBaseModel):
     class Meta:
         verbose_name = _("Isotopes Bio")
         verbose_name_plural = _("Isotopes Bios")
-
-
-class LNHouses(abstract.AbstractBaseModel):
-    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "site"), help_text=_("The site in which the House is located."))
-    number_houses = models.IntegerField(null=True, blank=True, verbose_name=_(
-        "number_houses"), help_text=_("The number of houses of the House."))
-    number_BA_houses = models.IntegerField(null=True, blank=True, verbose_name=_(
-        "number_BA_houses"), help_text=_("The number of BA houses of the House."))
-    features = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "features"), help_text=_("The features of the House."))
-    # dating_method = models.ForeignKey(DatingMethod, on_delete=models.CASCADE, related_name='dating_method_type',
-    #                                   null=True, blank=True, verbose_name=_("dating_method"), help_text=_("The dating method of the House."))
-    feature_house_K1 = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "feature_house_K1"), help_text=_("The feature house K1 of the House."))
-    context_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "context_date"), help_text=_("The context date of the House."))
-    aisle = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "aisle"), help_text=_("The aisle of the House."))
-    aisle_type = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "aisle_type"), help_text=_("The aisle type of the House."))
-    min_length = models.FloatField(null=True, blank=True, verbose_name=_(
-        "min_length"), help_text=_("The min length of the House."))
-    max_length = models.FloatField(null=True, blank=True, verbose_name=_(
-        "max_length"), help_text=_("The max length of the House."))
-    min_width = models.FloatField(null=True, blank=True, verbose_name=_(
-        "min_width"), help_text=_("The min width of the House."))
-    max_width = models.FloatField(null=True, blank=True, verbose_name=_(
-        "max_width"), help_text=_("The max width of the House."))
-    orientation = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "orientation"), help_text=_("The orientation of the House."))
-    earliest_period_typology = models.ForeignKey(Period, on_delete=models.CASCADE, related_name='earliest_period_typology_time', null=True, blank=True, verbose_name=_(
-        "earliest_period_typology"), help_text=_("The earliest period typology of the House."))
-    latest_period_typology = models.ForeignKey(Period, on_delete=models.CASCADE, related_name='latest_period_typology_time', null=True, blank=True, verbose_name=_(
-        "latest_period_typology"), help_text=_("The latest period typology of the House."))
-    # prefered_dating_method = models.ForeignKey(DatingMethod, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-    #     "prefered_dating_method"), help_text=_("The prefered dating method of the House."))
-    dating_typology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "dating_typology"), help_text=_("The dating typology of the House."))
-    dating_14C = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "dating_14C"), help_text=_("The dating 14C of the House."))
-    final_date = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "final_date"), help_text=_("The final date of the House."))
-    reason_exclusion = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "reason_exclusion"), help_text=_("The reason exclusion of the House."))
-
-    references = models.TextField(null=True, blank=True, verbose_name=_(
-        "references"), help_text=_("The references of the House."))
-    url = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
-        "url"), help_text=_("The url of the House."))
-
-    def __str__(self) -> str:
-        name_str = f" {self.number_houses}-{self.site.name}"
-        return name_str
-
-    class Meta:
-        verbose_name = _("Late Neolithic House")
-        verbose_name_plural = _("Late Neolithic Houses")
-
-
+        
 class Form(abstract.AbstractBaseModel):
     name = models.CharField(max_length=254, null=True, blank=True, verbose_name=_(
         "Name"), help_text=_("The form of an object, e.g. shafthole axe, miniature, etc."))
@@ -994,6 +935,105 @@ class Variant(abstract.AbstractBaseModel):
     class Meta:
         verbose_name = _("Variant")
         verbose_name_plural = _("Variants")
+
+
+class Orientation(abstract.AbstractTagModel):
+    # Represents the direction or orientation of a structure or find
+
+    def __str__(self) -> str:
+        return self.text
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    class Meta:
+        verbose_name = _("Orientation")
+        verbose_name_plural = _("Orientations")
+
+
+class GableDescriptor(abstract.AbstractTagModel):
+    # Represents the direction or orientation of a structure or find
+
+    def __str__(self) -> str:
+        return self.text
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    class Meta:
+        verbose_name = _("Gable Descriptor")
+        verbose_name_plural = _("Gable Descriptors")
+
+class ExteriorDescriptor(abstract.AbstractTagModel):
+    # Represents the direction or orientation of a structure or find
+
+    def __str__(self) -> str:
+        return self.text
+
+    def __repr__(self) -> str:
+        return str(self)
+
+    class Meta:
+        verbose_name = _("Exterior Descriptor")
+        verbose_name_plural = _("Exterior Descriptors")
+
+class LNHouses(abstract.AbstractBaseModel):
+    site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+        "site"), help_text=_("The site in which the House is located."))
+    farmstead = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "feature_house_K1"), help_text=_("Farmstead name"))
+    structure_num = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "feature_house_K1"), help_text=_("Structure number/identifier"))
+    cadastral_num  = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "feature_house_K1"), help_text=_("Cadastral ID"))
+    holding_num = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "feature_house_K1"), help_text=_("Holding ID"))
+    form = models.ForeignKey(Form, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+        "Form"), help_text=_("The form of the structure, e.g., longhouse"))
+    variant = models.ForeignKey(Variant, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+        "Variant"), help_text=_("The variant of the structure, e.g., three-aisled"))
+    orientation = models.ForeignKey(Orientation, on_delete=models.CASCADE,
+                                      null=True, blank=True, verbose_name=_("Orientation"), help_text=_("The orientation of the structure"))
+    length = models.FloatField(null=True, blank=True, verbose_name=_(
+        "Length"), help_text=_("The estimated length of the structure in metres"))
+    width = models.FloatField(null=True, blank=True, verbose_name=_(
+        "Width"), help_text=_("The estimated width of the structure in metres"))
+    area = models.FloatField(null=True, blank=True, verbose_name=_(
+        "Area"), help_text=_("The estimated area of the structure in square metres"))
+    period = models.ManyToManyField(Period, verbose_name=_(
+        "Period(s)"), help_text=_("The period(s) and phases the structure dates to"))
+    period_original = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        'Period (pre-translation)'), help_text=_('The period text before reformatting'))
+    dating = models.ManyToManyField(CalibratedDate, blank=True, verbose_name=_(
+        "Calibrated Dates"), help_text=_("The dated samples and calibrated dates"))
+    gable = models.ManyToManyField(GableDescriptor, verbose_name=_(
+        "Gable Type"), help_text=_("The shape/description of the structure's gable"))
+    exterior_construction = models.ManyToManyField(ExteriorDescriptor, verbose_name=_(
+        "Exterior Construction"), help_text=_("The type of the structure's exterior construction"))
+    roofbearing_posts = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "Roof-bearing Posts"), help_text=_("The number of roof-bearing posts"))
+    entrance = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "Entrances"), help_text=_("The number of entrances"))
+    comments = models.TextField(null=True, blank=True, verbose_name=_(
+        "Comments"), help_text=_("General comments about the entry."))
+    references = models.TextField(null=True, blank=True, verbose_name=_(
+        "References"), help_text=_("Reference citations for the entry. Separate each reference with a semicolon"))
+    url = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "url"), help_text=_("The url of the House."))
+    orig_coords = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "Original Coords"), help_text=_("The original coordinates of the object."))
+
+
+    def __str__(self) -> str:
+        name_str = f"{self.site.name}: {self.variant} {self.form}"
+        return name_str
+
+    class Meta:
+        verbose_name = _("Late Neolithic House")
+        verbose_name_plural = _("Late Neolithic Houses")
+
+
+
 
 
 class ObjectIds(abstract.AbstractBaseModel):

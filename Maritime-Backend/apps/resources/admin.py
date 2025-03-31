@@ -296,12 +296,32 @@ class IsotopesBioAdmin(admin.ModelAdmin):
     search_fields = ['site__name']
     list_filter = ['site']
 
+@admin.register(Orientation)
+class OrientationAdmin(admin.ModelAdmin):
+    list_display = ['text']
+    search_fields = ['text']
+    list_filter = ['text']
+    ordering = ['text']
+
+@admin.register(GableDescriptor)
+class GableDescriptorAdmin(admin.ModelAdmin):
+    list_display = ['text']
+    search_fields = ['text']
+    list_filter = ['text']
+    ordering = ['text']
+
+@admin.register(ExteriorDescriptor)
+class ExteriorDescriptorAdmin(admin.ModelAdmin):
+    list_display = ['text']
+    search_fields = ['text']
+    list_filter = ['text']
+    ordering = ['text']
 
 @admin.register(LNHouses)
 class LNHousesAdmin(admin.ModelAdmin):
     list_display = ['site']
-    search_fields = ['site__name']
-    list_filter = ['site']
+    search_fields = ['site__name', 'form','variant','orientation']
+    list_filter = ['site', 'form','variant','orientation']
 
 
 @admin.register(MuseumMeta)
