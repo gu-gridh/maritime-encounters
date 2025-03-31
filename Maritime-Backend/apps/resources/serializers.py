@@ -90,6 +90,14 @@ class ExcludeSitePloygonSampleSerializer(DynamicDepthSerializer):
         fields = ['id']+get_fields(NewSamples, exclude=DEFAULT_FIELDS)
 
 
+class ExcludePlolygonLocationGeoSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+
+    class Meta:
+        model = Location
+        fields = ['id'] + get_fields(Location, exclude=DEFAULT_FIELDS+['coordinates'])
+
+
 class PeriodSerializer(DynamicDepthSerializer):
 
     class Meta:
@@ -138,12 +146,12 @@ class IndivdualObjectSerializer(DynamicDepthSerializer):
         fields = ['id']+get_fields(IndividualObjects, exclude=DEFAULT_FIELDS)
 
 
-class RadiocarbonSerializer(DynamicDepthSerializer):
-    site = ExcludePlolygonSiteGeoSerializer()
+# class RadiocarbonSerializer(DynamicDepthSerializer):
+#     site = ExcludePlolygonSiteGeoSerializer()
 
-    class Meta:
-        model = Radiocarbon
-        fields = ['id']+get_fields(Radiocarbon, exclude=DEFAULT_FIELDS)
+#     class Meta:
+#         model = Radiocarbon
+#         fields = ['id']+get_fields(Radiocarbon, exclude=DEFAULT_FIELDS)
 
 
 class LandingPointsSerializer(DynamicDepthSerializer):
@@ -160,31 +168,66 @@ class NewSamplesSerializer(DynamicDepthSerializer):
         model = NewSamples
         fields = ['id']+get_fields(NewSamples, exclude=DEFAULT_FIELDS)
 
-class BoatSerializer(serializers.ModelSerializer):
+
+
+
+# class BoatSerializer(serializers.ModelSerializer):
+#     class Meta:
+#         model = Boat
+#         fields = '__all__'
+
+#     # def to_representation(self, instance):
+#     #     representation = super().to_representation(instance)
+#     #     if instance.type == 'bark':
+#     #         # Remove Log Boat fields
+#     #         log_fields = ['bow', 'stern', 'hull', 'basal', 'transerve_ridges', 'other_features', 'repair', 'burnt_mark', 'other_material']
+#     #         for field in log_fields:
+#     #             representation.pop(field, None)
+        
+#     #     elif instance.type == 'log':
+#     #         # Remove Bark Boat fields
+#     #         bark_fields = ['thwarts', 'frames', 'bottom_side_strakes', 'bss_description', 'outer_bottom_plank', 'obp_description', 
+#     #                        'keep_plank', 'kp_description', 'caulking', 'integ_cleat', 'integ_cleat_dist', 'integ_cleat_num',
+#     #                        'shape_holes', 'sealing_lath', 'rail_plough', 'tree_nails', 'keel_bend_bool', 'keel_bending', 
+#     #                        'outer_bend_bool', 'outer_bending', 'low_bend_bool', 'low_bending', 'long_shape_bool', 
+#     #                        'long_shape_bending', 'poss_tools']
+#     #         for field in bark_fields:
+#     #             representation.pop(field, None)
+        
+#     #     elif instance.type == 'plank':
+#     #         # Optionally customize fields for Plank Boat
+#     #         pass
+
+#     #     return representation
+
+class CalibratedDateSerializer(DynamicDepthSerializer):
+    class Meta:
+        model = CalibratedDate
+        fields = ["id", "sample", "lab", "dating_method", "date"]
+
+class BoatFeatureSerializer(DynamicDepthSerializer):
+    class Meta:
+        model = BoatFeatures
+        fields = get_fields(BoatFeatures, exclude=DEFAULT_FIELDS)
+
+class BoatComponentSerializer(DynamicDepthSerializer):
+    class Meta:
+        model = BoatComponent
+        fields = ["id"] + get_fields(BoatComponent, exclude=DEFAULT_FIELDS)
+
+class BoatRelComponentSerializer(DynamicDepthSerializer):
+    component = BoatComponentSerializer()
+
+    class Meta:
+        model = BoatRelComponent
+        fields = ['id'] + get_fields(BoatRelComponent, exclude=DEFAULT_FIELDS) + ['component']
+
+class BoatSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+    location = ExcludePlolygonLocationGeoSerializer()
+    components = BoatRelComponentSerializer(many=True, read_only=True)  # Just remove `source`
+
     class Meta:
         model = Boat
-        fields = '__all__'
+        fields = ['id'] + get_fields(Boat, exclude=DEFAULT_FIELDS) + ['components', 'site', 'location']
 
-    def to_representation(self, instance):
-        representation = super().to_representation(instance)
-        if instance.type == 'bark':
-            # Remove Log Boat fields
-            log_fields = ['bow', 'stern', 'hull', 'basal', 'transerve_ridges', 'other_features', 'repair', 'burnt_mark', 'other_material']
-            for field in log_fields:
-                representation.pop(field, None)
-        
-        elif instance.type == 'log':
-            # Remove Bark Boat fields
-            bark_fields = ['thwarts', 'frames', 'bottom_side_strakes', 'bss_description', 'outer_bottom_plank', 'obp_description', 
-                           'keep_plank', 'kp_description', 'caulking', 'integ_cleat', 'integ_cleat_dist', 'integ_cleat_num',
-                           'shape_holes', 'sealing_lath', 'rail_plough', 'tree_nails', 'keel_bend_bool', 'keel_bending', 
-                           'outer_bend_bool', 'outer_bending', 'low_bend_bool', 'low_bending', 'long_shape_bool', 
-                           'long_shape_bending', 'poss_tools']
-            for field in bark_fields:
-                representation.pop(field, None)
-        
-        elif instance.type == 'plank':
-            # Optionally customize fields for Plank Boat
-            pass
-
-        return representation

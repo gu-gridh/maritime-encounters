@@ -596,7 +596,7 @@ class Boat(abstract.AbstractBaseModel):
         verbose_name_plural = _("Boats")
 
 class BoatRelComponent(models.Model):
-    boat = models.ForeignKey(Boat, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Boat"), help_text=_("The boat the type is related to."))
+    boat = models.ForeignKey(Boat, on_delete=models.CASCADE, null=True, blank=True, related_name="components", verbose_name=_("Boat"), help_text=_("The boat the type is related to."))
     component = models.ForeignKey(BoatComponent, on_delete=models.CASCADE, null=True, blank=True, verbose_name=_("Component"), help_text=_("The component of the boat."))
  
 
