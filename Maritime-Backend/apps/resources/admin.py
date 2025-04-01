@@ -230,7 +230,8 @@ class BoatsAdmin(admin.ModelAdmin):
     search_fields = ['site__name', 'vessel_name', 'vessel_type']
     list_filter = ['site', 'vessel_type']
     ordering = ['site']
-    autocomplete_fields = ['site', 'period', ]
+    autocomplete_fields = ['site', 'period', 'location']
+    filter_horizontal = ['carbon_date']
     inlines = [
         RelBoatComponent
     ]

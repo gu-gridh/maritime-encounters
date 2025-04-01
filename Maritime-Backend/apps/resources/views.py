@@ -105,6 +105,26 @@ class LandingPointsViewSet(DynamicDepthViewSet):
     authentication_classes = [TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
+
+class BoatsViewSet(DynamicDepthViewSet):
+    serializer_class = BoatSerializer
+    queryset = (
+        Boat.objects.all()
+        .select_related("site", "location", "period")  # ForeignKey relations
+        .prefetch_related(
+            "components",  # Ensure components are prefetched properly
+            "components__component",  # Fetch related BoatComponent objects in one go
+        )
+    )
+    filterset_fields = get_fields(Boat, exclude=DEFAULT_FIELDS)
+
+class SearchPeriodsNames(DynamicDepthViewSet):
+    serializer_class = serializers.PeriodSerializer
+    queryset = models.Period.objects.all().order_by('name')
+    filterset_fields = get_fields(models.Period, exclude=DEFAULT_FIELDS)
+    authentication_classes = [TokenAuthentication]  
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+
 class SiteResourcesViewSet(viewsets.ViewSet):
     authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
     
@@ -137,26 +157,6 @@ class SiteResourcesViewSet(viewsets.ViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-class SearchPeriodsNames(DynamicDepthViewSet):
-    serializer_class = serializers.PeriodSerializer
-    queryset = models.Period.objects.all().order_by('name')
-    filterset_fields = get_fields(models.Period, exclude=DEFAULT_FIELDS)
-    authentication_classes = [TokenAuthentication]  
-    permission_classes = [IsAuthenticated]  # Explicitly require authentication
-
-
-
-class BoatsViewSet(DynamicDepthViewSet):
-    serializer_class = BoatSerializer
-    queryset = (
-        Boat.objects.all()
-        .select_related("site", "location", "period")  # ForeignKey relations
-        .prefetch_related(
-            "components",  # Ensure components are prefetched properly
-            "components__component",  # Fetch related BoatComponent objects in one go
-        )
-    )
-    filterset_fields = get_fields(Boat, exclude=DEFAULT_FIELDS)
 
 class ResourcesFilteringViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
