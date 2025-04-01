@@ -37,11 +37,16 @@ class ExcludePloygonFieldADM4Serializer(DynamicDepthSerializer):
         fields = ['id']+get_fields(ADM4, exclude=DEFAULT_FIELDS+['geometry'])
 
 
-# class ExcludePloygonFieldADM5Serializer(DynamicDepthSerializer):
-#     class Meta:
-#         model = ADM5
-#         fields = ['id']+get_fields(ADM5, exclude=DEFAULT_FIELDS+['geometry'])
+class ExcludePloygonFieldProvinceSerializer(DynamicDepthSerializer):
+    class Meta:
+        model = Province
+        fields = ['id']+get_fields(Province, exclude=DEFAULT_FIELDS+['geometry'])
 
+
+class ExcludePolygonFieldParishSerializer(DynamicDepthSerializer):
+    class Meta:
+        model = Parish
+        fields = ['id']+get_fields(Parish, exclude=DEFAULT_FIELDS+['geometry'])
 
 class SiteSerializer(DynamicDepthSerializer):
 
@@ -73,12 +78,16 @@ class ExcludePlolygonSiteGeoSerializer(DynamicDepthSerializer):
     ADM2 = ExcludePloygonFieldADM2Serializer()
     ADM3 = ExcludePloygonFieldADM3Serializer()
     ADM4 = ExcludePloygonFieldADM4Serializer()
+    Province = ExcludePloygonFieldProvinceSerializer()
+    Parish = ExcludePolygonFieldParishSerializer()
+
+
     # ADM5 = ExcludePloygonFieldADM5Serializer()
 
     class Meta:
         model = Site
         fields = ['id'] + \
-            get_fields(Site, exclude=DEFAULT_FIELDS+['coordinates'])
+            get_fields(Site, exclude=DEFAULT_FIELDS+['coordinates']) + ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish']
         # geo_field = 'coordinates'
 
 
@@ -168,37 +177,6 @@ class NewSamplesSerializer(DynamicDepthSerializer):
         model = NewSamples
         fields = ['id']+get_fields(NewSamples, exclude=DEFAULT_FIELDS)
 
-
-
-
-# class BoatSerializer(serializers.ModelSerializer):
-#     class Meta:
-#         model = Boat
-#         fields = '__all__'
-
-#     # def to_representation(self, instance):
-#     #     representation = super().to_representation(instance)
-#     #     if instance.type == 'bark':
-#     #         # Remove Log Boat fields
-#     #         log_fields = ['bow', 'stern', 'hull', 'basal', 'transerve_ridges', 'other_features', 'repair', 'burnt_mark', 'other_material']
-#     #         for field in log_fields:
-#     #             representation.pop(field, None)
-        
-#     #     elif instance.type == 'log':
-#     #         # Remove Bark Boat fields
-#     #         bark_fields = ['thwarts', 'frames', 'bottom_side_strakes', 'bss_description', 'outer_bottom_plank', 'obp_description', 
-#     #                        'keep_plank', 'kp_description', 'caulking', 'integ_cleat', 'integ_cleat_dist', 'integ_cleat_num',
-#     #                        'shape_holes', 'sealing_lath', 'rail_plough', 'tree_nails', 'keel_bend_bool', 'keel_bending', 
-#     #                        'outer_bend_bool', 'outer_bending', 'low_bend_bool', 'low_bending', 'long_shape_bool', 
-#     #                        'long_shape_bending', 'poss_tools']
-#     #         for field in bark_fields:
-#     #             representation.pop(field, None)
-        
-#     #     elif instance.type == 'plank':
-#     #         # Optionally customize fields for Plank Boat
-#     #         pass
-
-#     #     return representation
 
 class CalibratedDateSerializer(DynamicDepthSerializer):
     class Meta:
