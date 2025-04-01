@@ -225,8 +225,7 @@ class BoatRelComponentSerializer(DynamicDepthSerializer):
 class BoatSerializer(DynamicDepthSerializer):
     site = ExcludePlolygonSiteGeoSerializer()
     location = ExcludePlolygonLocationGeoSerializer()
-    components = BoatRelComponentSerializer(many=True, read_only=True)  # Just remove `source`
-
+    components = BoatRelComponentSerializer(many=True, read_only=True)  
     class Meta:
         model = Boat
         fields = ['id'] + get_fields(Boat, exclude=DEFAULT_FIELDS) + ['components', 'site', 'location']

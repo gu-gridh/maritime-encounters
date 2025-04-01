@@ -520,14 +520,14 @@ class Boat(abstract.AbstractBaseModel):
     vessel_type = models.CharField(max_length=256, null=True, blank=True, choices=BOAT_TYPE_CHOICES,
                                    verbose_name=_("Vessel Type"), help_text=_("Type of the vessel"))
     site = models.ForeignKey(Site, on_delete=models.CASCADE, null=True, blank=True, 
-                             verbose_name=_("Site"), help_text=_("The site where the vessel was found."))
+                             verbose_name=_("Site"), help_text=_("The site where the vessel was found."), db_index=True)
     location = models.ForeignKey(Location, on_delete=models.CASCADE, null=True, blank=True, 
-                                 verbose_name=_("Site Description"), help_text=_("Description of the site location"))
+                                 verbose_name=_("Site Description"), help_text=_("Description of the site location"), db_index=True)
 
     description = models.TextField(null=True, blank=True, verbose_name=_("Vessel Description"), 
                                    help_text=_("A description of the boat find"))
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, 
-                              verbose_name=_("Period"), help_text=_("The period the vessel dates to."))
+                              verbose_name=_("Period"), help_text=_("The period the vessel dates to."), db_index=True)
     # Radio Carbon Dating
     carbon_date = models.ManyToManyField(CalibratedDate, blank=True, verbose_name=_("Dating"),
                                             help_text=_("Radiocarbon, dendro, etc. dating of the vessel"))

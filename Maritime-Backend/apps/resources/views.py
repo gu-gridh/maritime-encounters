@@ -148,7 +148,14 @@ class SearchPeriodsNames(DynamicDepthViewSet):
 
 class BoatsViewSet(DynamicDepthViewSet):
     serializer_class = BoatSerializer
-    queryset = Boat.objects.all()
+    queryset = (
+        Boat.objects.all()
+        .select_related("site", "location", "period")  # ForeignKey relations
+        .prefetch_related(
+            "components",  # Ensure components are prefetched properly
+            "components__component",  # Fetch related BoatComponent objects in one go
+        )
+    )
     filterset_fields = get_fields(Boat, exclude=DEFAULT_FIELDS)
 
 class ResourcesFilteringViewSet(GeoViewSet):
