@@ -105,7 +105,7 @@ def import_individuals(data):
         try: 
             museum = MuseumMeta.objects.get_or_create(museum=row.Museum)[0] if not pd.isnull(row.Museum) else None
             accession_num = AccessionNum.objects.get_or_create(
-                accession_number=row.ID_national_database if 'ID_national_database' in row_names else None
+                accession_number=row.accession_num if 'ID_national_database' in row_names else None
             )[0]
         except:
             accession_num = None
