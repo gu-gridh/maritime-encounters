@@ -23,7 +23,10 @@ def import_individuals(data):
     for index, row in data.iterrows():
         # Handle coordinates
         if not pd.isnull(row.Lng) and not pd.isnull(row.Lat):
-            point = Point(row.Lng, row.Lat)
+            if row.CRS == None:
+                point = Point(row.Lng, row.Lat)
+            else:
+                point = Point(row.Lng,row.Lat,srid=row.EPSG_Code)
         else:
             point = None
         # Ask about County field
