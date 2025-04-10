@@ -2,6 +2,8 @@ import os
 import sys
 import django
 import pandas as pd
+import geopandas as gpd
+from shapely import geometry
 from django.contrib.gis.geos import Point
 import numpy as np
 import argparse
@@ -26,7 +28,10 @@ def import_individuals(data):
             if row.CRS == None:
                 point = Point(row.Lng, row.Lat)
             else:
-                point = Point(row.Lng,row.Lat,srid=row.EPSG_Code)
+                gdf = gpd.GeoDataFrame([row],geometry=[Point(row.Lng,row.Lat)],crs=int(row.EPSG_Code))
+                wgs_gdf=gdf.to_crs(epsg=4326)
+                lng,lat=wgs_gdf.geometry.get_coordinates().values[0]
+                point = Point(lng,lat)
         else:
             point = None
         # Ask about County field
