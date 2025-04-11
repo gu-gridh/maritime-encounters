@@ -86,12 +86,28 @@ def import_individuals(data):
         )[0]
 
         periods_obj = []
+        # if not pd.isnull(row.Period):
+        #     periods = row.Period.split("or")
+        #     for period in periods:
+        #         start_date = row.Start_date if pd.notna(row.Start_date) else None
+        #         end_date = row.End_date if pd.notna(row.End_date) else None
+        #         phase_obj, _ = Phase.objects.get_or_create(text=row.Phase)
+
+        #         period_obj, _ = Period.objects.get_or_create(
+        #             name=period.strip(),
+        #             start_date=start_date,
+        #             end_date=end_date,
+        #             phase=phase_obj
+        #         )
+        #         periods_obj.append(period_obj)
+
         if not pd.isnull(row.Period):
-            periods = row.Period.split("or")
-            for period in periods:
+            periods=row.Period.split(';')
+            phases=row.Phase.split(';')
+            for period,phase in zip(periods,phases):
                 start_date = row.Start_date if pd.notna(row.Start_date) else None
                 end_date = row.End_date if pd.notna(row.End_date) else None
-                phase_obj, _ = Phase.objects.get_or_create(text=row.Phase)
+                phase_obj, _ = Phase.objects.get_or_create(text=phase)
 
                 period_obj, _ = Period.objects.get_or_create(
                     name=period.strip(),
@@ -113,7 +129,7 @@ def import_individuals(data):
         try: 
             museum = MuseumMeta.objects.get_or_create(museum=row.Museum)[0] if not pd.isnull(row.Museum) else None
             accession_num = AccessionNum.objects.get_or_create(
-                accession_number=row.accession_num if 'ID_national_database' in row_names else None
+                accession_number=row.accession_num if 'accession_num' in row_names else None
             )[0]
         except:
             accession_num = None
@@ -123,35 +139,33 @@ def import_individuals(data):
         try:
             categories = row.Object_category.split(",") if not pd.isnull(row.Object_category) else []
             for category in categories:
-                category_obj = ObjectCategories.objects.get_or_create(text=category.strip())[0]
+                category_obj = ObjectCategories.objects.get_or_create(text=category.strip().capitalize())[0]
                 obj_cat.append(category_obj)
         except:
             pass
             
         
-        try:
-            object_description = ObjectDescription.objects.get_or_create(
-                category=obj_cat[0]
-            )[0]
-            object_description.category.set(obj_cat)
-        except: 
-            object_description = None
+        # try:
+        #     object_description = ObjectDescription.objects.get_or_create(
+        #         category=obj_cat[0]
+        #     )[0]
+        #     object_description.category.set(obj_cat)
+        # except: 
+        #     object_description = None
 
         try:
-            sub_categories = ObjectSubcategories.objects.get_or_create(subcategory=row.Object_subcategory)[0] if not pd.isnull(row.Object_subcategory) else None
-            object_description = ObjectDescription.objects.get_or_create(
-                subcategory=sub_categories
-            )[0]
-            object_description.category.set(obj_cat)
+            sub_categories = ObjectSubcategories.objects.get_or_create(subcategory=row.Object_subcategory.capitalize())[0] if not pd.isnull(row.Object_subcategory) else None
+            categories = ObjectCategories.objects.get_or_create(category=row.Object_category.capitalize())[0] if not pd.isnull(row.Objcet_category) else None
+            object_description = ObjectDescription.objects.get_or_create(category=categories,subcategory=sub_categories)[0]
         except:
-            sub_categories = None
+            object_description = None
 
         # Variant and Form
         variant = Variant.objects.get_or_create(name=row.Variant)[0] if not pd.isnull(row.Variant) else None
         form = Form.objects.get_or_create(name=row.Form)[0] if not pd.isnull(row.Form) else None
         # Context
         try:
-            context = ContextKeywords.objects.get_or_create(text=row.Context)[0] if not pd.isnull(row.Context) else None
+            context = ContextKeywords.objects.get_or_create(text=row.Context.capitalize())[0] if not pd.isnull(row.Context) else None
         except:
             context = None
         
