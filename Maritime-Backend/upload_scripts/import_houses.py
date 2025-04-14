@@ -146,7 +146,7 @@ def import_houses(data):
             gable = gable,
             roofbearing_posts = row.Roofbearing_posts if 'Roofbearing_posts' in row_names else None,
             entrance = row.Entrance if 'Entrace' in row_names else None,
-            comments = row.Comments,
+            comments = f"Size descr: {row.Size}; {row.Comments}",
             references = row.Reference,
             url = row.Heritage_DB_Link if 'Heritage_DB_Link' in row_names else None,
             orig_coords = f"{row.X},{row.Y} (CRS: {row.Projection})"
