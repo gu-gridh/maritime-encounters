@@ -1006,6 +1006,8 @@ class LNHouses(abstract.AbstractBaseModel):
         'Period (pre-translation)'), help_text=_('The period text before reformatting'))
     dating = models.ManyToManyField(CalibratedDate, blank=True, verbose_name=_(
         "Calibrated Dates"), help_text=_("The dated samples and calibrated dates"))
+    calibrated = models.BooleanField(blank=True, verbose_name=_("Calibrated Dating"), help_text=_(
+        "Check if the dating is reported calibrated"), default=False)
     gable = models.ManyToManyField(GableDescriptor, verbose_name=_(
         "Gable Type"), help_text=_("The shape/description of the structure's gable"))
     exterior_construction = models.ManyToManyField(ExteriorDescriptor, verbose_name=_(
