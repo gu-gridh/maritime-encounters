@@ -35,7 +35,7 @@ def import_individuals(data):
                     wgs_gdf = gdf.to_crs(epsg=4326)
                     point = Point(wgs_gdf.geometry.x.values[0], wgs_gdf.geometry.y.values[0])
                 except Exception as e:
-                    print(f"CRS transformation failed at index {i}: {e}")
+                    print(f"CRS transformation failed at index {index}: {e}")
                     point = Point(lng, lat)
             else: point = Point(lng, lat)
         else:
