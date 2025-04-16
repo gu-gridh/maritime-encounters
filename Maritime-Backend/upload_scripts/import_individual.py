@@ -18,22 +18,27 @@ django.setup()
 from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, Province, Parish
 from apps.resources.models import *
 
-#row_names = ['County', 'Location', 'Lat', 'Lng', 'Museum', 'Object_type', 'Object_category', 'Form', 'Form_description', 'Variant', 'Material', 'Period', 'Phase', 'Start_date', 'End_date', 'Context', 'ID_national_database']
 
 def import_individuals(data):
     row_names = data.columns
     for index, row in data.iterrows():
         # Handle coordinates
-        if not pd.isnull(row.Lng) and not pd.isnull(row.Lat):
-            if row.CRS == None:
-                point = Point(row.Lng, row.Lat)
-            else:
-                gdf = gpd.GeoDataFrame([row],geometry=[Point(row.Lng,row.Lat)],crs=int(row.EPSG_Code))
-                wgs_gdf=gdf.to_crs(epsg=4326)
-                lng,lat=wgs_gdf.geometry.get_coordinates().values[0]
-                point = Point(lng,lat)
+        lng = row.get('Lng') or row.get('Longitude') or row.get('lng')
+        lat = row.get('Lat') or row.get('Latitude') or row.get('lat')
+
+        if pd.notna(lng) and pd.notna(lat):
+            try:
+                epsg_code = int(row.EPSG_Code)
+                temp_df = pd.DataFrame({'geometry': [Point(lng, lat)]}, index=[0])
+                gdf = gpd.GeoDataFrame(temp_df, geometry='geometry', crs=epsg_code)
+                wgs_gdf = gdf.to_crs(epsg=4326)
+                point = Point(wgs_gdf.geometry.x.values[0], wgs_gdf.geometry.y.values[0])
+            except Exception as e:
+                print(f"CRS transformation failed at index {index}: {e}")
+                point = Point(lng, lat)
         else:
-            point = None
+            point = None  # or some fallback
+
         # Ask about County field
         # Administrative division assignments
         adm4 = adm3 = adm2 = adm1 = country = province = parish = None
@@ -68,8 +73,8 @@ def import_individuals(data):
                 pass
         
         # Site Name determination
-        if not pd.isnull(row.Location):        
-            site_name = row.Location
+        if not pd.isnull(row.Place_name):        
+            site_name = row.Place_name
         else:
             site_name = f"{adm2.name}, {adm2.ADM1.name}" if adm2 else None
 
@@ -101,14 +106,13 @@ def import_individuals(data):
         #         )
         #         periods_obj.append(period_obj)
 
-        if not pd.isnull(row.Period):
-            periods=row.Period.split(';')
-            phases=row.Phase.split(';')
-            for period,phase in zip(periods,phases):
+        if pd.notna(row.Period) and pd.notna(row.Phase):
+            periods = row.Period.split(';')
+            phases = row.Phase.split(';')
+            for period, phase in zip(periods, phases):
                 start_date = row.Start_date if pd.notna(row.Start_date) else None
                 end_date = row.End_date if pd.notna(row.End_date) else None
-                phase_obj, _ = Phase.objects.get_or_create(text=phase)
-
+                phase_obj, _ = Phase.objects.get_or_create(text=phase.strip())
                 period_obj, _ = Period.objects.get_or_create(
                     name=period.strip(),
                     start_date=start_date,
@@ -116,6 +120,7 @@ def import_individuals(data):
                     phase=phase_obj
                 )
                 periods_obj.append(period_obj)
+
 
         # Material
         materials_obj = []
@@ -178,7 +183,7 @@ def import_individuals(data):
             object_type=object_description,
             type_original=row.Object_type if 'Object_type' in row_names else None,
             form=form,
-            form_translation=row.Form_description,
+            # form_translation=row.Form_description,
             form_original=row.Form,
             variant=variant,
             variant_original=row.Variant,
