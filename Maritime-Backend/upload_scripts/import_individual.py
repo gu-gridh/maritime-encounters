@@ -27,15 +27,17 @@ def import_individuals(data):
         lat = row.get('Lat') or row.get('Latitude') or row.get('lat')
 
         if pd.notna(lng) and pd.notna(lat):
-            try:
-                epsg_code = int(row.EPSG_Code)
-                temp_df = pd.DataFrame({'geometry': [Point(lng, lat)]}, index=[0])
-                gdf = gpd.GeoDataFrame(temp_df, geometry='geometry', crs=epsg_code)
-                wgs_gdf = gdf.to_crs(epsg=4326)
-                point = Point(wgs_gdf.geometry.x.values[0], wgs_gdf.geometry.y.values[0])
-            except Exception as e:
-                print(f"CRS transformation failed at index {index}: {e}")
-                point = Point(lng, lat)
+            if pd.notna(row.EPSG_Code):
+                try:
+                    epsg_code = int(row.EPSG_Code)
+                    temp_df = pd.DataFrame({'geometry': [Point(lng, lat)]}, index=[0])
+                    gdf = gpd.GeoDataFrame(temp_df, geometry='geometry', crs=epsg_code)
+                    wgs_gdf = gdf.to_crs(epsg=4326)
+                    point = Point(wgs_gdf.geometry.x.values[0], wgs_gdf.geometry.y.values[0])
+                except Exception as e:
+                    print(f"CRS transformation failed at index {i}: {e}")
+                    point = Point(lng, lat)
+            else: point = Point(lng, lat)
         else:
             point = None  # or some fallback
 
