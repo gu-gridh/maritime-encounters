@@ -4,7 +4,7 @@ from . import models
 from maritime.utils import get_fields, DEFAULT_FIELDS
 from .models import *
 from apps.geography.models import *
-from rest_framework import serializers
+import math
 
 # ADMs serializers: We need to exclude PolygonField from the serializer to make it faster
 class ExcludePloygonFieldADM0Serializer(DynamicDepthSerializer):
@@ -130,6 +130,20 @@ class MetalworkSerializer(DynamicDepthSerializer):
         model = Metalwork
         fields = ['id']+get_fields(Metalwork, exclude=DEFAULT_FIELDS)
 
+
+class LNHouseSerializer(DynamicDepthSerializer):
+    site = ExcludePlolygonSiteGeoSerializer()
+
+    class Meta:
+        model = LNHouses
+        fields = ['id']+get_fields(LNHouses, exclude=DEFAULT_FIELDS)
+        
+    def to_representation(self, instance):
+        data = super().to_representation(instance)
+        for key, value in data.items():
+            if isinstance(value, float) and math.isnan(value):
+                data[key] = None  # Replace NaN with null in JSON
+        return data
 
 class RadioCarbonSerializer(DynamicDepthSerializer):
     site = ExcludePlolygonSiteGeoSerializer()

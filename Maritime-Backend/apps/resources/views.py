@@ -106,6 +106,14 @@ class LandingPointsViewSet(DynamicDepthViewSet):
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 
+class HousesViewSet(DynamicDepthViewSet):
+    serializer_class = serializers.LNHouseSerializer
+    queryset = models.LNHouses.objects.all()
+    filterset_fields = get_fields(models.LNHouses, exclude=DEFAULT_FIELDS)
+    search_fields = ['site__name']
+    # authentication_classes = [TokenAuthentication]  
+    # permission_classes = [IsAuthenticated]  # Explicitly require authentication
+
 class BoatsViewSet(DynamicDepthViewSet):
     serializer_class = BoatSerializer
     queryset = (

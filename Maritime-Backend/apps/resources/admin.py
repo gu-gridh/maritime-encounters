@@ -245,8 +245,6 @@ class LandingPointsAdmin(admin.ModelAdmin):
         RelPeriodActivityLandingPoints,
     ]
     filter_horizontal = ['period', 'related_finds']
-
-
 @admin.register(NewSamples)
 class NewSamplesAdmin(admin.ModelAdmin):
     list_display = ['site', 'sampler', 'metal']
@@ -323,7 +321,7 @@ class LNHousesAdmin(admin.ModelAdmin):
     list_display = ['site']
     search_fields = ['site__name', 'form','variant','orientation']
     list_filter = ['site', 'form','variant','orientation']
-
+    filter_horizontal = ['period', 'dating', 'gable', 'exterior_construction']
 
 @admin.register(MuseumMeta)
 class MuseumMetaAdmin(admin.ModelAdmin):
