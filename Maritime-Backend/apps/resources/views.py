@@ -134,12 +134,12 @@ class SearchPeriodsNames(DynamicDepthViewSet):
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class SiteResourcesViewSet(viewsets.ViewSet):
-    authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
+    # authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
     
-    def get_permissions(self):
-        if self.action == 'list':
-            return [IsAuthenticated()]  # Require authentication for 'list' action
-        return [AllowAny()]  # Allow any access for other actions (if any)
+    # def get_permissions(self):
+    #     if self.action == 'list':
+    #         return [IsAuthenticated()]  # Require authentication for 'list' action
+    #     return [AllowAny()]  # Allow any access for other actions (if any)
     
     def list(self, request):
         site_id = request.GET.get("site_id")
@@ -254,28 +254,28 @@ class ResourcesFilteringViewSet(GeoViewSet):
     )
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-    authentication_classes = [TokenAuthentication]  
-    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+    # authentication_classes = [TokenAuthentication]  
+    # permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 # Viweset to download data for selected area based on parameters and bounding box in search function
 # Data should provided in csv and json format
 # We can provide a  parameter to select the type of data to downloadfrom io import BytesIO
 class DownloadViewSet(viewsets.ViewSet):
 
-    authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
+    # authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
     
-    def get_permissions(self):
-        """
-        Determine the permissions required for different actions.
+    # def get_permissions(self):
+    #     """
+    #     Determine the permissions required for different actions.
 
-        Returns:
-            list: A list of permission classes. If the action is 'list' or 'export_csv',
-                  it returns a list containing IsAuthenticated permission. For other actions,
-                  it returns a list containing AllowAny permission.
-        """
-        if self.action in ['list', 'export_csv']:
-            return [IsAuthenticated()]  # Require authentication for 'list' and 'export_csv' actions
-        return [AllowAny()]  # Allow any access for other actions (if any)
+    #     Returns:
+    #         list: A list of permission classes. If the action is 'list' or 'export_csv',
+    #               it returns a list containing IsAuthenticated permission. For other actions,
+    #               it returns a list containing AllowAny permission.
+    #     """
+    #     if self.action in ['list', 'export_csv']:
+    #         return [IsAuthenticated()]  # Require authentication for 'list' and 'export_csv' actions
+    #     return [AllowAny()]  # Allow any access for other actions (if any)
     
     def list(self, request):
         resource_type = request.GET.get('type')
