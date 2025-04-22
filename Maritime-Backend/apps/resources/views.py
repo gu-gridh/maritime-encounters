@@ -166,7 +166,6 @@ class SiteResourcesViewSet(viewsets.ViewSet):
 
         return Response(data, status=status.HTTP_200_OK)
 
-
 class ResourcesFilteringViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
 
@@ -193,13 +192,15 @@ class ResourcesFilteringViewSet(GeoViewSet):
             # 'metalwork': models.Metalwork,
         }
 
-        if not (resource_type and min_year and max_year or period_name):
+        # If no meaningful filter is provided, return everything
+        if not (resource_type and (min_year or max_year) or period_name):
             return sites
 
+        # Special case: fallback condition
         if min_year == -2450 and max_year == 50 and not resource_type:
             return sites
 
-        # Create filters for date ranges and period names
+        # Filters for models with start_date/end_date
         date_filter = Q()
         if min_year:
             date_filter &= Q(start_date__gte=min_year)
@@ -208,8 +209,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
         if period_name:
             date_filter &= Q(period__name=period_name)
 
-        # Create filters for period names
-        # This is a separate filter for models that have a period field
+        # Filters for models with period field
         date_filter_period = Q()
         if min_year:
             date_filter_period &= Q(period__start_date__gte=min_year)
@@ -218,47 +218,40 @@ class ResourcesFilteringViewSet(GeoViewSet):
         if period_name:
             date_filter_period &= Q(period__name=period_name)
 
-        # if there are start_date and end date but no start_date or end_date for period in objects then return the objects
-
         if min_year and max_year:
             date_filter_period = Q()
             Q(period__start_date__isnull=True) | Q(period__end_date__isnull=True)
 
-
-        # Use a set to collect site IDs
         site_ids = set()
 
         def collect_site_ids(model, filter_q):
             return model.objects.filter(filter_q).values_list('site_id', flat=True)
 
-        # Filter by specific resource type
-        if resource_type in resource_mapping:
-            resource_model = resource_mapping[resource_type]
-            model_fields = [field.name for field in resource_model._meta.get_fields()]
+        # Decide which models to process
+        models_to_check = (
+            [resource_mapping[resource_type]] if resource_type in resource_mapping
+            else resource_mapping.values()
+        )
+
+        for model in models_to_check:
+            model_fields = [field.name for field in model._meta.get_fields()]
 
             if 'start_date' in model_fields or 'end_date' in model_fields:
-                site_ids.update(collect_site_ids(resource_model, date_filter))
+                site_ids.update(collect_site_ids(model, date_filter))
+
             elif 'period' in model_fields:
-                site_ids.update(collect_site_ids(resource_model, date_filter_period))
-            else:
-                site_ids.update(resource_model.objects.values_list('site_id', flat=True))
-
-        # Filter across all resources if no type is specified
-        else:
-            for resource_model in resource_mapping.values():
-                model_fields = [field.name for field in resource_model._meta.get_fields()]
-
-                if 'start_date' in model_fields or 'end_date' in model_fields:
-                    site_ids.update(collect_site_ids(resource_model, date_filter))
-                elif 'period' in model_fields:
-                    site_ids.update(collect_site_ids(resource_model, date_filter_period))
+                if min_year != -2450 and max_year != 50:
+                    filter_with_valid_dates = date_filter_period & Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
+                    site_ids.update(collect_site_ids(model, filter_with_valid_dates))
                 else:
-                    site_ids.update(resource_model.objects.values_list('site_id', flat=True))
+                    filter_with_null_dates = date_filter_period & Q(period__start_date__isnull=True) & Q(period__end_date__isnull=True)
+                    site_ids.update(collect_site_ids(model, filter_with_null_dates))
 
-        # Final filter with no union or filter chaining
+            else:
+                site_ids.update(model.objects.values_list('site_id', flat=True))
+
         return sites.filter(id__in=site_ids)
-        # Fields and filters
-        
+
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
     )
@@ -342,7 +335,12 @@ class DownloadViewSet(viewsets.ViewSet):
             if 'start_date' in model_fields or 'end_date' in model_fields:
                 queryset = queryset.filter(date_filter)
             elif 'period' in model_fields:
-                queryset = queryset.filter(date_filter_period)
+                if min_year != -2450 and max_year != 50:
+                    filter_with_valid_dates = date_filter_period & Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
+                    queryset = queryset.filter(filter_with_valid_dates)
+                else:
+                    filter_with_null_dates = date_filter_period & Q(period__start_date__isnull=True) & Q(period__end_date__isnull=True)
+                    queryset = queryset.filter(filter_with_null_dates)
 
             if queryset.exists():
                 queryset_list[model.__name__] = list(queryset.values())
