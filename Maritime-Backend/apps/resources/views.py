@@ -227,7 +227,9 @@ class ResourcesFilteringViewSet(GeoViewSet):
         def collect_site_ids(model, filter_q):
             return model.objects.filter(filter_q).values_list('site_id', flat=True)
 
-        # Decide which models to process
+        # Decide if this is the "full range" fallback
+        is_full_range = min_year == -2450 and max_year == 50
+
         models_to_check = (
             [resource_mapping[resource_type]] if resource_type in resource_mapping
             else resource_mapping.values()
@@ -237,18 +239,24 @@ class ResourcesFilteringViewSet(GeoViewSet):
             model_fields = [field.name for field in model._meta.get_fields()]
 
             if 'start_date' in model_fields or 'end_date' in model_fields:
-                site_ids.update(collect_site_ids(model, date_filter))
+                # If full range, include everything; otherwise filter
+                if is_full_range:
+                    site_ids.update(model.objects.values_list('site_id', flat=True))
+                else:
+                    site_ids.update(collect_site_ids(model, date_filter))
 
             elif 'period' in model_fields:
-                if min_year != -2450 or max_year != 50:
+                if is_full_range:
+                    # Include all, even if period dates are null
+                    site_ids.update(model.objects.values_list('site_id', flat=True))
+                else:
+                    # Only include those with valid start and end dates
                     filter_with_valid_dates = date_filter_period & Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
                     site_ids.update(collect_site_ids(model, filter_with_valid_dates))
-                else:
-                    filter_with_null_dates = date_filter_period & Q(period__start_date__isnull=True) & Q(period__end_date__isnull=True)
-                    site_ids.update(collect_site_ids(model, filter_with_null_dates))
 
             else:
                 site_ids.update(model.objects.values_list('site_id', flat=True))
+
 
         return sites.filter(id__in=site_ids)
 
