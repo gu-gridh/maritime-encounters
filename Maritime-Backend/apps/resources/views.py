@@ -193,12 +193,13 @@ class ResourcesFilteringViewSet(GeoViewSet):
             # 'metalwork': models.Metalwork,
         }
 
-        if not (resource_type or min_year or max_year or period_name):
+        if not (resource_type and min_year and max_year or period_name):
             return sites
 
         if min_year == -2450 and max_year == 50 and not resource_type:
             return sites
 
+        # Create filters for date ranges and period names
         date_filter = Q()
         if min_year:
             date_filter &= Q(start_date__gte=min_year)
@@ -207,6 +208,8 @@ class ResourcesFilteringViewSet(GeoViewSet):
         if period_name:
             date_filter &= Q(period__name=period_name)
 
+        # Create filters for period names
+        # This is a separate filter for models that have a period field
         date_filter_period = Q()
         if min_year:
             date_filter_period &= Q(period__start_date__gte=min_year)
@@ -214,6 +217,13 @@ class ResourcesFilteringViewSet(GeoViewSet):
             date_filter_period &= Q(period__end_date__lte=max_year)
         if period_name:
             date_filter_period &= Q(period__name=period_name)
+
+        # if there are start_date and end date but no start_date or end_date for period in objects then return the objects
+
+        if min_year and max_year:
+            date_filter_period = Q()
+            Q(period__start_date__isnull=True) | Q(period__end_date__isnull=True)
+
 
         # Use a set to collect site IDs
         site_ids = set()
