@@ -332,6 +332,11 @@ class DownloadViewSet(viewsets.ViewSet):
                 date_filter_period &= Q(period__start_date__gte=min_year)
             if max_year:
                 date_filter_period &= Q(period__end_date__lte=max_year)
+            
+            # This is a separate filter for models that have a period field but no start_date or end_date for the period
+            if min_year and max_year:
+                date_filter_period = Q()
+                Q(period__start_date__isnull=True) | Q(period__end_date__isnull=True)
 
             model_fields = [field.name for field in model._meta.get_fields()]
             if 'start_date' in model_fields or 'end_date' in model_fields:
