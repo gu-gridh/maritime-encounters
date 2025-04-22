@@ -240,7 +240,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
                 site_ids.update(collect_site_ids(model, date_filter))
 
             elif 'period' in model_fields:
-                if min_year != -2450 and max_year != 50:
+                if min_year != -2450 or max_year != 50:
                     filter_with_valid_dates = date_filter_period & Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
                     site_ids.update(collect_site_ids(model, filter_with_valid_dates))
                 else:
@@ -335,7 +335,7 @@ class DownloadViewSet(viewsets.ViewSet):
             if 'start_date' in model_fields or 'end_date' in model_fields:
                 queryset = queryset.filter(date_filter)
             elif 'period' in model_fields:
-                if min_year != -2450 and max_year != 50:
+                if min_year != -2450 or max_year != 50:
                     filter_with_valid_dates = date_filter_period & Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
                     queryset = queryset.filter(filter_with_valid_dates)
                 else:
