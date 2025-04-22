@@ -257,7 +257,6 @@ class ResourcesFilteringViewSet(GeoViewSet):
             else:
                 site_ids.update(model.objects.values_list('site_id', flat=True))
 
-
         return sites.filter(id__in=site_ids)
 
     filterset_fields = get_fields(
@@ -313,6 +312,8 @@ class DownloadViewSet(viewsets.ViewSet):
         selected_models = [resource_mapping[resource_type]] if resource_type in resource_mapping else resource_mapping.values()
         queryset_list = {}
 
+        is_full_range = (min_year == -2450 and max_year == 50)
+
         for model in selected_models:
             queryset = model.objects.all()
 
@@ -322,33 +323,33 @@ class DownloadViewSet(viewsets.ViewSet):
                 bbox_polygon = Polygon.from_bbox((min_x, min_y, max_x, max_y))
                 queryset = queryset.filter(site__coordinates__within=bbox_polygon)  # Correct lookup for GeoDjango
 
-            date_filter = Q()
-            if min_year:
-                date_filter &= Q(start_date__gte=min_year)
-            if max_year:
-                date_filter &= Q(end_date__lte=max_year)
-
-            date_filter_period = Q()
-            if min_year:
-                date_filter_period &= Q(period__start_date__gte=min_year)
-            if max_year:
-                date_filter_period &= Q(period__end_date__lte=max_year)
-            
-            # This is a separate filter for models that have a period field but no start_date or end_date for the period
-            if min_year and max_year:
-                date_filter_period = Q()
-                Q(period__start_date__isnull=True) | Q(period__end_date__isnull=True)
-
             model_fields = [field.name for field in model._meta.get_fields()]
-            if 'start_date' in model_fields or 'end_date' in model_fields:
-                queryset = queryset.filter(date_filter)
-            elif 'period' in model_fields:
-                if min_year != -2450 or max_year != 50:
-                    filter_with_valid_dates = date_filter_period & Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
-                    queryset = queryset.filter(filter_with_valid_dates)
-                else:
-                    filter_with_null_dates = date_filter_period & Q(period__start_date__isnull=True) & Q(period__end_date__isnull=True)
-                    queryset = queryset.filter(filter_with_null_dates)
+            if not is_full_range:
+                if 'start_date' in model_fields or 'end_date' in model_fields:
+                    date_filter = Q()
+                    if min_year:
+                        date_filter &= Q(start_date__gte=min_year)
+                    if max_year:
+                        date_filter &= Q(end_date__lte=max_year)
+
+                    queryset = queryset.filter(date_filter)
+
+                elif 'period' in model_fields:
+                    date_filter_period = Q()
+                    if min_year:
+                        date_filter_period &= Q(period__start_date__gte=min_year)
+                    if max_year:
+                        date_filter_period &= Q(period__end_date__lte=max_year)
+
+                    # Only include rows where both period dates are not null
+                    queryset = queryset.filter(
+                        date_filter_period &
+                        Q(period__start_date__isnull=False) &
+                        Q(period__end_date__isnull=False)
+                    )
+
+            # Otherwise, in full range case: skip filtering
+            # (queryset is already all(), possibly filtered by bbox)
 
             if queryset.exists():
                 queryset_list[model.__name__] = list(queryset.values())
