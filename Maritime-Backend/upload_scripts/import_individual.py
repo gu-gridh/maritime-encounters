@@ -133,14 +133,19 @@ def import_individuals(data):
                 materials_obj.append(material_obj)
         
         # Museum and Accession Number
-        # try: 
-        museum = MuseumMeta.objects.get_or_create(museum=row.Museum)[0] if not pd.isnull(row.Museum) and 'Museum' in row_names else None
-        accession_num = AccessionNum.objects.get_or_create(
-            accession_number=row.accession_num if 'accession_num' in row_names else None
-        )[0]
-        # except:
-        #     accession_num = None
-        #     museum = None
+        try: 
+            museum = MuseumMeta.objects.get_or_create(museum=row.Museum)[0] if not pd.isnull(row.Museum) and 'Museum' in row_names else None
+     
+        except:
+            museum = None
+
+        try:
+            accession_num = AccessionNum.objects.get_or_create(
+                    accession_number=row.accession_num if 'accession_num' in row_names else None
+                )[0]
+        except:
+            accession_num = None
+        
         # Object Category and Description
         obj_cat = []
         try:
@@ -219,7 +224,7 @@ if __name__ == '__main__':
 
         for sheet in sheets:
             print(f"Importing {name} data from {sheet} sheet")
-            df = pd.read_excel(file, sheet_name=sheet)
+            df = pd.read_excel(file, sheet_name=sheet).replace({np.nan: None})
             import_individuals(df)
 
         print(f"{name}: Data imported successfully")

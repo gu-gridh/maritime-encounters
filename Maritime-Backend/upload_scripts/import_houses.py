@@ -171,8 +171,6 @@ def import_houses(data):
         # Now set the M2M gable if exists
         if gable:
             house_object.gable.set([gable])
-
-        # Then set other M2M fields
         if periods_obj:
             house_object.period.set(periods_obj)
         if dates_obj:
