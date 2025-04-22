@@ -133,14 +133,14 @@ def import_individuals(data):
                 materials_obj.append(material_obj)
         
         # Museum and Accession Number
-        try: 
-            museum = MuseumMeta.objects.get_or_create(museum=row.Museum)[0] if not pd.isnull(row.Museum) else None
-            accession_num = AccessionNum.objects.get_or_create(
-                accession_number=row.accession_num if 'accession_num' in row_names else None
-            )[0]
-        except:
-            accession_num = None
-            museum = None
+        # try: 
+        museum = MuseumMeta.objects.get_or_create(museum=row.Museum)[0] if not pd.isnull(row.Museum) and 'Museum' in row_names else None
+        accession_num = AccessionNum.objects.get_or_create(
+            accession_number=row.accession_num if 'accession_num' in row_names else None
+        )[0]
+        # except:
+        #     accession_num = None
+        #     museum = None
         # Object Category and Description
         obj_cat = []
         try:
@@ -162,7 +162,7 @@ def import_individuals(data):
 
         try:
             sub_categories = ObjectSubcategories.objects.get_or_create(subcategory=row.Object_subcategory.capitalize())[0] if not pd.isnull(row.Object_subcategory) else None
-            categories = ObjectCategories.objects.get_or_create(category=row.Object_category.capitalize())[0] if not pd.isnull(row.Objcet_category) else None
+            categories = ObjectCategories.objects.get_or_create(category=row.Object_category.capitalize())[0] if not pd.isnull(row.Object_category) else None
             object_description = ObjectDescription.objects.get_or_create(category=categories,subcategory=sub_categories)[0]
         except:
             object_description = None
