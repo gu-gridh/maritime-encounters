@@ -140,7 +140,10 @@ def import_houses(data):
         variant = Variant.objects.get_or_create(name=row.Type.strip().capitalize())[0] if not pd.isnull(row.Type) else None
         # form = Form.objects.get_or_create(name=row.Form)[0] if not pd.isnull(row.Form) else None
         form = Form.objects.get_or_create(name='House')[0]
-        orientation = Orientation.objects.get_or_create(text=row.Orientation)[0]
+        orientation = None
+        if pd.notna(row.Orientation) and str(row.Orientation).strip():
+            orientation, _ = Orientation.objects.get_or_create(text=str(row.Orientation).strip())
+
         gable_text = row.Gable.strip().capitalize() if pd.notnull(row.Gable) else None
         gable = GableDescriptor.objects.get_or_create(text=gable_text)[0] if gable_text else None
         
@@ -194,7 +197,7 @@ if __name__ == '__main__':
 
         for sheet in sheets:
             print(f"Importing {name} data from {sheet} sheet")
-            df = pd.read_excel(file, sheet_name=sheet)
+            df = pd.read_excel(file, sheet_name=sheet).replace({np.nan: None})
             import_houses(df)
 
         print(f"{name}: Data imported successfully")

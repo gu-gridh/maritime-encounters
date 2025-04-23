@@ -1035,9 +1035,6 @@ class LNHouses(abstract.AbstractBaseModel):
         verbose_name_plural = _("Late Neolithic Houses")
 
 
-
-
-
 class ObjectIds(abstract.AbstractBaseModel):
     art_id = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "Art ID"), help_text=_("Norweigian ID of the object."))
