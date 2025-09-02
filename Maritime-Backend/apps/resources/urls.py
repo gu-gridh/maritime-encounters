@@ -32,6 +32,7 @@ urlpatterns = [
     path('get-token/', views.GetTokenView.as_view(), name='get-token'),
     path('session-to-token/', views.SessionToTokenView.as_view(), name='session-to-token'),
     path('auth-bridge/', views.auth_bridge_view, name='auth-bridge'),
+    path('csrf-token/', views.csrf_token_view, name='csrf-token'),
     path('', include(router.urls)),
 
     # Automatically generated views

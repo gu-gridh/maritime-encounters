@@ -21,6 +21,10 @@ from rest_framework.authentication import TokenAuthentication, SessionAuthentica
 from rest_framework.decorators import action
 from django.contrib.gis.geos import Polygon
 from django.shortcuts import render
+from django.views.decorators.csrf import csrf_exempt
+from django.utils.decorators import method_decorator
+from django.middleware.csrf import get_token
+from django.http import JsonResponse
 
 class ProtectedAPIView(APIView):
     permission_classes = []  # Only authenticated users can access
@@ -33,9 +37,10 @@ class ProtectedAPIView(APIView):
             return Response({'message': 'This is a protected API'})
         except Token.DoesNotExist:
             return Response({'error': 'Invalid token'}, status=status.HTTP_401_UNAUTHORIZED)
-        
+
+@method_decorator(csrf_exempt, name='dispatch')        
 class TokenLoginView(APIView):
-    permission_classes = []  
+    permission_classes = [AllowAny]  # Allow anyone to access login
 
     def post(self, request):
         username = request.data.get('username')
@@ -85,6 +90,12 @@ def auth_bridge_view(request):
     Simple HTML page to help users get their API token after admin login
     """
     return render(request, 'auth_bridge.html')
+
+def csrf_token_view(request):
+    """
+    Get CSRF token for frontend
+    """
+    return JsonResponse({'csrfToken': get_token(request)})
 
 class SiteViewSet(DynamicDepthViewSet):
     serializer_class = serializers.SiteGeoSerializer

@@ -22,9 +22,12 @@ from django.utils.translation import gettext_lazy as _
 from django.contrib.staticfiles.urls import staticfiles_urlpatterns
 from django.conf.urls.static import static
 from django.conf import settings
+from apps.resources.views import TokenLoginView, csrf_token_view
 
 urlpatterns = [
     path("i18n/", include("django.conf.urls.i18n")),
+    path('login/', TokenLoginView.as_view(), name='login'),  # Direct login endpoint
+    path('csrf-token/', csrf_token_view, name='csrf-token'),  # CSRF token endpoint
 ]
 
 
