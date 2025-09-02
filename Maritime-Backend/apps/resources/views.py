@@ -352,21 +352,19 @@ class ResourcesFilteringViewSet(GeoViewSet):
 # Data should provided in csv and json format
 # We can provide a  parameter to select the type of data to downloadfrom io import BytesIO
 class DownloadViewSet(viewsets.ViewSet):
+    # Allow token via header, session cookie, or ?token= query parameter (for file downloads via <a> tags)
+    class QueryParamTokenAuthentication(TokenAuthentication):
+        def authenticate(self, request):
+            q_token = request.query_params.get('token')
+            if q_token:
+                try:
+                    return self.authenticate_credentials(q_token)
+                except Exception:
+                    return None  # Fall through to other authenticators
+            return super().authenticate(request)
 
-    authentication_classes = [SessionAuthentication, TokenAuthentication]  # Add TokenAuthentication here
-    
-    def get_permissions(self):
-        """
-        Determine the permissions required for different actions.
-
-        Returns:
-            list: A list of permission classes. If the action is 'list' or 'export_csv',
-                  it returns a list containing IsAuthenticated permission. For other actions,
-                  it returns a list containing AllowAny permission.
-        """
-        if self.action in ['list', 'export_csv']:
-            return [IsAuthenticated()]  # Require authentication for 'list' and 'export_csv' actions
-        return [AllowAny()]  # Allow any access for other actions (if any)
+    authentication_classes = [QueryParamTokenAuthentication, SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     
     def list(self, request):
         resource_type = request.GET.get('type')
@@ -441,43 +439,81 @@ class DownloadViewSet(viewsets.ViewSet):
 
         # Return separate CSV files per model
         if output_format == 'csv':
-            return self.export_csv(queryset_list)
+            return self._export_csv_zip(queryset_list)
 
         return Response({'error': 'Invalid format'}, status=400)
     
-    @action(detail=False, methods=['get'], permission_classes=[IsAuthenticated])
-    def export_csv(self, data):
-
-        """
-        Exports multiple CSV files for each model in the dataset.
-        """
+    def _export_csv_zip(self, data):
+        """Internal helper to generate ZIP of CSVs."""
         if not data:
             return Response({}, status=400)
-
-        # Create a ZIP file in memory
         zip_buffer = io.BytesIO()
-
-        # Creating the zip file
         with zipfile.ZipFile(zip_buffer, 'w') as zip_file:
             for model_name, rows in data.items():
                 if not rows:
                     continue
-
-                # Create an in-memory CSV file (in UTF-8 encoding)
                 csv_buffer = io.StringIO()
                 csv_writer = csv.DictWriter(csv_buffer, fieldnames=rows[0].keys())
                 csv_writer.writeheader()
-
                 for row in rows:
-                    # Write each row to the CSV
                     csv_writer.writerow({key: str(value) if value is not None else "" for key, value in row.items()})
-
-                # Move to the start of the StringIO buffer before writing it to the ZIP file
                 zip_file.writestr(f"{model_name}.csv", csv_buffer.getvalue())
-
-        # Prepare response as a ZIP file
         zip_buffer.seek(0)
         response = HttpResponse(zip_buffer.read(), content_type="application/zip")
         response['Content-Disposition'] = 'attachment; filename="exported_data.zip"'
         return response
+
+    @action(detail=False, methods=['get'])
+    def export_csv(self, request, *args, **kwargs):
+        """Action endpoint to export CSV (same filtering as list). Accepts ?token=TOKEN."""
+        # Reuse logic by replicating core of list (could be further refactored)
+        resource_type = request.GET.get('type')
+        min_year = request.GET.get('min_year')
+        max_year = request.GET.get('max_year')
+        bbox = request.GET.get('in_bbox')
+        min_year = int(min_year) if min_year else None
+        max_year = int(max_year) if max_year else None
+        resource_mapping = {
+            'boats': models.Boat,
+            'radiocarbon_dates': models.Radiocarbon,
+            'individual_samples': models.IndividualObjects,
+            'dna_samples': models.aDNA,
+            'metal_analysis': models.MetalAnalysis,
+            'landing_points': models.LandingPoints,
+            'new_samples': models.NewSamples,
+            'lnhouses': models.LNHouses,
+        }
+        selected_models = [resource_mapping[resource_type]] if resource_type in resource_mapping else resource_mapping.values()
+        queryset_list = {}
+        is_full_range = (min_year == -2450 and max_year == 50)
+        for model in selected_models:
+            queryset = model.objects.all()
+            if bbox:
+                try:
+                    min_x, min_y, max_x, max_y = map(float, bbox.split(','))
+                    bbox_polygon = Polygon.from_bbox((min_x, min_y, max_x, max_y))
+                    queryset = queryset.filter(site__coordinates__within=bbox_polygon)
+                except Exception:
+                    pass
+            model_fields = [field.name for field in model._meta.get_fields()]
+            if not is_full_range:
+                if 'start_date' in model_fields or 'end_date' in model_fields:
+                    date_filter = Q()
+                    if min_year:
+                        date_filter &= Q(start_date__gte=min_year)
+                    if max_year:
+                        date_filter &= Q(end_date__lte=max_year)
+                    queryset = queryset.filter(date_filter)
+                elif 'period' in model_fields:
+                    date_filter_period = Q()
+                    if min_year:
+                        date_filter_period &= Q(period__start_date__gte=min_year)
+                    if max_year:
+                        date_filter_period &= Q(period__end_date__lte=max_year)
+                    queryset = queryset.filter(
+                        date_filter_period & Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
+                    )
+            if queryset.exists():
+                queryset_list[model.__name__] = list(queryset.values())
+        return self._export_csv_zip(queryset_list)
     
