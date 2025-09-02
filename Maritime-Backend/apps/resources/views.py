@@ -25,6 +25,10 @@ from django.views.decorators.csrf import csrf_exempt
 from django.utils.decorators import method_decorator
 from django.middleware.csrf import get_token
 from django.http import JsonResponse
+from rest_framework.decorators import api_view, permission_classes
+import logging
+
+logger = logging.getLogger(__name__)
 
 class ProtectedAPIView(APIView):
     permission_classes = []  # Only authenticated users can access
@@ -41,15 +45,25 @@ class ProtectedAPIView(APIView):
 @method_decorator(csrf_exempt, name='dispatch')        
 class TokenLoginView(APIView):
     permission_classes = [AllowAny]  # Allow anyone to access login
+    authentication_classes = []  # Disable authentication for login
 
     def post(self, request):
+        # Debug logging to trace 403 issues (whether view is reached)
+        logger.info("TokenLoginView POST reached. Headers=%s", dict(request.headers))
+        logger.info("Content-Type=%s", request.content_type)
+        logger.info("Body raw=%s", request.body[:500])
         username = request.data.get('username')
         password = request.data.get('password')
-        user = authenticate(username=username, password=password)
+        if not username or not password:
+            logger.warning("Missing username or password in request data")
+            return Response({'error': 'Missing credentials'}, status=status.HTTP_400_BAD_REQUEST)
 
+        user = authenticate(username=username, password=password)
         if user:
             token, created = Token.objects.get_or_create(user=user)
+            logger.info("User %s authenticated successfully (token created=%s)", user.username, created)
             return Response({'token': token.key, 'user': user.username})
+        logger.warning("Authentication failed for username=%s", username)
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 class GetTokenView(APIView):
@@ -90,6 +104,22 @@ def auth_bridge_view(request):
     Simple HTML page to help users get their API token after admin login
     """
     return render(request, 'auth_bridge.html')
+
+@csrf_exempt
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def login_view(request):
+    """
+    Simple function-based login view
+    """
+    username = request.data.get('username')
+    password = request.data.get('password')
+    user = authenticate(username=username, password=password)
+
+    if user:
+        token, created = Token.objects.get_or_create(user=user)
+        return Response({'token': token.key, 'user': user.username})
+    return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
 def csrf_token_view(request):
     """
