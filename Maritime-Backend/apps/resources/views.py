@@ -17,9 +17,10 @@ from rest_framework.views import APIView
 from rest_framework.authtoken.models import Token
 from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
-from rest_framework.authentication import TokenAuthentication
+from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.decorators import action
 from django.contrib.gis.geos import Polygon
+from django.shortcuts import render
 
 class ProtectedAPIView(APIView):
     permission_classes = []  # Only authenticated users can access
@@ -43,8 +44,47 @@ class TokenLoginView(APIView):
 
         if user:
             token, created = Token.objects.get_or_create(user=user)
-            return Response({'token': token.key})
+            return Response({'token': token.key, 'user': user.username})
         return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
+
+class GetTokenView(APIView):
+    """
+    View to get token for already authenticated users (e.g., from admin login)
+    """
+    permission_classes = [IsAuthenticated]
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  # Support both token and session auth
+
+    def get(self, request):
+        # If user is authenticated via session, provide them with a token
+        token, created = Token.objects.get_or_create(user=request.user)
+        return Response({
+            'token': token.key,
+            'user': request.user.username,
+            'created': created
+        })
+
+class SessionToTokenView(APIView):
+    """
+    Convert session authentication to token authentication
+    """
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        if request.user.is_authenticated:
+            token, created = Token.objects.get_or_create(user=request.user)
+            return Response({
+                'token': token.key,
+                'user': request.user.username,
+                'is_staff': request.user.is_staff,
+                'is_superuser': request.user.is_superuser
+            })
+        return Response({'error': 'Not authenticated'}, status=status.HTTP_401_UNAUTHORIZED)
+
+def auth_bridge_view(request):
+    """
+    Simple HTML page to help users get their API token after admin login
+    """
+    return render(request, 'auth_bridge.html')
 
 class SiteViewSet(DynamicDepthViewSet):
     serializer_class = serializers.SiteGeoSerializer
@@ -55,7 +95,7 @@ class SiteViewSet(DynamicDepthViewSet):
     search_fields = ['placename']
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-    authentication_classes = [TokenAuthentication]  
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]
 
 class SiteCoordinatesViewSet(GeoViewSet):
@@ -65,7 +105,7 @@ class SiteCoordinatesViewSet(GeoViewSet):
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-    authentication_classes = [TokenAuthentication]  
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class SiteGeoViewSet(GeoViewSet):
@@ -78,7 +118,7 @@ class SiteGeoViewSet(GeoViewSet):
     search_fields = ['placename', 'name']
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-    authentication_classes = [TokenAuthentication]  
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class MetalAnalysisViewSet(DynamicDepthViewSet):
@@ -86,7 +126,7 @@ class MetalAnalysisViewSet(DynamicDepthViewSet):
     queryset = models.MetalAnalysis.objects.all()
     filterset_fields = get_fields(models.MetalAnalysis, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
-    authentication_classes = [TokenAuthentication]  
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class MetalworkViewSet(DynamicDepthViewSet):
@@ -94,7 +134,7 @@ class MetalworkViewSet(DynamicDepthViewSet):
     queryset = models.Metalwork.objects.all()
     filterset_fields = get_fields(models.Metalwork, exclude=DEFAULT_EXCLUDE+DEFAULT_FIELDS+['orig_coords'])
     search_fields = ['site__name', 'entry_number']
-    authentication_classes = [TokenAuthentication]  
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class LandingPointsViewSet(DynamicDepthViewSet):
@@ -102,7 +142,7 @@ class LandingPointsViewSet(DynamicDepthViewSet):
     queryset = models.LandingPoints.objects.all()
     filterset_fields = get_fields(models.LandingPoints, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
-    authentication_classes = [TokenAuthentication]  
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 
@@ -111,7 +151,7 @@ class HousesViewSet(DynamicDepthViewSet):
     queryset = models.LNHouses.objects.all()
     filterset_fields = get_fields(models.LNHouses, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
-    authentication_classes = [TokenAuthentication]  
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class BoatsViewSet(DynamicDepthViewSet):
@@ -130,11 +170,11 @@ class SearchPeriodsNames(DynamicDepthViewSet):
     serializer_class = serializers.PeriodSerializer
     queryset = models.Period.objects.all().order_by('name')
     filterset_fields = get_fields(models.Period, exclude=DEFAULT_FIELDS)
-    authentication_classes = [TokenAuthentication]  
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class SiteResourcesViewSet(viewsets.ViewSet):
-    authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  # Add TokenAuthentication here
     
     def get_permissions(self):
         if self.action == 'list':
@@ -264,7 +304,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
     )
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-    authentication_classes = [TokenAuthentication]  
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 # Viweset to download data for selected area based on parameters and bounding box in search function
@@ -272,7 +312,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
 # We can provide a  parameter to select the type of data to downloadfrom io import BytesIO
 class DownloadViewSet(viewsets.ViewSet):
 
-    authentication_classes = [TokenAuthentication]  # Add TokenAuthentication here
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  # Add TokenAuthentication here
     
     def get_permissions(self):
         """

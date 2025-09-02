@@ -69,6 +69,7 @@ ADDONS = [
     'admin_auto_filters',
     'rangefilter',
     'rest_framework_xml',
+    'rest_framework.authtoken'
 ]
 
 INSTALLED_APPS = [
@@ -131,6 +132,7 @@ DATABASE_ROUTERS = ['maritime.routers.DjangoRouter', 'maritime.routers.AppRouter
 
 DATABASES = {name: read_json(os.path.join(str(BASE_DIR), 'configs', name, 'db.json')) for name in APPS+NON_MANAGED_APPS}
 
+# AUTH_USER_MODEL = 'maritime.CustomUser'
 
 
 # Password validation
@@ -194,15 +196,24 @@ REST_FRAMEWORK = {
     # or allow read-only access for unauthenticated users.
     'DEFAULT_PERMISSION_CLASSES': [
         'rest_framework.permissions.DjangoModelPermissionsOrAnonReadOnly'
+        # 'rest_framework.permissions.IsAuthenticated',
+    ],
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication',  # Support session authentication first
+        'rest_framework.authentication.TokenAuthentication',   # Then token authentication
     ],
     'DEFAULT_METADATA_CLASS': 'rest_framework.metadata.SimpleMetadata',
     'DEFAULT_FILTER_BACKENDS': ['django_filters.rest_framework.DjangoFilterBackend'],
     'DEFAULT_PAGINATION_CLASS': 'rest_framework.pagination.PageNumberPagination',
     'PAGE_SIZE': 20,
-    # 'DEFAULT_SCHEMA_CLASS': 'drf_spectacular.openapi.AutoSchema',
-    # 'DEFAULT_SCHEMA_CLASS': 'maritime.abstract.schemas.MaritimeSchema',
+    'DEFAULT_SCHEMA_CLASS': 'maritime.abstract.schemas.MaritimeSchema',
     'DEFAULT_PARSER_CLASSES': ['rest_framework_xml.parsers.XMLParser',],
-    'DEFAULT_RENDERER_CLASSES': ['rest_framework_xml.renderers.XMLRenderer',],
+    'DEFAULT_RENDERER_CLASSES': ['rest_framework_xml.renderers.XMLRenderer',
+                                'rest_framework.renderers.JSONRenderer',
+                                'rest_framework.renderers.BrowsableAPIRenderer',
+        'apps.resources.renderers.ZipRenderer'],
+    'EXCEPTION_HANDLER': 'my_project.my_app.views.custom_exception_handler',  # Replace with your app path
+
 
 }
 
