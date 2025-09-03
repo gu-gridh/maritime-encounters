@@ -19,6 +19,7 @@ from rest_framework.permissions import IsAuthenticated, AllowAny
 from django.contrib.auth import authenticate
 from rest_framework.authentication import TokenAuthentication, SessionAuthentication
 from rest_framework.decorators import action
+from rest_framework.negotiation import DefaultContentNegotiation
 from django.contrib.gis.geos import Polygon
 from django.shortcuts import render
 from django.views.decorators.csrf import csrf_exempt
@@ -363,8 +364,14 @@ class DownloadViewSet(viewsets.ViewSet):
                     return None  # Fall through to other authenticators
             return super().authenticate(request)
 
+    class IgnoreClientContentNegotiation(DefaultContentNegotiation):
+        """Always select the first renderer (ignore Accept header to prevent 406)."""
+        def select_renderer(self, request, renderers, format_suffix):
+            return renderers[0], renderers[0].media_type
+
     authentication_classes = [QueryParamTokenAuthentication, SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
+    content_negotiation_class = IgnoreClientContentNegotiation
     
     def list(self, request):
         resource_type = request.GET.get('type')
