@@ -16,7 +16,7 @@ router.register(rf'{endpoint}/metal_analysis', views.MetalAnalysisViewSet, basen
 router.register(rf'{endpoint}/landing_points', views.LandingPointsViewSet, basename='landing points')
 router.register(rf'{endpoint}/boat', views.BoatsViewSet, basename='boats')
 router.register(rf'{endpoint}/lnhouses', views.HousesViewSet, basename='houses')
-router.register(rf'{endpoint}/radiocarbon', views.RadiocarbonViewSet, basename='radiocarbon')
+router.register(rf'{endpoint}/radiocarbon', views.RadioCarbonViewSet, basename='radiocarbon')
 router.register(rf'{endpoint}/site_resources', views.SiteResourcesViewSet, basename='site resources')
 router.register(rf'{endpoint}/order_periods', views.SearchPeriodsNames, basename='sort periods by their name')
 
@@ -39,6 +39,6 @@ urlpatterns = [
     *utils.get_model_urls('resources', endpoint, 
         exclude=['site', 'metal_analysis', 'metalwork', 'boat', 'lnhouses']),
 
-    *utils.get_model_urls('resources', f'{endpoint}', exclude=['site', 'metal_analysis', 'metalwork', 'boat', 'lnhouses']),
+    *utils.get_model_urls('resources', f'{endpoint}', exclude=['site', 'metal_analysis', 'metalwork', 'boat', 'lnhouses', 'radiocarbon']),
     *documentation
 ]

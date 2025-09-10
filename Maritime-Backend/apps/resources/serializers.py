@@ -169,7 +169,7 @@ class IndivdualObjectSerializer(DynamicDepthSerializer):
         fields = ['id']+get_fields(IndividualObjects, exclude=DEFAULT_FIELDS)
 
 
-class RadiocarbonSerializer(DynamicDepthSerializer):
+class RadioCarbonSerializer(DynamicDepthSerializer):
     site = ExcludePlolygonSiteGeoSerializer()
 
     class Meta:
