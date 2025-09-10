@@ -24,6 +24,7 @@ router.register(rf'{endpoint}/order_periods', views.SearchPeriodsNames, basename
 router.register(rf'{endpoint}/data', views.DownloadViewSet, basename='Download data in csv and json format')
 
 # Api urls to filter resources based on different criteria
+router.register(rf'{endpoint}/common_sites', views.CommonSitesViewSet, basename='Common sites based on different criteria')
 router.register(rf'{endpoint}/search', views.ResourcesFilteringViewSet, basename='Filtering resources based on different criteria')
 
 

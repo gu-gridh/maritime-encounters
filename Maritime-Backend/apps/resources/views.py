@@ -607,3 +607,72 @@ class DownloadViewSet(viewsets.ViewSet):
                 queryset_list[model.__name__] = list(queryset.values())
         return self._export_csv_zip(queryset_list)
     
+
+# Add new viewset when you select multiple resources, it resturns common sites have the same resources
+# We can filter them also based on period  
+class CommonSitesViewSet(GeoViewSet):
+    serializer_class = serializers.SiteCoordinatesSerializer
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
+    permission_classes = [IsAuthenticated]  
+
+    def get_queryset(self):
+        # Use 'type' instead of 'types' to match your URL
+        resources = self.request.query_params.get('type')
+        min_year = self.request.query_params.get('min_year')
+        max_year = self.request.query_params.get('max_year')
+
+
+        min_year = int(min_year) if min_year else None
+        max_year = int(max_year) if max_year else None
+        
+        # Handle empty resources parameter
+        if not resources:
+            return models.Site.objects.none()
+            
+        resource_list = [r.strip() for r in resources.split(',') if r.strip()]
+
+        resource_mapping = {
+            'boats': models.Boat,
+            'radiocarbon_dates': models.Radiocarbon,
+            'individual_samples': models.IndividualObjects,
+            'dna_samples': models.aDNA,
+            'metal_analysis': models.MetalAnalysis,
+            'landing_points': models.LandingPoints,
+            'new_samples': models.NewSamples,
+            'lnhouses': models.LNHouses,
+        }
+
+        selected_models = [resource_mapping[r] for r in resource_list if r in resource_mapping]
+        
+        if not selected_models:
+            return models.Site.objects.none()
+        
+        field_mapping = {
+            'Boat': 'boat',
+            'Radiocarbon': 'radiocarbon', 
+            'IndividualObjects': 'individualobjects',
+            'aDNA': 'adna',
+            'MetalAnalysis': 'metalanalysis',
+            'LandingPoints': 'landingpoints',
+            'NewSamples': 'newsamples',
+            'LNHouses': 'lnhouses',
+        }
+
+        # Start with all sites
+        sites = models.Site.objects.all()
+        
+        # Apply AND filter: site must have ALL selected resource types
+        for model in selected_models:
+            field_name = field_mapping.get(model.__name__)
+            if field_name:
+                sites = sites.filter(**{f"{field_name}__isnull": False})
+
+        sites = sites.distinct()
+
+        return sites
+    
+    filterset_fields = get_fields(
+        models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
+    )
+    bbox_filter_field = 'coordinates'
+    bbox_filter_include_overlapping = True
