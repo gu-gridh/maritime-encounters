@@ -335,6 +335,18 @@ class ResourcesFilteringViewSet(GeoViewSet):
 
         # Early return for no filters
         if not (resource_type or min_year or max_year or period_name):
+            # If no filters are applied, return all sites that have at least one resource attached to them
+            sites = sites.filter(
+                Q(boat__isnull=False) |
+                Q(radiocarbon__isnull=False) |
+                Q(individualobjects__isnull=False) |
+                Q(adna__isnull=False) |
+                Q(metalanalysis__isnull=False) |
+                Q(landingpoints__isnull=False) |
+                Q(newsamples__isnull=False) |
+                Q(lnhouses__isnull=False)
+            ).distinct()
+
             return sites
 
         # Special case: fallback condition
@@ -342,11 +354,28 @@ class ResourcesFilteringViewSet(GeoViewSet):
         if is_full_range and not resource_type:
             return sites
 
-        # Determine models to check
-        models_to_check = (
-            [resource_mapping[resource_type]] if resource_type in resource_mapping
-            else list(resource_mapping.values())
-        )
+        # Determine models to check - supports comma-separated resource types
+        models_to_check = []
+        
+        if resource_type:
+            # Split by comma and clean up whitespace
+            resource_types = [rt.strip() for rt in resource_type.split(',') if rt.strip()]
+            
+            # Get models for valid resource types
+            for rt in resource_types:
+                if rt in resource_mapping:
+                    models_to_check.append(resource_mapping[rt])
+                else:
+                    # Log warning for invalid resource type
+                    print(f"Warning: Unknown resource type '{rt}' ignored")
+            
+            # If no valid resource types found, use all models as fallback
+            if not models_to_check:
+                print(f"Warning: No valid resource types in '{resource_type}', using all models")
+                models_to_check = list(resource_mapping.values())
+        else:
+            # No resource type specified, use all models
+            models_to_check = list(resource_mapping.values())
 
         # **Key Optimization: Use database-level filtering with EXISTS subqueries**
         site_filter = Q()
