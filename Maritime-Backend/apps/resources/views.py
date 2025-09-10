@@ -179,6 +179,15 @@ class MetalworkViewSet(DynamicDepthViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
+
+class RadiocarbonViewSet(DynamicDepthViewSet):
+    serializer_class = serializers.RadiocarbonSerializer
+    queryset = models.Radiocarbon.objects.all()
+    filterset_fields = get_fields(models.Radiocarbon, exclude=DEFAULT_FIELDS)
+    search_fields = ['site__name', 'lab_code']
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
+    permission_classes = [IsAuthenticated]  # Explicitly require authentication
+
 class LandingPointsViewSet(DynamicDepthViewSet):
     serializer_class = serializers.LandingPointsSerializer
     queryset = models.LandingPoints.objects.all()
