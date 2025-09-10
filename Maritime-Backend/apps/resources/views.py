@@ -8,7 +8,7 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework import status
 from . import models, serializers
-from django.db.models import Q
+from django.db.models import Q, Exists, OuterRef
 from maritime.abstract.views import DynamicDepthViewSet, GeoViewSet
 from maritime.abstract.models import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
 
@@ -180,8 +180,8 @@ class MetalworkViewSet(DynamicDepthViewSet):
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 
-class RadiocarbonViewSet(DynamicDepthViewSet):
-    serializer_class = serializers.RadiocarbonSerializer
+class RadioCarbonViewSet(DynamicDepthViewSet):
+    serializer_class = serializers.RadioCarbonSerializer
     queryset = models.Radiocarbon.objects.all()
     filterset_fields = get_fields(models.Radiocarbon, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name', 'lab_code']
@@ -225,12 +225,28 @@ class SearchPeriodsNames(DynamicDepthViewSet):
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 class SiteResourcesViewSet(viewsets.ViewSet):
-    authentication_classes = [SessionAuthentication, TokenAuthentication]  # Add TokenAuthentication here
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
     
     def get_permissions(self):
         if self.action == 'list':
-            return [IsAuthenticated()]  # Require authentication for 'list' action
-        return [AllowAny()]  # Allow any access for other actions (if any)
+            return [IsAuthenticated()]
+        return [AllowAny()]
+    
+    def _get_select_related_fields(self, model):
+        """Dynamically get available ForeignKey fields for select_related"""
+        fields = []
+        for field in model._meta.get_fields():
+            if hasattr(field, 'related_model') and field.many_to_one:  # ForeignKey fields
+                fields.append(field.name)
+        return fields
+    
+    def _get_prefetch_related_fields(self, model):
+        """Dynamically get available M2M and reverse FK fields for prefetch_related"""
+        fields = []
+        for field in model._meta.get_fields():
+            if hasattr(field, 'related_model') and (field.many_to_many or field.one_to_many):
+                fields.append(field.name)
+        return fields
     
     def list(self, request):
         site_id = request.GET.get("site_id")
@@ -243,22 +259,51 @@ class SiteResourcesViewSet(viewsets.ViewSet):
         except Site.DoesNotExist:
             return Response({"error": "Site not found."}, status=status.HTTP_404_NOT_FOUND)
         
-        data = {
-            'boats': BoatSerializer(Boat.objects.filter(site=site), many=True).data,
-            'radiocarbon_dates': RadiocarbonSerializer(Radiocarbon.objects.filter(site=site), many=True).data,
-            'individual_samples': IndivdualObjectSerializer(IndividualObjects.objects.filter(site=site), many=True).data,
-            'dna_samples': aDNASerializer(aDNA.objects.filter(site=site), many=True).data,
-            'metal_analysis': MetalAnalysisSerializer(MetalAnalysis.objects.filter(site=site), many=True).data,
-            'landing_points': LandingPointsSerializer(LandingPoints.objects.filter(site=site), many=True).data,
-            'new_samples': NewSamplesSerializer(NewSamples.objects.filter(site=site), many=True).data,
-            'lnhouses': LNHouseSerializer(LNHouses.objects.filter(site=site), many=True).data,
-            # 'metalwork': MetalworkSerializer(Metalwork.objects.filter(location__site=site), many=True).data,
-        }
-
+        # Model configurations with their serializers
+        model_configs = [
+            (Boat, BoatSerializer, 'boats'),
+            (Radiocarbon, RadioCarbonSerializer, 'radiocarbon_dates'),
+            (IndividualObjects, IndivdualObjectSerializer, 'individual_samples'),
+            (aDNA, aDNASerializer, 'dna_samples'),
+            (MetalAnalysis, MetalAnalysisSerializer, 'metal_analysis'),
+            (LandingPoints, LandingPointsSerializer, 'landing_points'),
+            (NewSamples, NewSamplesSerializer, 'new_samples'),
+            (LNHouses, LNHouseSerializer, 'lnhouses'),
+        ]
+        
+        data = {}
+        
+        for model, serializer_class, key in model_configs:
+            try:
+                # Get available fields dynamically
+                select_fields = self._get_select_related_fields(model)
+                prefetch_fields = self._get_prefetch_related_fields(model)
+                
+                # Build queryset with optimization
+                queryset = model.objects.filter(site=site)
+                
+                if select_fields:
+                    queryset = queryset.select_related(*select_fields)
+                
+                if prefetch_fields:
+                    queryset = queryset.prefetch_related(*prefetch_fields)
+                
+                # Serialize data
+                data[key] = serializer_class(queryset, many=True).data
+                
+            except Exception as e:
+                # Log the error but continue with other models
+                print(f"Error processing {model.__name__}: {e}")
+                data[key] = []
+        
         return Response(data, status=status.HTTP_200_OK)
+
+# ...existing code...
 
 class ResourcesFilteringViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
+    authentication_classes = [SessionAuthentication, TokenAuthentication]  
+    permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
         sites = models.Site.objects.all()
@@ -280,83 +325,77 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'landing_points': models.LandingPoints,
             'new_samples': models.NewSamples,
             'lnhouses': models.LNHouses,
-            # 'metalwork': models.Metalwork,
         }
 
-        # If no meaningful filter is provided, return everything
-        if not (resource_type and (min_year or max_year) or period_name):
+        # Early return for no filters
+        if not (resource_type or min_year or max_year or period_name):
             return sites
 
         # Special case: fallback condition
-        if min_year == -2450 and max_year == 50 and not resource_type:
+        is_full_range = min_year == -2450 and max_year == 50
+        if is_full_range and not resource_type:
             return sites
 
-        # Filters for models with start_date/end_date
-        date_filter = Q()
-        if min_year:
-            date_filter &= Q(start_date__gte=min_year)
-        if max_year:
-            date_filter &= Q(end_date__lte=max_year)
-        if period_name:
-            date_filter &= Q(period__name=period_name)
-
-        # Filters for models with period field
-        date_filter_period = Q()
-        if min_year:
-            date_filter_period &= Q(period__start_date__gte=min_year)
-        if max_year:
-            date_filter_period &= Q(period__end_date__lte=max_year)
-        if period_name:
-            date_filter_period &= Q(period__name=period_name)
-
-        if min_year and max_year:
-            date_filter_period = Q()
-            Q(period__start_date__isnull=True) | Q(period__end_date__isnull=True)
-
-        site_ids = set()
-
-        def collect_site_ids(model, filter_q):
-            return model.objects.filter(filter_q).values_list('site_id', flat=True)
-
-        # Decide if this is the "full range" fallback
-        is_full_range = min_year == -2450 and max_year == 50
-
+        # Determine models to check
         models_to_check = (
             [resource_mapping[resource_type]] if resource_type in resource_mapping
-            else resource_mapping.values()
+            else list(resource_mapping.values())
         )
 
+        # **Key Optimization: Use database-level filtering with EXISTS subqueries**
+        site_filter = Q()
+        
         for model in models_to_check:
             model_fields = [field.name for field in model._meta.get_fields()]
-
+            model_filter = Q()
+            
+            # Build filter for this specific model
             if 'start_date' in model_fields or 'end_date' in model_fields:
-                # If full range, include everything; otherwise filter
-                if is_full_range:
-                    site_ids.update(model.objects.values_list('site_id', flat=True))
-                else:
-                    site_ids.update(collect_site_ids(model, date_filter))
-
+                if not is_full_range:
+                    if min_year:
+                        model_filter &= Q(start_date__gte=min_year)
+                    if max_year:
+                        model_filter &= Q(end_date__lte=max_year)
+                    if period_name:
+                        model_filter &= Q(period__name=period_name)
+                
             elif 'period' in model_fields:
-                if is_full_range:
-                    # Include all, even if period dates are null
-                    site_ids.update(model.objects.values_list('site_id', flat=True))
-                else:
-                    # Only include those with valid start and end dates
-                    filter_with_valid_dates = date_filter_period & Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
-                    site_ids.update(collect_site_ids(model, filter_with_valid_dates))
+                if not is_full_range:
+                    # Build period-based filter
+                    period_filter = Q()
+                    if min_year:
+                        period_filter &= Q(period__start_date__gte=min_year)
+                    if max_year:
+                        period_filter &= Q(period__end_date__lte=max_year)
+                    if period_name:
+                        period_filter &= Q(period__name=period_name)
+                    
+                    # Only include records with valid period dates
+                    model_filter &= (
+                        period_filter & 
+                        Q(period__start_date__isnull=False) & 
+                        Q(period__end_date__isnull=False)
+                    )
+            
+            # **FIXED: Use imported OuterRef and Exists instead of models.OuterRef/models.Exists**
+            if model_filter or is_full_range:
+                subquery = model.objects.filter(site=OuterRef('pk'))  # Changed from models.OuterRef
+                if not is_full_range and model_filter:
+                    subquery = subquery.filter(model_filter)
+                
+                site_filter |= Exists(subquery)  # Changed from models.Exists
 
-            else:
-                site_ids.update(model.objects.values_list('site_id', flat=True))
+        # Apply the combined filter
+        if site_filter:
+            sites = sites.filter(site_filter)
 
-        return sites.filter(id__in=site_ids)
+        return sites
 
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
     )
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
-    authentication_classes = [SessionAuthentication, TokenAuthentication]  
-    permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
 # Viweset to download data for selected area based on parameters and bounding box in search function
 # Data should provided in csv and json format
