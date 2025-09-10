@@ -226,27 +226,35 @@ class SearchPeriodsNames(DynamicDepthViewSet):
 
 class SiteResourcesViewSet(viewsets.ViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
     
-    def get_permissions(self):
-        if self.action == 'list':
-            return [IsAuthenticated()]
-        return [AllowAny()]
+    def _get_safe_prefetch_fields(self, model):
+        """Get safe prefetch fields - manually defined for each model"""
+        prefetch_map = {
+            'Boat': ['components'],
+            'IndividualObjects': ['material', 'period'],
+            'Radiocarbon': [],  # No prefetch needed
+            'aDNA': [],
+            'MetalAnalysis': [],  # Skip problematic prefetch
+            'LandingPoints': [],
+            'NewSamples': [],
+            'LNHouses': [],
+        }
+        return prefetch_map.get(model.__name__, [])
     
-    def _get_select_related_fields(self, model):
-        """Dynamically get available ForeignKey fields for select_related"""
-        fields = []
-        for field in model._meta.get_fields():
-            if hasattr(field, 'related_model') and field.many_to_one:  # ForeignKey fields
-                fields.append(field.name)
-        return fields
-    
-    def _get_prefetch_related_fields(self, model):
-        """Dynamically get available M2M and reverse FK fields for prefetch_related"""
-        fields = []
-        for field in model._meta.get_fields():
-            if hasattr(field, 'related_model') and (field.many_to_many or field.one_to_many):
-                fields.append(field.name)
-        return fields
+    def _get_safe_select_fields(self, model):
+        """Get safe select_related fields - manually defined for each model"""
+        select_map = {
+            'Boat': ['site', 'period', 'location'],
+            'IndividualObjects': ['site', 'museum', 'accession_number', 'object_type', 'form', 'variant', 'context'],
+            'Radiocarbon': ['site', 'period', 'dating_method'],
+            'aDNA': ['site'],
+            'MetalAnalysis': ['site'],
+            'LandingPoints': ['site'],
+            'NewSamples': ['site'],
+            'LNHouses': ['site'],
+        }
+        return select_map.get(model.__name__, ['site'])
     
     def list(self, request):
         site_id = request.GET.get("site_id")
@@ -275,9 +283,9 @@ class SiteResourcesViewSet(viewsets.ViewSet):
         
         for model, serializer_class, key in model_configs:
             try:
-                # Get available fields dynamically
-                select_fields = self._get_select_related_fields(model)
-                prefetch_fields = self._get_prefetch_related_fields(model)
+                # Get safe fields for this specific model
+                select_fields = self._get_safe_select_fields(model)
+                prefetch_fields = self._get_safe_prefetch_fields(model)
                 
                 # Build queryset with optimization
                 queryset = model.objects.filter(site=site)
@@ -297,8 +305,6 @@ class SiteResourcesViewSet(viewsets.ViewSet):
                 data[key] = []
         
         return Response(data, status=status.HTTP_200_OK)
-
-# ...existing code...
 
 class ResourcesFilteringViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer

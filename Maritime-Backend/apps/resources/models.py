@@ -787,8 +787,20 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     LIconsistency = models.ManyToManyField(LISource, blank=True, verbose_name=_("LI Consistent - Region"),help_text=_("Region or location the Lead Isotopes are consistent with wthin 1 analytical error."))
     LIoriginal = models.TextField(null=True, blank=True, verbose_name=_(
         "LI Consistency - Text"), help_text=_("The original text in 'LI consistent with - within 1 analytical error' field used for geocoding."))
+    
+    
     def __str__(self) -> str:
-        name_str = f"{self.museum_entry}-{self.context}"
+        name_str = ""
+        if self.museum_entry and self.context:
+            name_str = f"{self.museum_entry}-{self.context}"
+        elif self.museum_entry:
+            name_str = f"{self.museum_entry}"
+        elif self.context:
+            name_str = f"{self.context}"
+        elif self.site:
+            name_str = f"{self.site.name}"
+        else:
+            name_str = f"Metal Analysis {self.id}"
         return name_str
 
     class Meta:
