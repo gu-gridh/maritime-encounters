@@ -3,6 +3,7 @@ from django.contrib.gis import admin
 from django.utils.translation import gettext_lazy as _
 from admin_auto_filters.filters import AutocompleteFilter
 import mapwidgets
+from django.db.models import Case, When, IntegerField
 
 class SiteFilter(AutocompleteFilter):
     title = _('Site')  # display title
@@ -177,29 +178,29 @@ class DatingMethodAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
-
 @admin.register(Site)
 class SiteAdmin(admin.ModelAdmin):
-    list_display = ['name', 'ADM0',]
-    search_fields = ['name', 'ADM0__name', 'ADM1__name',]
-    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2',
-                           'ADM3', 'ADM4', 'Province', 'Parish']
-    # list_filter = ['name', 'ADM1']
-    ordering = [
-        # Push empty names to the end, then order by name
-        models.Case(
-            models.When(name='', then=1),
-            models.When(name__isnull=True, then=1),
-            default=0,
-            output_field=models.IntegerField(),
-        ),
-        'name'
-    ]
+    list_display = ['name', 'ADM0', 'placename']
+    search_fields = ['name', 'placename', 'ADM0__name', 'ADM1__name']
+    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish']
     list_per_page = 50
     formfield_overrides = {
         models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}
     }
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # Annotate: 1 if both name and placename are empty/null, else 0
+        return qs.annotate(
+            empty_name=Case(
+                When(name__isnull=True, placename__isnull=True, then=1),
+                When(name='', placename='', then=1),
+                When(name='', placename__isnull=True, then=1),
+                When(name__isnull=True, placename='', then=1),
+                default=0,
+                output_field=IntegerField(),
+            )
+        ).order_by('empty_name', 'name', 'placename')
 
 @admin.register(Fastening)
 class FasteningAdmin(admin.ModelAdmin):
