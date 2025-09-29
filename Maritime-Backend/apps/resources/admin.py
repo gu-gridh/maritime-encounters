@@ -228,6 +228,13 @@ class RadiocarbonAdmin(admin.ModelAdmin):
 class BoatsAdmin(admin.ModelAdmin):
     list_display = ['site_name', 'vessel_name', 'vessel_type']
 
+    def get_queryset(self, request):
+        qs = super().get_queryset(request)
+        # Only fetch needed fields for related Site, excluding geometry
+        return qs.select_related('site').only(
+            'id', 'site__id', 'site__name', 'vessel_name', 'vessel_type'
+        )
+
     def site_name(self, obj):
         return obj.site.name if obj.site else ''
     site_name.admin_order_field = 'site'
