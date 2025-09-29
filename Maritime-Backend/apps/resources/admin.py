@@ -185,7 +185,16 @@ class SiteAdmin(admin.ModelAdmin):
     autocomplete_fields = ['ADM0', 'ADM1', 'ADM2',
                            'ADM3', 'ADM4', 'Province', 'Parish']
     # list_filter = ['name', 'ADM1']
-    ordering = ['name']
+    ordering = [
+        # Push empty names to the end, then order by name
+        models.Case(
+            models.When(name='', then=1),
+            models.When(name__isnull=True, then=1),
+            default=0,
+            output_field=models.IntegerField(),
+        ),
+        'name'
+    ]
     list_per_page = 50
     formfield_overrides = {
         models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}
