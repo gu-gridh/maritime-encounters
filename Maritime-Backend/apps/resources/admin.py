@@ -226,7 +226,13 @@ class RadiocarbonAdmin(admin.ModelAdmin):
 
 @admin.register(Boat)
 class BoatsAdmin(admin.ModelAdmin):
-    list_display = ['site', 'vessel_name', 'vessel_type']
+    list_display = ['site_name', 'vessel_name', 'vessel_type']
+
+    def site_name(self, obj):
+        return obj.site.name if obj.site else ''
+    site_name.admin_order_field = 'site'
+    site_name.short_description = 'Site Name'
+
     search_fields = ['site__name', 'vessel_name', 'vessel_type']
     list_filter = ['site', 'vessel_type']
     ordering = ['site']
