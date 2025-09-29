@@ -528,6 +528,9 @@ class Boat(abstract.AbstractBaseModel):
                                    help_text=_("A description of the boat find"))
     period = models.ForeignKey(Period, on_delete=models.CASCADE, null=True, blank=True, 
                               verbose_name=_("Period"), help_text=_("The period the vessel dates to."), db_index=True)
+    date_ranges = models.ManyToManyField(DateRanges, blank=True, verbose_name=_("Date Ranges"),
+                                          help_text=_("The date ranges the vessel dates to."), db_index=True)
+    
     # Radio Carbon Dating
     carbon_date = models.ManyToManyField(CalibratedDate, blank=True, verbose_name=_("Dating"),
                                             help_text=_("Radiocarbon, dendro, etc. dating of the vessel"))
