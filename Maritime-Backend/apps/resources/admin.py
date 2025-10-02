@@ -3,7 +3,7 @@ from django.contrib.gis import admin
 from django.utils.translation import gettext_lazy as _
 from admin_auto_filters.filters import AutocompleteFilter
 import mapwidgets
-from django.db.models import Case, When, IntegerField
+from django.db.models import Case, When, IntegerField, Q
 
 class SiteFilter(AutocompleteFilter):
     title = _('Site')  # display title
@@ -199,8 +199,13 @@ class SiteAdmin(admin.ModelAdmin):
                 When(name__isnull=True, placename='', then=1),
                 default=0,
                 output_field=IntegerField(),
-            )
-        ).order_by('empty_name', 'name', 'placename')
+            ),
+            name_is_blank=Case(
+                When(Q(name__isnull=True) | Q(name=''), then=1),
+                default=0,
+                output_field=IntegerField(),
+            ),
+        ).order_by('empty_name', 'name_is_blank', 'placename', 'name')
 
 @admin.register(Fastening)
 class FasteningAdmin(admin.ModelAdmin):
