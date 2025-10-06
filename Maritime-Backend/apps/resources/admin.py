@@ -12,9 +12,9 @@ class SiteFilter(AutocompleteFilter):
 
 @admin.register(Location)
 class LocationAdmin(admin.ModelAdmin):
-    list_display = ['site', 'location_detail', 'location_name']
-    search_fields = ['location_name', 'site__name', 'location_name']
-    list_filter = ['location_name', 'site']
+    list_display = ['location_name', 'location_detail']
+    search_fields = ['location_name', 'location_name']
+    list_filter = ['location_name']
     ordering = ['location_detail']
     formfield_overrides = {
         models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}

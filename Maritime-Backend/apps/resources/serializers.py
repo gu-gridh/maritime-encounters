@@ -100,7 +100,7 @@ class ExcludeSitePloygonSampleSerializer(DynamicDepthSerializer):
 
 
 class ExcludePlolygonLocationGeoSerializer(DynamicDepthSerializer):
-    site = ExcludePlolygonSiteGeoSerializer()
+    # site = ExcludePlolygonSiteGeoSerializer()
 
     class Meta:
         model = Location

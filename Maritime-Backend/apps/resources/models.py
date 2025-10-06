@@ -6,8 +6,9 @@ from django.contrib.postgres.fields import ArrayField
  
 class Location(abstract.AbstractBaseModel):
     # Represents the location of the site
-    site = models.ForeignKey('Site', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
-        "site"), help_text=_("The site in which the location is located."))
+    # Just extra information about the site in case there are need for more details
+    # site = models.ForeignKey('Site', on_delete=models.CASCADE, null=True, blank=True, verbose_name=_(
+    #     "site"), help_text=_("The site in which the location is located."))
     location_name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "location_name"), help_text=_("The name of the location."))
     location_detail = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
