@@ -61,6 +61,12 @@ class PeriodActivityAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
+@admin.register(DateRanges)
+class DateRangesAdmin(admin.ModelAdmin):
+    list_display = ['start_date', 'end_date']
+    search_fields = ['start_date', 'end_date']
+    list_filter = ['start_date', 'end_date']
+    ordering = ['start_date', 'end_date']
 
 @admin.register(Species)
 class SpeciesAdmin(admin.ModelAdmin):
