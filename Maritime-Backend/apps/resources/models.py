@@ -557,8 +557,8 @@ class Boat(abstract.AbstractBaseModel):
                                 help_text=_("Description of the tree nail(s)"))
     
     # evidence of bending/twisting
-    evidence_of_propulsion = models.CharField(max_length=256, null=True, blank=True, verbose_name=_("Evidence of Propulsion"),
-                                help_text=_("Description of evidence of propulsion"))
+    evidence_of_propulsion = models.BooleanField(null=True, default=False, verbose_name=_("Evidence of Propulsion"),
+                                help_text=_("Indicate presence or absence of evidence of propulsion"))
     loose_transom = models.BooleanField(null=True, default=False, verbose_name=_("Loose Transom"),
                                 help_text=_("Indicate presence or absence of a loose transom"))
     hewn_out_ridges = models.BooleanField(null=True, default=False, verbose_name=_("Hewn-out Ridges"),
