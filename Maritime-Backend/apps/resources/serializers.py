@@ -104,7 +104,7 @@ class ExcludePlolygonLocationGeoSerializer(DynamicDepthSerializer):
 
     class Meta:
         model = Location
-        fields = ['id'] + get_fields(Location, exclude=DEFAULT_FIELDS+['coordinates'])
+        fields = ['id'] + get_fields(Location, exclude=DEFAULT_FIELDS)
 
 
 class PeriodSerializer(DynamicDepthSerializer):
@@ -216,9 +216,9 @@ class BoatRelComponentSerializer(DynamicDepthSerializer):
 
 class BoatSerializer(DynamicDepthSerializer):
     site = ExcludePlolygonSiteGeoSerializer()
-    location = ExcludePlolygonLocationGeoSerializer()
+    # location = ExcludePlolygonLocationGeoSerializer()
     components = BoatRelComponentSerializer(many=True, read_only=True)  
     class Meta:
         model = Boat
-        fields = ['id'] + get_fields(Boat, exclude=DEFAULT_FIELDS) + ['components', 'site', 'location']
+        fields = ['id'] + get_fields(Boat, exclude=DEFAULT_FIELDS+['location']) + ['components', 'site', 'location']
 

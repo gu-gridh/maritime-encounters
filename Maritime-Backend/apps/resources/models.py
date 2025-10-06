@@ -14,8 +14,10 @@ class Location(abstract.AbstractBaseModel):
         "location_detail"), help_text=_("The description of the location."))
     location_detail_eng = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "location_detail_eng"), help_text=_("The english translation of location detail."))
-    coordinates = models.PointField(null=True, blank=True, verbose_name=_(
-        "Coordinates"), help_text=_("Mid-point coordinates of the location."))
+    # We do not use coordinates here, instead we use the coordinates from the Site model
+    #  This is to avoid confusion and duplication of data
+    # coordinates = models.PointField(null=True, blank=True, verbose_name=_(
+    #     "Coordinates"), help_text=_("Mid-point coordinates of the location."))
 
     def __str__(self) -> str:
         return self.location_name or self.location_detail or self.site.name or ''
