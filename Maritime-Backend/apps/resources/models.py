@@ -21,7 +21,7 @@ class Location(abstract.AbstractBaseModel):
     #     "Coordinates"), help_text=_("Mid-point coordinates of the location."))
 
     def __str__(self) -> str:
-        return self.location_name or self.location_detail or self.site.name or ''
+        return self.location_name or self.location_detail  or ''
 
     class Meta:
         verbose_name = _("Location")
