@@ -5,9 +5,30 @@ from admin_auto_filters.filters import AutocompleteFilter
 import mapwidgets
 from django.db.models import Case, When, IntegerField, Q
 
+
 class SiteFilter(AutocompleteFilter):
-    title = _('Site')  # display title
-    field_name = 'site'  # name of the foreign key field
+    title = _('Site')
+    field_name = 'site'
+
+
+class PeriodFilter(AutocompleteFilter):
+    title = _('Period')
+    field_name = 'period'
+
+
+class FormFilter(AutocompleteFilter):
+    title = _('Form')
+    field_name = 'form'
+
+
+class VariantFilter(AutocompleteFilter):
+    title = _('Variant')
+    field_name = 'variant'
+
+
+class OrientationFilter(AutocompleteFilter):
+    title = _('Orientation')
+    field_name = 'orientation'
 
 
 @admin.register(Location)
@@ -240,21 +261,23 @@ class RelBoatComponent(admin.TabularInline):
     extra = 1
 
 @admin.register(CalibratedDate)
-class RadiocarbonAdmin(admin.ModelAdmin):
+class CalibratedDateAdmin(admin.ModelAdmin):
     list_display = ['sample', 'lab', 'dating_method', 'date']
-    search_fields = ['sample', 'lab', 'dating_method', 'date']
-    list_filter = ['sample', 'lab', 'dating_method', 'date']
+    list_per_page = 50
+    search_fields = ['sample', 'lab', 'date']
+    autocomplete_fields = ['dating_method']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('dating_method')
 
 @admin.register(Boat)
 class BoatsAdmin(admin.ModelAdmin):
     list_display = ['site_name', 'vessel_name', 'vessel_type']
+    list_per_page = 50
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        # Only fetch needed fields for related Site, excluding geometry
-        return qs.select_related('site').only(
-            'id', 'site__id', 'site__name', 'vessel_name', 'vessel_type'
-        )
+        return qs.select_related('site', 'period', 'location')
 
     def site_name(self, obj):
         return obj.site.name if obj.site else ''
@@ -262,7 +285,7 @@ class BoatsAdmin(admin.ModelAdmin):
     site_name.short_description = 'Site Name'
 
     search_fields = ['site__name', 'vessel_name', 'vessel_type']
-    list_filter = ['site', 'vessel_type']
+    list_filter = [SiteFilter, 'vessel_type']
     ordering = ['site']
     autocomplete_fields = ['site', 'period', 'location']
     filter_horizontal = ['carbon_date']
@@ -273,24 +296,39 @@ class BoatsAdmin(admin.ModelAdmin):
 @admin.register(LandingPoints)
 class LandingPointsAdmin(admin.ModelAdmin):
     list_display = ['site']
+    list_per_page = 50
     search_fields = ['site__name', 'period__name']
-    list_filter = ['site']
+    list_filter = [SiteFilter]
+    autocomplete_fields = ['site']
     inlines = [
         RelPeriodActivityLandingPoints,
     ]
     filter_horizontal = ['period', 'related_finds']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('site')
 @admin.register(NewSamples)
 class NewSamplesAdmin(admin.ModelAdmin):
     list_display = ['site', 'sampler', 'metal']
+    list_per_page = 50
     search_fields = ['site__name']
-    list_filter = ['site']
+    list_filter = [SiteFilter]
+    autocomplete_fields = ['site']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('site', 'sampler', 'metal')
 
 
 @admin.register(Radiocarbon)
 class RadiocarbonAdmin(admin.ModelAdmin):
     list_display = ['site', 'period']
-    search_fields = ['site__name', 'period__name']
-    list_filter = ['site', 'period']
+    list_per_page = 50
+    search_fields = ['site__name', 'period__name', 'lab_id']
+    list_filter = [SiteFilter, PeriodFilter]
+    autocomplete_fields = ['site', 'period', 'sample', 'material', 'species']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('site', 'period', 'sample', 'material', 'species')
 
 
 
@@ -305,8 +343,9 @@ class LISourceAdmin(admin.ModelAdmin):
 @admin.register(MetalAnalysis)
 class MetalAnalysisAdmin(admin.ModelAdmin):
     list_display = ['site', 'museum_entry', 'context']
+    list_per_page = 50
     search_fields = ['site__name']
-    list_filter = ['site']
+    list_filter = [SiteFilter]
     inlines = [
         RelMetalElementAdmin,
         RelMetalIsotopAdmin,
@@ -315,19 +354,34 @@ class MetalAnalysisAdmin(admin.ModelAdmin):
     autocomplete_fields = ['context', 'object_description',
                            'site', 'museum_entry', 'sample', 'period']
 
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'site', 'museum_entry', 'context', 'object_description', 'sample', 'period'
+        )
+
 
 @admin.register(aDNA)
 class aDNAAdmin(admin.ModelAdmin):
     list_display = ['site']
+    list_per_page = 50
     search_fields = ['site__name']
-    list_filter = ['site']
+    list_filter = [SiteFilter]
+    autocomplete_fields = ['site']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('site')
 
 
 @admin.register(IsotopesBio)
 class IsotopesBioAdmin(admin.ModelAdmin):
     list_display = ['site']
+    list_per_page = 50
     search_fields = ['site__name']
-    list_filter = ['site']
+    list_filter = [SiteFilter]
+    autocomplete_fields = ['site']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('site', 'sample', 'smple_type', 'species', 'period')
 
 @admin.register(Orientation)
 class OrientationAdmin(admin.ModelAdmin):
@@ -353,9 +407,14 @@ class ExteriorDescriptorAdmin(admin.ModelAdmin):
 @admin.register(LNHouses)
 class LNHousesAdmin(admin.ModelAdmin):
     list_display = ['site']
-    search_fields = ['site__name', 'form','variant','orientation']
-    list_filter = ['site', 'form','variant','orientation']
+    list_per_page = 50
+    search_fields = ['site__name', 'form__name', 'variant__name', 'orientation__text']
+    list_filter = [SiteFilter, FormFilter, VariantFilter, OrientationFilter]
+    autocomplete_fields = ['site', 'form', 'variant', 'orientation']
     filter_horizontal = ['period', 'dating', 'gable', 'exterior_construction']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related('site', 'form', 'variant', 'orientation')
 
 @admin.register(MuseumMeta)
 class MuseumMetaAdmin(admin.ModelAdmin):
@@ -453,12 +512,17 @@ class ObjectMaterialsAdmin(admin.ModelAdmin):
 @admin.register(ObjectCount)
 class ObjectCountAdmin(admin.ModelAdmin):
     list_display = ['metal', 'object', 'material_list', 'count']
+    list_per_page = 50
     search_fields = ['metal__entry_num__entry_number',
                      'metal__literature_num__literature_number']
-    list_filter = ['metal']
     ordering = ['metal']
     filter_horizontal = ['material']
     autocomplete_fields = ['metal', 'object']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'metal', 'object'
+        ).prefetch_related('material')
 
     def material_list(self, obj):
         return [material.text for material in obj.material.all()]
@@ -492,17 +556,23 @@ class RelObjectCountAdmin(admin.TabularInline):
 class MetalworkAdmin(admin.ModelAdmin):
     list_display = ['entry_num', 'literature_num', 'accession_num',
                     'location', 'main_context', 'find_context', 'context_detail', 'site']
+    list_per_page = 50
     search_fields = ['entry_num__entry_number', 'literature_num__literature_number', 'accession_num__accession_number', 'collection__collection',
                      'location__location_name', 'main_context__text', 'find_context__text', 'context_detail__text', 'period__name', 'period__phase__text']
-    list_filter = ['entry_num', 'literature_num', 'accession_num', 'collection',
-                   'site', 'location', 'main_context', 'find_context', 'context_detail', 'period']
+    list_filter = [SiteFilter]
     ordering = ['entry_num']
     inlines = [
         RelObjectCountAdmin
     ]
     filter_horizontal = ['context_keywords', 'period', 'context_keywords',
                          'certain_context_descriptors', 'uncertain_context_descriptors', 'museum', 'collection']
-    autocomplete_fields = ['entry_num', 'literature_num', 'accession_num','location', 'main_context', 'find_context', 'context_detail', 'site']
+    autocomplete_fields = ['entry_num', 'literature_num', 'accession_num', 'location', 'main_context', 'find_context', 'context_detail', 'site']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'entry_num', 'literature_num', 'accession_num',
+            'location', 'main_context', 'find_context', 'context_detail', 'site'
+        )
 
 
 @admin.register(Form)
@@ -534,10 +604,17 @@ class ObjectIdsAdmin(admin.ModelAdmin):
 
 @admin.register(IndividualObjects)
 class IndividualObjectsAdmin(admin.ModelAdmin):
-    list_display = ['site','accession_number']
-    search_fields = ['site__name', 'object_id__art_id',
-                     'form__name', 'variant__name', 'period__name', 'start_date', 'end_date', 'context']
+    list_display = ['site', 'accession_number']
+    list_per_page = 50
+    search_fields = ['site__name', 'id_national_database__art_id',
+                     'form__name', 'variant__name', 'period__name', 'start_date', 'end_date']
+    list_filter = [SiteFilter]
     ordering = ['site']
-    filter_horizontal = ['material','period']
+    filter_horizontal = ['material', 'period']
     autocomplete_fields = ['site', 'accession_number',
-                           'object_type', 'form', 'variant']
+                           'object_type', 'form', 'variant', 'museum', 'context']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).select_related(
+            'site', 'accession_number', 'museum', 'object_type', 'form', 'variant', 'context'
+        )

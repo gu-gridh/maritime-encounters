@@ -128,9 +128,17 @@ def csrf_token_view(request):
     """
     return JsonResponse({'csrfToken': get_token(request)})
 
+# Common select_related paths for Site with geography
+SITE_SELECT_RELATED = [
+    'site__ADM0', 'site__ADM1', 'site__ADM2',
+    'site__ADM3', 'site__ADM4', 'site__Province', 'site__Parish',
+]
+
 class SiteViewSet(DynamicDepthViewSet):
     serializer_class = serializers.SiteGeoSerializer
-    queryset = models.Site.objects.all()
+    queryset = models.Site.objects.select_related(
+        'ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish'
+    ).all()
 
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
@@ -153,7 +161,9 @@ class SiteCoordinatesViewSet(GeoViewSet):
 class SiteGeoViewSet(GeoViewSet):
 
     serializer_class = serializers.SiteGeoSerializer
-    queryset = models.Site.objects.all()
+    queryset = models.Site.objects.select_related(
+        'ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish'
+    ).all()
 
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
@@ -165,7 +175,11 @@ class SiteGeoViewSet(GeoViewSet):
 
 class MetalAnalysisViewSet(DynamicDepthViewSet):
     serializer_class = serializers.MetalAnalysisSerializer
-    queryset = models.MetalAnalysis.objects.all()
+    queryset = models.MetalAnalysis.objects.select_related(
+        'site__ADM0', 'site__ADM1', 'site__ADM2',
+        'site__ADM3', 'site__ADM4', 'site__Province', 'site__Parish',
+        'sample__site', 'museum_entry', 'context', 'object_description', 'period',
+    ).all()
     filterset_fields = get_fields(models.MetalAnalysis, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
@@ -173,7 +187,12 @@ class MetalAnalysisViewSet(DynamicDepthViewSet):
 
 class MetalworkViewSet(DynamicDepthViewSet):
     serializer_class = serializers.MetalworkSerializer
-    queryset = models.Metalwork.objects.all()
+    queryset = models.Metalwork.objects.select_related(
+        'site__ADM0', 'site__ADM1', 'site__ADM2',
+        'site__ADM3', 'site__ADM4', 'site__Province', 'site__Parish',
+        'entry_num', 'literature_num', 'accession_num',
+        'location', 'main_context', 'find_context', 'context_detail',
+    ).prefetch_related('period', 'museum', 'collection', 'context_keywords').all()
     filterset_fields = get_fields(models.Metalwork, exclude=DEFAULT_EXCLUDE+DEFAULT_FIELDS+['orig_coords'])
     search_fields = ['site__name', 'entry_number']
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
@@ -182,7 +201,11 @@ class MetalworkViewSet(DynamicDepthViewSet):
 
 class RadioCarbonViewSet(DynamicDepthViewSet):
     serializer_class = serializers.RadioCarbonSerializer
-    queryset = models.Radiocarbon.objects.all()
+    queryset = models.Radiocarbon.objects.select_related(
+        'site__ADM0', 'site__ADM1', 'site__ADM2',
+        'site__ADM3', 'site__ADM4', 'site__Province', 'site__Parish',
+        'sample__site', 'period', 'material', 'species',
+    ).all()
     filterset_fields = get_fields(models.Radiocarbon, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name', 'lab_code']
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
@@ -190,7 +213,10 @@ class RadioCarbonViewSet(DynamicDepthViewSet):
 
 class LandingPointsViewSet(DynamicDepthViewSet):
     serializer_class = serializers.LandingPointsSerializer
-    queryset = models.LandingPoints.objects.all()
+    queryset = models.LandingPoints.objects.select_related(
+        'site__ADM0', 'site__ADM1', 'site__ADM2',
+        'site__ADM3', 'site__ADM4', 'site__Province', 'site__Parish',
+    ).prefetch_related('period', 'related_finds').all()
     filterset_fields = get_fields(models.LandingPoints, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
@@ -199,7 +225,11 @@ class LandingPointsViewSet(DynamicDepthViewSet):
 
 class HousesViewSet(DynamicDepthViewSet):
     serializer_class = serializers.LNHouseSerializer
-    queryset = models.LNHouses.objects.all()
+    queryset = models.LNHouses.objects.select_related(
+        'site__ADM0', 'site__ADM1', 'site__ADM2',
+        'site__ADM3', 'site__ADM4', 'site__Province', 'site__Parish',
+        'form', 'variant', 'orientation',
+    ).prefetch_related('period', 'dating', 'gable', 'exterior_construction').all()
     filterset_fields = get_fields(models.LNHouses, exclude=DEFAULT_FIELDS)
     search_fields = ['site__name']
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
@@ -209,10 +239,14 @@ class BoatsViewSet(DynamicDepthViewSet):
     serializer_class = BoatSerializer
     queryset = (
         Boat.objects.all()
-        .select_related("site", "location", "period")  # ForeignKey relations
+        .select_related(
+            "site", "location", "period",
+            "site__ADM0", "site__ADM1", "site__ADM2",
+            "site__ADM3", "site__ADM4", "site__Province", "site__Parish",
+        )
         .prefetch_related(
-            "components",  # Ensure components are prefetched properly
-            "components__component",  # Fetch related BoatComponent objects in one go
+            "components",
+            "components__component",
         )
     )
     filterset_fields = get_fields(Boat, exclude=DEFAULT_FIELDS)
@@ -244,15 +278,17 @@ class SiteResourcesViewSet(viewsets.ViewSet):
     
     def _get_safe_select_fields(self, model):
         """Get safe select_related fields - manually defined for each model"""
+        # Include geography relations for site to avoid N+1 on nested serializers
+        _site_geo = ['site__ADM0', 'site__ADM1', 'site__ADM2', 'site__ADM3', 'site__ADM4', 'site__Province', 'site__Parish']
         select_map = {
-            'Boat': ['site', 'period', 'location'],
-            'IndividualObjects': ['site', 'museum', 'accession_number', 'object_type', 'form', 'variant', 'context'],
-            'Radiocarbon': ['site', 'period', 'dating_method'],
-            'aDNA': ['site'],
-            'MetalAnalysis': ['site'],
-            'LandingPoints': ['site'],
-            'NewSamples': ['site'],
-            'LNHouses': ['site'],
+            'Boat': ['site', 'period', 'location'] + _site_geo,
+            'IndividualObjects': ['site', 'museum', 'accession_number', 'object_type', 'form', 'variant', 'context'] + _site_geo,
+            'Radiocarbon': ['site', 'period', 'dating_method', 'material', 'species', 'sample'] + _site_geo,
+            'aDNA': ['site', 'period', 'dating_method', 'cultural_group'] + _site_geo,
+            'MetalAnalysis': ['site', 'museum_entry', 'context', 'object_description', 'sample', 'period'] + _site_geo,
+            'LandingPoints': ['site'] + _site_geo,
+            'NewSamples': ['site', 'sampler', 'metal'] + _site_geo,
+            'LNHouses': ['site', 'form', 'variant', 'orientation'] + _site_geo,
         }
         return select_map.get(model.__name__, ['site'])
     
