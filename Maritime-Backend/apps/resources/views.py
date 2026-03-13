@@ -273,6 +273,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
             'LandingPoints': [],
             'NewSamples': [],
             'LNHouses': [],
+            'Metalwork': ['period', 'museum', 'collection', 'context_keywords'],
         }
         return prefetch_map.get(model.__name__, [])
     
@@ -289,6 +290,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
             'LandingPoints': ['site'] + _site_geo,
             'NewSamples': ['site', 'sampler', 'metal'] + _site_geo,
             'LNHouses': ['site', 'form', 'variant', 'orientation'] + _site_geo,
+            'Metalwork': ['site', 'entry_num', 'literature_num', 'accession_num', 'location', 'main_context', 'find_context', 'context_detail'] + _site_geo,
         }
         return select_map.get(model.__name__, ['site'])
     
@@ -313,6 +315,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
             (LandingPoints, LandingPointsSerializer, 'landing_points'),
             (NewSamples, NewSamplesSerializer, 'new_samples'),
             (LNHouses, LNHouseSerializer, 'lnhouses'),
+            (Metalwork, MetalworkSerializer, 'metalwork'),
         ]
         
         data = {}
@@ -367,6 +370,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
             'landing_points': models.LandingPoints,
             'new_samples': models.NewSamples,
             'lnhouses': models.LNHouses,
+            'metalwork': models.Metalwork,
         }
 
         # Early return for no filters
@@ -380,7 +384,8 @@ class ResourcesFilteringViewSet(GeoViewSet):
                 Q(metalanalysis__isnull=False) |
                 Q(landingpoints__isnull=False) |
                 Q(newsamples__isnull=False) |
-                Q(lnhouses__isnull=False)
+                Q(lnhouses__isnull=False) |
+                Q(metalwork__isnull=False)
             ).distinct()
 
             return sites
@@ -511,7 +516,7 @@ class DownloadViewSet(viewsets.ViewSet):
             'landing_points': models.LandingPoints,
             'new_samples': models.NewSamples,
             'lnhouses': models.LNHouses,
-            # 'metalwork': models.Metalwork,
+            'metalwork': models.Metalwork,
         }
 
         selected_models = [resource_mapping[resource_type]] if resource_type in resource_mapping else resource_mapping.values()
@@ -608,6 +613,7 @@ class DownloadViewSet(viewsets.ViewSet):
             'landing_points': models.LandingPoints,
             'new_samples': models.NewSamples,
             'lnhouses': models.LNHouses,
+            'metalwork': models.Metalwork,
         }
         selected_models = [resource_mapping[resource_type]] if resource_type in resource_mapping else resource_mapping.values()
         queryset_list = {}
@@ -676,6 +682,7 @@ class CommonSitesViewSet(GeoViewSet):
             'landing_points': models.LandingPoints,
             'new_samples': models.NewSamples,
             'lnhouses': models.LNHouses,
+            'metalwork': models.Metalwork,
         }
 
         selected_models = [resource_mapping[r] for r in resource_list if r in resource_mapping]
@@ -692,6 +699,7 @@ class CommonSitesViewSet(GeoViewSet):
             'LandingPoints': 'landingpoints',
             'NewSamples': 'newsamples',
             'LNHouses': 'lnhouses',
+            'Metalwork': 'metalwork',
         }
 
         # Start with all sites
