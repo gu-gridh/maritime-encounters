@@ -284,7 +284,7 @@ class SiteResourcesViewSet(viewsets.ViewSet):
         select_map = {
             'Boat': ['site', 'period', 'location'] + _site_geo,
             'IndividualObjects': ['site', 'museum', 'accession_number', 'object_type', 'form', 'variant', 'context'] + _site_geo,
-            'Radiocarbon': ['site', 'period', 'dating_method', 'material', 'species', 'sample'] + _site_geo,
+            'Radiocarbon': ['site', 'period', 'material', 'species', 'sample', 'Carbon_to_nitrogen_ratio'] + _site_geo,
             'aDNA': ['site', 'period', 'dating_method', 'cultural_group'] + _site_geo,
             'MetalAnalysis': ['site', 'museum_entry', 'context', 'object_description', 'sample', 'period'] + _site_geo,
             'LandingPoints': ['site'] + _site_geo,
@@ -340,7 +340,8 @@ class SiteResourcesViewSet(viewsets.ViewSet):
                 
             except Exception as e:
                 # Log the error but continue with other models
-                print(f"Error processing {model.__name__}: {e}")
+                logger.error(f"Error processing {model.__name__} for site {site_id}: {e}", exc_info=True)
+                print(f"Error processing {model.__name__} for site {site_id}: {e}")
                 data[key] = []
         
         return Response(data, status=status.HTTP_200_OK)
