@@ -651,70 +651,100 @@ class DownloadViewSet(viewsets.ViewSet):
         return self._export_csv_zip(queryset_list)
     
 
-# Add new viewset when you select multiple resources, it resturns common sites have the same resources
+# Add new viewset when you select multiple resources, it returns common sites that have the same resources
 # We can filter them also based on period  
 class CommonSitesViewSet(GeoViewSet):
-    serializer_class = serializers.SiteCoordinatesSerializer
+    serializer_class = serializers.CommonSiteSerializer
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  
 
+    RESOURCE_MAPPING = {
+        'boats': models.Boat,
+        'radiocarbon_dates': models.Radiocarbon,
+        'individual_samples': models.IndividualObjects,
+        'dna_samples': models.aDNA,
+        'metal_analysis': models.MetalAnalysis,
+        'landing_points': models.LandingPoints,
+        'new_samples': models.NewSamples,
+        'lnhouses': models.LNHouses,
+        'metalwork': models.Metalwork,
+    }
+
+    FIELD_MAPPING = {
+        'Boat': 'boat',
+        'Radiocarbon': 'radiocarbon', 
+        'IndividualObjects': 'individualobjects',
+        'aDNA': 'adna',
+        'MetalAnalysis': 'metalanalysis',
+        'LandingPoints': 'landingpoints',
+        'NewSamples': 'newsamples',
+        'LNHouses': 'lnhouses',
+        'Metalwork': 'metalwork',
+    }
+
+    def _build_date_filter(self, model, min_year, max_year):
+        """Build date filter for a model based on its field structure."""
+        model_fields = [field.name for field in model._meta.get_fields()]
+        date_filter = Q()
+
+        if 'start_date' in model_fields or 'end_date' in model_fields:
+            if min_year is not None:
+                date_filter &= Q(start_date__gte=min_year)
+            if max_year is not None:
+                date_filter &= Q(end_date__lte=max_year)
+        elif 'period' in model_fields:
+            if min_year is not None:
+                date_filter &= Q(period__start_date__gte=min_year)
+            if max_year is not None:
+                date_filter &= Q(period__end_date__lte=max_year)
+            date_filter &= Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
+
+        return date_filter
+
     def get_queryset(self):
-        # Use 'type' instead of 'types' to match your URL
         resources = self.request.query_params.get('type')
         min_year = self.request.query_params.get('min_year')
         max_year = self.request.query_params.get('max_year')
 
-
         min_year = int(min_year) if min_year else None
         max_year = int(max_year) if max_year else None
-        
-        # Handle empty resources parameter
+        is_full_range = min_year == -2450 and max_year == 50
+
         if not resources:
             return models.Site.objects.none()
             
         resource_list = [r.strip() for r in resources.split(',') if r.strip()]
-
-        resource_mapping = {
-            'boats': models.Boat,
-            'radiocarbon_dates': models.Radiocarbon,
-            'individual_samples': models.IndividualObjects,
-            'dna_samples': models.aDNA,
-            'metal_analysis': models.MetalAnalysis,
-            'landing_points': models.LandingPoints,
-            'new_samples': models.NewSamples,
-            'lnhouses': models.LNHouses,
-            'metalwork': models.Metalwork,
-        }
-
-        selected_models = [resource_mapping[r] for r in resource_list if r in resource_mapping]
+        selected_models = [self.RESOURCE_MAPPING[r] for r in resource_list if r in self.RESOURCE_MAPPING]
         
         if not selected_models:
             return models.Site.objects.none()
-        
-        field_mapping = {
-            'Boat': 'boat',
-            'Radiocarbon': 'radiocarbon', 
-            'IndividualObjects': 'individualobjects',
-            'aDNA': 'adna',
-            'MetalAnalysis': 'metalanalysis',
-            'LandingPoints': 'landingpoints',
-            'NewSamples': 'newsamples',
-            'LNHouses': 'lnhouses',
-            'Metalwork': 'metalwork',
-        }
 
         # Start with all sites
         sites = models.Site.objects.all()
         
-        # Apply AND filter: site must have ALL selected resource types
+        # Apply AND filter: site must have ALL selected resource types (with optional date filtering)
         for model in selected_models:
-            field_name = field_mapping.get(model.__name__)
+            field_name = self.FIELD_MAPPING.get(model.__name__)
+            if not field_name:
+                continue
+
+            # Build subquery with date filter
+            subquery = model.objects.filter(site=OuterRef('pk'))
+            if not is_full_range and (min_year is not None or max_year is not None):
+                date_filter = self._build_date_filter(model, min_year, max_year)
+                if date_filter:
+                    subquery = subquery.filter(date_filter)
+
+            sites = sites.filter(Exists(subquery))
+
+        # Annotate with resource counts for each selected type
+        from django.db.models import Count
+        for model in selected_models:
+            field_name = self.FIELD_MAPPING.get(model.__name__)
             if field_name:
-                sites = sites.filter(**{f"{field_name}__isnull": False})
+                sites = sites.annotate(**{f'{field_name}_count': Count(field_name, distinct=True)})
 
-        sites = sites.distinct()
-
-        return sites
+        return sites.distinct()
     
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates']

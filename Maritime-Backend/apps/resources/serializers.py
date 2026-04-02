@@ -1,5 +1,6 @@
 from maritime.abstract.serializers import DynamicDepthSerializer, GenericSerializer
 from rest_framework_gis.serializers import GeoFeatureModelSerializer
+from rest_framework import serializers as serializers_module
 from . import models
 from maritime.utils import get_fields, DEFAULT_FIELDS
 from .models import *
@@ -70,6 +71,36 @@ class SiteCoordinatesSerializer(GeoFeatureModelSerializer):
         fields = ['id', 'name']
         geo_field = 'coordinates'
         # depth = 1
+
+
+class CommonSiteSerializer(GeoFeatureModelSerializer):
+    """Serializer for common sites endpoint - includes resource type counts."""
+    resource_counts = serializers_module.SerializerMethodField()
+
+    class Meta:
+        model = Site
+        fields = ['id', 'name', 'resource_counts']
+        geo_field = 'coordinates'
+
+    def get_resource_counts(self, obj):
+        """Return annotated resource counts from the queryset."""
+        count_fields = {
+            'boats': 'boat_count',
+            'radiocarbon_dates': 'radiocarbon_count',
+            'individual_samples': 'individualobjects_count',
+            'dna_samples': 'adna_count',
+            'metal_analysis': 'metalanalysis_count',
+            'landing_points': 'landingpoints_count',
+            'new_samples': 'newsamples_count',
+            'lnhouses': 'lnhouses_count',
+            'metalwork': 'metalwork_count',
+        }
+        result = {}
+        for key, attr in count_fields.items():
+            val = getattr(obj, attr, None)
+            if val is not None and val > 0:
+                result[key] = val
+        return result
 
 
 class ExcludePlolygonSiteGeoSerializer(DynamicDepthSerializer):
