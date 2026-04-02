@@ -682,43 +682,17 @@ class CommonSitesViewSet(GeoViewSet):
         'Metalwork': 'metalwork',
     }
 
-    def _build_date_filter(self, model, min_year, max_year):
-        """Build date filter for a model based on its field structure."""
-        model_fields = [field.name for field in model._meta.get_fields()]
-        date_filter = Q()
-
-        if 'start_date' in model_fields or 'end_date' in model_fields:
-            if min_year is not None:
-                date_filter &= Q(start_date__gte=min_year)
-            if max_year is not None:
-                date_filter &= Q(end_date__lte=max_year)
-        elif 'period' in model_fields:
-            if min_year is not None:
-                date_filter &= Q(period__start_date__gte=min_year)
-            if max_year is not None:
-                date_filter &= Q(period__end_date__lte=max_year)
-            date_filter &= Q(period__start_date__isnull=False) & Q(period__end_date__isnull=False)
-
-        return date_filter
-
     def get_queryset(self):
         resources = self.request.query_params.get('type')
-        min_year = self.request.query_params.get('min_year')
-        max_year = self.request.query_params.get('max_year')
 
-        min_year = int(min_year) if min_year else None
-        max_year = int(max_year) if max_year else None
-        is_full_range = min_year == -2450 and max_year == 50
-
-        logger.info("CommonSites: type=%s, min_year=%s, max_year=%s, is_full_range=%s",
-                     resources, min_year, max_year, is_full_range)
+        logger.info("CommonSites: type=%s", resources)
 
         if not resources:
             return models.Site.objects.none()
-            
+
         resource_list = [r.strip() for r in resources.split(',') if r.strip()]
         selected_models = [self.RESOURCE_MAPPING[r] for r in resource_list if r in self.RESOURCE_MAPPING]
-        
+
         if not selected_models:
             logger.warning("CommonSites: no valid resource types found in '%s'", resources)
             return models.Site.objects.none()
@@ -733,10 +707,6 @@ class CommonSitesViewSet(GeoViewSet):
             if not field_name:
                 continue
             subquery = model.objects.filter(site=OuterRef('pk'))
-            if not is_full_range and (min_year is not None or max_year is not None):
-                date_filter = self._build_date_filter(model, min_year, max_year)
-                if date_filter:
-                    subquery = subquery.filter(date_filter)
             site_filter |= Exists(subquery)
         sites = sites.filter(site_filter)
 
