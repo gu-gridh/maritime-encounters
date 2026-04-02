@@ -699,16 +699,14 @@ class CommonSitesViewSet(GeoViewSet):
 
         logger.info("CommonSites: selected models = %s", [m.__name__ for m in selected_models])
 
-        # Site must have ANY of the selected resource types
+        # Site must have ALL of the selected resource types (common sites)
         sites = models.Site.objects.all()
-        site_filter = Q()
         for model in selected_models:
             field_name = self.FIELD_MAPPING.get(model.__name__)
             if not field_name:
                 continue
             subquery = model.objects.filter(site=OuterRef('pk'))
-            site_filter |= Exists(subquery)
-        sites = sites.filter(site_filter)
+            sites = sites.filter(Exists(subquery))
 
         # Annotate with resource counts for each selected type
         from django.db.models import Count
