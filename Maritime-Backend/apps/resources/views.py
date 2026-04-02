@@ -705,10 +705,14 @@ class CommonSitesViewSet(GeoViewSet):
         resources = self.request.query_params.get('type')
         min_year = self.request.query_params.get('min_year')
         max_year = self.request.query_params.get('max_year')
+        mode = self.request.query_params.get('mode', 'and')  # 'and' or 'or'
 
         min_year = int(min_year) if min_year else None
         max_year = int(max_year) if max_year else None
         is_full_range = min_year == -2450 and max_year == 50
+
+        logger.info("CommonSites: type=%s, min_year=%s, max_year=%s, mode=%s, is_full_range=%s",
+                     resources, min_year, max_year, mode, is_full_range)
 
         if not resources:
             return models.Site.objects.none()
@@ -717,25 +721,40 @@ class CommonSitesViewSet(GeoViewSet):
         selected_models = [self.RESOURCE_MAPPING[r] for r in resource_list if r in self.RESOURCE_MAPPING]
         
         if not selected_models:
+            logger.warning("CommonSites: no valid resource types found in '%s'", resources)
             return models.Site.objects.none()
+
+        logger.info("CommonSites: selected models = %s", [m.__name__ for m in selected_models])
 
         # Start with all sites
         sites = models.Site.objects.all()
-        
-        # Apply AND filter: site must have ALL selected resource types (with optional date filtering)
-        for model in selected_models:
-            field_name = self.FIELD_MAPPING.get(model.__name__)
-            if not field_name:
-                continue
 
-            # Build subquery with date filter
-            subquery = model.objects.filter(site=OuterRef('pk'))
-            if not is_full_range and (min_year is not None or max_year is not None):
-                date_filter = self._build_date_filter(model, min_year, max_year)
-                if date_filter:
-                    subquery = subquery.filter(date_filter)
-
-            sites = sites.filter(Exists(subquery))
+        if mode == 'or':
+            # OR mode: site must have ANY of the selected resource types
+            site_filter = Q()
+            for model in selected_models:
+                field_name = self.FIELD_MAPPING.get(model.__name__)
+                if not field_name:
+                    continue
+                subquery = model.objects.filter(site=OuterRef('pk'))
+                if not is_full_range and (min_year is not None or max_year is not None):
+                    date_filter = self._build_date_filter(model, min_year, max_year)
+                    if date_filter:
+                        subquery = subquery.filter(date_filter)
+                site_filter |= Exists(subquery)
+            sites = sites.filter(site_filter)
+        else:
+            # AND mode (default): site must have ALL selected resource types
+            for model in selected_models:
+                field_name = self.FIELD_MAPPING.get(model.__name__)
+                if not field_name:
+                    continue
+                subquery = model.objects.filter(site=OuterRef('pk'))
+                if not is_full_range and (min_year is not None or max_year is not None):
+                    date_filter = self._build_date_filter(model, min_year, max_year)
+                    if date_filter:
+                        subquery = subquery.filter(date_filter)
+                sites = sites.filter(Exists(subquery))
 
         # Annotate with resource counts for each selected type
         from django.db.models import Count
@@ -744,7 +763,9 @@ class CommonSitesViewSet(GeoViewSet):
             if field_name:
                 sites = sites.annotate(**{f'{field_name}_count': Count(field_name, distinct=True)})
 
-        return sites.distinct()
+        result = sites.distinct()
+        logger.info("CommonSites: query returned %d sites (mode=%s)", result.count(), mode)
+        return result
     
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates']
