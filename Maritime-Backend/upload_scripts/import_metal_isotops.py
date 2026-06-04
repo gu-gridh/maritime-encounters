@@ -126,19 +126,25 @@ def import_metal_analyses(df):
         if not site_name and adm2:
             site_name = f"{adm2.name}, {adm2.ADM1.name}"
 
-        site_obj, _ = Site.objects.update_or_create(
-            name=site_name,
-            coordinates=point,
-            defaults={
-                'ADM0': adm0,
-                'ADM1': adm1,
-                'ADM2': adm2,
-                'ADM3': adm3,
-                'ADM4': adm4,
-                'Province': province,
-                'Parish': parish,
-            }
-        )
+        site_defaults = {
+            'ADM0': adm0,
+            'ADM1': adm1,
+            'ADM2': adm2,
+            'ADM3': adm3,
+            'ADM4': adm4,
+            'Province': province,
+            'Parish': parish,
+        }
+        try:
+            site_obj, _ = Site.objects.update_or_create(
+                name=site_name,
+                coordinates=point,
+                defaults=site_defaults,
+            )
+        except Site.MultipleObjectsReturned:
+            site_qs = Site.objects.filter(name=site_name, coordinates=point)
+            site_qs.update(**site_defaults)
+            site_obj = site_qs.first()
 
         # --- Accession / museum number ---
         # Use Sample/Analytical No. as the primary lookup key; museum number as supplementary
