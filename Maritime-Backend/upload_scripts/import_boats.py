@@ -168,14 +168,31 @@ def get_site(row, point):
 	adm4, adm3, adm2, adm1, country, province, parish = resolve_admin_units(point)
 
 	if site_name:
-		site_obj, _ = Site.objects.get_or_create(name=site_name)
+		site_candidates = Site.objects.filter(name=site_name)
+		if point:
+			site_obj = site_candidates.filter(coordinates=point).first()
+			if site_obj is None:
+				site_obj = (
+					site_candidates.filter(ADM0=country, ADM1=adm1, ADM2=adm2, ADM3=adm3, ADM4=adm4, Province=province, Parish=parish)
+					.first()
+					or site_candidates.filter(coordinates__isnull=False).first()
+					or site_candidates.first()
+			)
+		else:
+			site_obj = site_candidates.first()
+		if site_obj is None:
+			site_obj = Site.objects.create(name=site_name)
 	elif point:
-		site_obj, _ = Site.objects.get_or_create(
-			coordinates=point,
-			defaults={"name": f"Boat site ({point.y:.6f}, {point.x:.6f})"},
-		)
+		site_obj = Site.objects.filter(coordinates=point).first()
+		if site_obj is None:
+			site_obj = Site.objects.create(
+				coordinates=point,
+				name=f"Boat site ({point.y:.6f}, {point.x:.6f})",
+			)
 	else:
-		site_obj, _ = Site.objects.get_or_create(name="Unknown boat site")
+		site_obj = Site.objects.filter(name="Unknown boat site").first()
+		if site_obj is None:
+			site_obj = Site.objects.create(name="Unknown boat site")
 
 	# Keep geography and coordinates in sync when they are available.
 	changed = False
@@ -381,7 +398,14 @@ def import_boats(data, dry_run=False):
 
 def main():
 	parser = argparse.ArgumentParser(description="Import boats from XLSX into Boat model")
-	parser.add_argument("--files", nargs="*", type=str, help="One or more .xlsx files")
+	parser.add_argument(
+		"--file",
+		"--files",
+		dest="files",
+		nargs="*",
+		type=str,
+		help="One or more .xlsx files",
+	)
 	parser.add_argument("--dry-run", action="store_true", help="Parse and validate rows without saving")
 	args = parser.parse_args()
 
