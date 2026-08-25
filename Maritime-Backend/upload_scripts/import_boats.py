@@ -234,17 +234,23 @@ def get_period(row):
 	phase_obj = None
 	phase_text = value_or_none(row.get("Phase"))
 	if phase_text:
-		phase_obj, _ = Phase.objects.get_or_create(text=phase_text)
+		# Handle historical duplicates gracefully by reusing the first match.
+		phase_obj = Phase.objects.filter(text=phase_text).order_by("id").first()
+		if phase_obj is None:
+			phase_obj = Phase.objects.create(text=phase_text)
 
 	start_date = as_int_or_none(row.get("Period Start Date"))
 	end_date = as_int_or_none(row.get("Period End Date"))
 
-	period_obj, _ = Period.objects.get_or_create(
-		name=period_name,
-		phase=phase_obj,
-		start_date=start_date,
-		end_date=end_date,
-	)
+	period_filter = {
+		"name": period_name,
+		"phase": phase_obj,
+		"start_date": start_date,
+		"end_date": end_date,
+	}
+	period_obj = Period.objects.filter(**period_filter).order_by("id").first()
+	if period_obj is None:
+		period_obj = Period.objects.create(**period_filter)
 	return period_obj
 
 
