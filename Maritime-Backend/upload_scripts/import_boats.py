@@ -1,5 +1,6 @@
 import argparse
 import os
+import re
 import sys
 
 import django
@@ -54,7 +55,7 @@ def value_limited(value, max_len):
 		return None
 	if len(text) <= max_len:
 		return text
-	return text[: max_len - 1].rstrip()
+	return text[:max_len].rstrip()
 
 
 def as_int_or_none(value):
@@ -80,18 +81,88 @@ def as_bool_or_none(value):
 	return None
 
 
-def split_values(value):
+def as_presence_or_none(value):
+	"""Boolean for columns the spreadsheet fills with counts or prose.
+
+	"Hewn-out Ridges" holds "Yes", a count ("2", "5") or a full description; a
+	strict boolean parse silently discarded everything but "Yes"/"1".
+	"""
+	parsed = as_bool_or_none(value)
+	if parsed is not None:
+		return parsed
+
+	text = value_or_none(value)
+	if not text:
+		return None
+
+	number = as_int_or_none(text)
+	if number is not None:
+		return number > 0
+	# Any descriptive content is a record of the feature being present.
+	return True
+
+
+def split_values(value, delimiters=(";",)):
+	"""Split a multi-valued cell.
+
+	Only ";" is a real delimiter in the source spreadsheet. Commas appear inside
+	free-text descriptions ("Harpix (80% ox tallow, 20% linseed oil)") and must
+	not be split on, or the prose is shredded into meaningless records.
+	Pass extra delimiters explicitly for the few columns that need them.
+	"""
 	text = value_or_none(value)
 	if not text:
 		return []
 
 	parts = [text]
-	for delimiter in [";", ",", "|"]:
+	for delimiter in delimiters:
 		new_parts = []
 		for part in parts:
 			new_parts.extend(part.split(delimiter))
 		parts = new_parts
 	return [part.strip() for part in parts if part and part.strip()]
+
+
+# Materials actually attested in the boat-building dataset. A ";"-separated
+# segment is only treated as a material when it looks like one; everything else
+# is free-text and is stored on the component description instead.
+MATERIAL_VOCABULARY = {
+	"alder", "ash", "aspen", "bark", "bast", "beech", "birch", "betula", "clay",
+	"cley", "elm", "harpix", "hazel", "hazle", "leather", "lime", "lind",
+	"linden", "moss", "oak", "pine", "pinus", "pitch", "quercus", "resin",
+	"rope", "sp", "spruce", "tallow", "tar", "willow", "withies", "withy",
+	"wool", "yew",
+}
+
+
+def looks_like_material(segment):
+	"""True when a segment reads as a material name rather than a description."""
+	# A trailing or embedded sentence break marks prose, not a species name.
+	if segment.rstrip().endswith(".") or re.search(r"[.;:]\s*\S", segment):
+		return False
+
+	stripped = re.sub(r"\([^)]*\)", " ", segment)
+	stripped = re.sub(r"[^A-Za-z\u00C0-\u00FF ]", " ", stripped)
+	words = [word for word in stripped.lower().split() if word]
+	if not words or len(words) > 4:
+		return False
+	return any(word in MATERIAL_VOCABULARY for word in words)
+
+
+def split_material_cell(value):
+	"""Return (material names, description text) for a "* Material" column.
+
+	The spreadsheet packs both into one cell, e.g.
+	"Linden; Slightly curved cross section, c. 15.33 m long; Scarf joint 40mm wide".
+	"""
+	materials = []
+	descriptions = []
+	for segment in split_values(value):
+		if looks_like_material(segment):
+			materials.append(segment)
+		else:
+			descriptions.append(segment)
+	return materials, "; ".join(descriptions) or None
 
 
 def normalize_vessel_type(raw_value):
@@ -270,7 +341,8 @@ def get_date_range(row):
 
 def get_carbon_dates(row):
 	date_text = value_or_none(row.get("14C Date"))
-	labs = split_values(row.get("14C Lab"))
+	# Lab IDs are the one place a comma is a genuine separator ("MAMS-16588, MAMS-16589").
+	labs = split_values(row.get("14C Lab"), delimiters=(";", ","))
 
 	if not date_text and not labs:
 		return []
@@ -288,22 +360,34 @@ def get_carbon_dates(row):
 	return dates
 
 
-def get_or_create_component(part_type, material_value, row):
-	material_names = split_values(material_value)
-	if not material_names:
+def build_component(part_type, material_value, row):
+	"""Create the component for one boat.
+
+	Components are always created fresh per boat: every non-hull component has
+	the same all-null column values, so get_or_create() would hand the same
+	single row to every boat and each import would overwrite the previous
+	boat's materials.
+	"""
+	material_names, material_description = split_material_cell(material_value)
+	if not material_names and not material_description:
 		return None
 
-	component, _ = BoatComponent.objects.get_or_create(
+	is_hull = part_type == "hull"
+	description_parts = [value_or_none(row.get("Hull Finish"))] if is_hull else []
+	description_parts.append(material_description)
+	description = "; ".join(part for part in description_parts if part) or None
+
+	component = BoatComponent.objects.create(
 		part_type=part_type,
-		description=value_or_none(row.get("Hull Finish")) if part_type == "hull" else None,
-		length_est=value_or_none(row.get("Hull Length Est")) if part_type == "hull" else None,
-		width_est=value_or_none(row.get("Hull Width Est")) if part_type == "hull" else None,
-		height_est=value_or_none(row.get("Hull Height Est")) if part_type == "hull" else None,
-		length_meas=value_or_none(row.get("Hull Length Actual")) if part_type == "hull" else None,
-		width_meas=value_or_none(row.get("Hull Width Actual")) if part_type == "hull" else None,
-		height_meas=value_or_none(row.get("Hull Height Actual")) if part_type == "hull" else None,
-		integral_bool=as_bool_or_none(row.get("Integral Cleat Bool")) if part_type == "hull" else None,
-		integral_dist=value_or_none(row.get("Integral Cleats Distance")) if part_type == "hull" else None,
+		description=description,
+		length_est=value_or_none(row.get("Hull Length Est")) if is_hull else None,
+		width_est=value_or_none(row.get("Hull Width Est")) if is_hull else None,
+		height_est=value_or_none(row.get("Hull Height Est")) if is_hull else None,
+		length_meas=value_or_none(row.get("Hull Length Actual")) if is_hull else None,
+		width_meas=value_or_none(row.get("Hull Width Actual")) if is_hull else None,
+		height_meas=value_or_none(row.get("Hull Height Actual")) if is_hull else None,
+		integral_bool=as_bool_or_none(row.get("Integral Cleat Bool")) if is_hull else None,
+		integral_dist=value_or_none(row.get("Integral Cleats Distance")) if is_hull else None,
 	)
 
 	materials = []
@@ -316,19 +400,55 @@ def get_or_create_component(part_type, material_value, row):
 	return component
 
 
+COMPONENT_MAP = {
+	"hull": "Hull Material",
+	"frames": "Frames or Ribs Material",
+	"thwarts": "Thwarts Material",
+	"bottom_side_strakes": "Bottom Side Strakes Material",
+	"outer_bottom_plank": "Outer Bottom Plank Material",
+	"keep_plank": "Keel Plank Material",
+	"caulking": "Caulking Material",
+}
+
+# Columns the spreadsheet carries that no model field can hold yet.
+UNMAPPED_COLUMNS = [
+	"Length of Longest Plank",
+	"Size of Trees",
+	"Integral Cleats Number",
+	"Plank Fastenings Material",
+]
+
+
+def report(data):
+	"""Print every judgement call the import makes, without touching the DB."""
+	print("\n== Material cells split into material vs. description ==")
+	for column in COMPONENT_MAP.values():
+		if column not in data.columns:
+			continue
+		for idx, value in data[column].items():
+			materials, description = split_material_cell(value)
+			if not description:
+				continue
+			print(f"[Row {idx}] {column}")
+			print(f"    material   : {materials}")
+			print(f"    description: {description}")
+
+	print("\n== Special features truncated to 256 characters ==")
+	if "Special Features" in data.columns:
+		for idx, value in data["Special Features"].items():
+			for feature in split_values(value):
+				if len(feature) > 256:
+					print(f"[Row {idx}] {len(feature)} chars: {feature[:80]}...")
+
+	print("\n== Columns present in the file but not imported ==")
+	for column in UNMAPPED_COLUMNS:
+		if column in data.columns:
+			print(f"    {column}: {int(data[column].notna().sum())} non-empty rows")
+
+
 def import_boats(data, dry_run=False):
 	created_count = 0
 	updated_count = 0
-
-	component_map = {
-		"hull": "Hull Material",
-		"frames": "Frames or Ribs Material",
-		"thwarts": "Thwarts Material",
-		"bottom_side_strakes": "Bottom Side Strakes Material",
-		"outer_bottom_plank": "Outer Bottom Plank Material",
-		"keep_plank": "Keel Plank Material",
-		"caulking": "Caulking Material",
-	}
 
 	for idx, row in data.iterrows():
 		with transaction.atomic():
@@ -358,7 +478,7 @@ def import_boats(data, dry_run=False):
 					"sealing_lath": value_limited(row.get("CleatHoles SewingHoles Size"), 256),
 					"rail_plough": value_limited(row.get("Rail Plough"), 256),
 					"tree_nails": value_limited(row.get("Tree Nails"), 256),
-					"hewn_out_ridges": as_bool_or_none(row.get("Hewn-out Ridges")),
+					"hewn_out_ridges": as_presence_or_none(row.get("Hewn-out Ridges")),
 					"tool_marks": value_limited(row.get("Tool Marks"), 256),
 					"potential_tools": value_limited(row.get("Potential Tools"), 256),
 					"fastening_method": value_limited(row.get("Fastening Method"), 256),
@@ -383,11 +503,20 @@ def import_boats(data, dry_run=False):
 			if features:
 				boat.special_features.set(features)
 
+			previous_component_ids = list(
+				BoatRelComponent.objects.filter(boat=boat).values_list("component_id", flat=True)
+			)
 			BoatRelComponent.objects.filter(boat=boat).delete()
-			for part_type, column in component_map.items():
-				component = get_or_create_component(part_type, row.get(column), row)
+			for part_type, column in COMPONENT_MAP.items():
+				component = build_component(part_type, row.get(column), row)
 				if component:
-					BoatRelComponent.objects.get_or_create(boat=boat, component=component)
+					BoatRelComponent.objects.create(boat=boat, component=component)
+
+			# Drop components the boat no longer references and nothing else uses.
+			if previous_component_ids:
+				BoatComponent.objects.filter(id__in=previous_component_ids).exclude(
+					id__in=BoatRelComponent.objects.values_list("component_id", flat=True)
+				).delete()
 
 			if dry_run:
 				transaction.set_rollback(True)
@@ -413,6 +542,11 @@ def main():
 		help="One or more .xlsx files",
 	)
 	parser.add_argument("--dry-run", action="store_true", help="Parse and validate rows without saving")
+	parser.add_argument(
+		"--report",
+		action="store_true",
+		help="Print how each cell is interpreted (no database access at all)",
+	)
 	args = parser.parse_args()
 
 	files = args.files or [DEFAULT_FILE]
@@ -425,6 +559,9 @@ def main():
 		for sheet in workbook.sheet_names:
 			print(f"Importing {os.path.basename(file)} :: {sheet}")
 			df = pd.read_excel(file, sheet_name=sheet).replace({np.nan: None})
+			if args.report:
+				report(df)
+				continue
 			created, updated = import_boats(df, dry_run=args.dry_run)
 			print(
 				f"Finished {sheet} | created={created}, updated={updated}, dry_run={args.dry_run}"
