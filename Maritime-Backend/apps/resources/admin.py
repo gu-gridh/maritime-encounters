@@ -69,7 +69,7 @@ class PhaseAdmin(admin.ModelAdmin):
 @admin.register(Period)
 class PeriodAdmin(admin.ModelAdmin):
     list_display = ['name', 'phase', 'start_date', 'end_date']
-    search_fields = ['name', 'phase', 'start_date', 'end_date']
+    search_fields = ['name', 'phase__text', 'start_date', 'end_date']
     list_filter = ['name', 'start_date', 'end_date']
     ordering = ['start_date', 'end_date', 'name']
     autocomplete_fields = ['phase']
@@ -426,7 +426,7 @@ class MuseumMetaAdmin(admin.ModelAdmin):
 @admin.register(MuseumCollection)
 class MuseumCollectionAdmin(admin.ModelAdmin):
     list_display = ['museum', 'collection']
-    search_fields = ['museum', 'collection']
+    search_fields = ['museum__museum', 'museum__museum_number', 'collection']
     list_filter = ['museum', 'collection']
 
 
@@ -539,7 +539,7 @@ class ContextFindsCategoriesAdmin(admin.ModelAdmin):
 @admin.register(ContextFindsSubcategories)
 class ContextFindsSubcategoriesAdmin(admin.ModelAdmin):
     list_display = ['category', 'text']
-    search_fields = ['category', 'text']
+    search_fields = ['category__text', 'text']
     list_filter = ['category', 'text']
     ordering = ['category', 'text']
 
