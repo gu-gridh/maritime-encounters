@@ -1,0 +1,51 @@
+/* Compact many-to-many pickers in the admin.
+   Several vocabularies (Boat features, Museum collections, Site types) hold
+   entries hundreds of characters long. Without these rules a single value can
+   push the form metres wide or bury the field under a wall of text. */
+
+/* --- Autocomplete (Select2) pickers ------------------------------------- */
+
+/* Keep the field itself a sane width instead of stretching to the form. */
+.select2-container--admin-autocomplete {
+    max-width: 60em;
+}
+
+/* Selected values: one line each, ellipsis when too long.
+   Select2 puts the full value in a title attribute, so hovering shows it. */
+.select2-container--admin-autocomplete .select2-selection--multiple .select2-selection__choice {
+    max-width: 34em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    vertical-align: top;
+}
+
+/* Dropdown results: wrap rather than clip, but cap the list height so the
+   page does not jump when a long entry matches. */
+.select2-container--admin-autocomplete .select2-results__option {
+    white-space: normal;
+    line-height: 1.35;
+}
+
+.select2-container--admin-autocomplete .select2-results > .select2-results__options {
+    max-height: 22em;
+}
+
+/* --- filter_horizontal pickers ------------------------------------------ */
+
+/* Give the two boxes room and let long options scroll instead of clipping. */
+.selector .selector-available select,
+.selector .selector-chosen select {
+    min-height: 14em;
+}
+
+.selector select option {
+    text-overflow: ellipsis;
+}
+
+/* --- Changelist many-to-many summary columns ---------------------------- */
+
+.column-feature_list,
+.column-material_list {
+    max-width: 28em;
+}

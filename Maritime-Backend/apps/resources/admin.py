@@ -6,6 +6,17 @@ import mapwidgets
 from django.db.models import Case, When, IntegerField, Q
 
 
+class CompactM2MMedia:
+    """Loads the stylesheet that keeps many-to-many pickers readable.
+
+    Several vocabularies contain very long entries, which otherwise stretch the
+    Select2 boxes across the form. Mixed into every admin that edits an M2M.
+    """
+
+    class Media:
+        css = {'all': ('maritime/css/m2m_admin.css',)}
+
+
 class SiteFilter(AutocompleteFilter):
     title = _('Site')
     field_name = 'site'
@@ -135,11 +146,12 @@ class SamplerAdmin(admin.ModelAdmin):
 
 
 @admin.register(ObjectDescription)
-class ObjectDescriptionAdmin(admin.ModelAdmin):
+class ObjectDescriptionAdmin(CompactM2MMedia, admin.ModelAdmin):
     list_display = ['subcategory']
     search_fields = ['category__text', 'subcategory__subcategory']
     list_filter = ['category', 'subcategory']
     ordering = ['category__text', 'subcategory__subcategory']
+    filter_horizontal = ['category']
 
 
 @admin.register(Cleat)
@@ -250,11 +262,20 @@ class ShapeAdmin(admin.ModelAdmin):
     ordering = ['text']
 
 @admin.register(BoatComponent)
-class BoatComponentAdmin(admin.ModelAdmin):
-    list_display = ['part_type']
+class BoatComponentAdmin(CompactM2MMedia, admin.ModelAdmin):
+    list_display = ['part_type', 'material_list']
     search_fields = ['part_type']
     list_filter = ['part_type'] 
     ordering = ['part_type']
+    filter_horizontal = ['material']
+
+    def get_queryset(self, request):
+        return super().get_queryset(request).prefetch_related('material')
+
+    def material_list(self, obj):
+        names = [m.common_name for m in obj.material.all() if m.common_name]
+        return ', '.join(names) if names else '-'
+    material_list.short_description = _('Material')
 
 class RelBoatComponent(admin.TabularInline):
     model = BoatRelComponent
@@ -271,13 +292,23 @@ class CalibratedDateAdmin(admin.ModelAdmin):
         return super().get_queryset(request).select_related('dating_method')
 
 @admin.register(Boat)
-class BoatsAdmin(admin.ModelAdmin):
-    list_display = ['site_name', 'vessel_name', 'vessel_type']
+class BoatsAdmin(CompactM2MMedia, admin.ModelAdmin):
+    list_display = ['site_name', 'vessel_name', 'vessel_type', 'feature_list']
     list_per_page = 50
 
     def get_queryset(self, request):
         qs = super().get_queryset(request)
-        return qs.select_related('site', 'period', 'location')
+        return qs.select_related(
+            'site', 'period', 'location'
+        ).prefetch_related('special_features')
+
+    def feature_list(self, obj):
+        names = [f.text for f in obj.special_features.all() if f.text]
+        if not names:
+            return '-'
+        text = ', '.join(names)
+        return text if len(text) <= 80 else text[:80] + '...'
+    feature_list.short_description = _('Special Features')
 
     def site_name(self, obj):
         return obj.site.name if obj.site else ''
@@ -287,23 +318,23 @@ class BoatsAdmin(admin.ModelAdmin):
     search_fields = ['site__name', 'vessel_name', 'vessel_type']
     list_filter = [SiteFilter, 'vessel_type']
     ordering = ['site']
-    autocomplete_fields = ['site', 'period', 'location']
-    filter_horizontal = ['carbon_date']
+    autocomplete_fields = ['site', 'period', 'location',
+                           'carbon_date', 'date_ranges', 'special_features']
     inlines = [
         RelBoatComponent
     ]
 
 @admin.register(LandingPoints)
-class LandingPointsAdmin(admin.ModelAdmin):
+class LandingPointsAdmin(CompactM2MMedia, admin.ModelAdmin):
     list_display = ['site']
     list_per_page = 50
     search_fields = ['site__name', 'period__name']
     list_filter = [SiteFilter]
-    autocomplete_fields = ['site']
+    autocomplete_fields = ['site', 'period', 'related_finds', 'active_dates']
     inlines = [
         RelPeriodActivityLandingPoints,
     ]
-    filter_horizontal = ['period', 'related_finds']
+    filter_horizontal = ['subproject']
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('site')
@@ -320,12 +351,13 @@ class NewSamplesAdmin(admin.ModelAdmin):
 
 
 @admin.register(Radiocarbon)
-class RadiocarbonAdmin(admin.ModelAdmin):
+class RadiocarbonAdmin(CompactM2MMedia, admin.ModelAdmin):
     list_display = ['site', 'period']
     list_per_page = 50
     search_fields = ['site__name', 'period__name', 'lab_id']
     list_filter = [SiteFilter, PeriodFilter]
-    autocomplete_fields = ['site', 'period', 'sample', 'material', 'species']
+    autocomplete_fields = ['site', 'period', 'sample',
+                           'material', 'species', 'site_type']
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('site', 'period', 'sample', 'material', 'species')
@@ -341,7 +373,7 @@ class LISourceAdmin(admin.ModelAdmin):
 
 
 @admin.register(MetalAnalysis)
-class MetalAnalysisAdmin(admin.ModelAdmin):
+class MetalAnalysisAdmin(CompactM2MMedia, admin.ModelAdmin):
     list_display = ['site', 'museum_entry', 'context']
     list_per_page = 50
     search_fields = ['site__name']
@@ -405,13 +437,14 @@ class ExteriorDescriptorAdmin(admin.ModelAdmin):
     ordering = ['text']
 
 @admin.register(LNHouses)
-class LNHousesAdmin(admin.ModelAdmin):
+class LNHousesAdmin(CompactM2MMedia, admin.ModelAdmin):
     list_display = ['site']
     list_per_page = 50
     search_fields = ['site__name', 'form__name', 'variant__name', 'orientation__text']
     list_filter = [SiteFilter, FormFilter, VariantFilter, OrientationFilter]
-    autocomplete_fields = ['site', 'form', 'variant', 'orientation']
-    filter_horizontal = ['period', 'dating', 'gable', 'exterior_construction']
+    autocomplete_fields = ['site', 'form', 'variant', 'orientation',
+                           'period', 'dating']
+    filter_horizontal = ['gable', 'exterior_construction']
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related('site', 'form', 'variant', 'orientation')
@@ -510,7 +543,7 @@ class ObjectMaterialsAdmin(admin.ModelAdmin):
 #     ordering = ['subcategory']
 
 @admin.register(ObjectCount)
-class ObjectCountAdmin(admin.ModelAdmin):
+class ObjectCountAdmin(CompactM2MMedia, admin.ModelAdmin):
     list_display = ['metal', 'object', 'material_list', 'count']
     list_per_page = 50
     search_fields = ['metal__entry_num__entry_number',
@@ -553,7 +586,7 @@ class RelObjectCountAdmin(admin.TabularInline):
 
 
 @admin.register(Metalwork)
-class MetalworkAdmin(admin.ModelAdmin):
+class MetalworkAdmin(CompactM2MMedia, admin.ModelAdmin):
     list_display = ['entry_num', 'literature_num', 'accession_num',
                     'location', 'main_context', 'find_context', 'context_detail', 'site']
     list_per_page = 50
@@ -564,9 +597,12 @@ class MetalworkAdmin(admin.ModelAdmin):
     inlines = [
         RelObjectCountAdmin
     ]
-    filter_horizontal = ['context_keywords', 'period', 'context_keywords',
-                         'certain_context_descriptors', 'uncertain_context_descriptors', 'museum', 'collection']
-    autocomplete_fields = ['entry_num', 'literature_num', 'accession_num', 'location', 'main_context', 'find_context', 'context_detail', 'site']
+    filter_horizontal = ['context_keywords', 'museum']
+    autocomplete_fields = ['entry_num', 'literature_num', 'accession_num',
+                           'location', 'main_context', 'find_context',
+                           'context_detail', 'site', 'period', 'collection',
+                           'certain_context_descriptors',
+                           'uncertain_context_descriptors']
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
@@ -603,16 +639,16 @@ class ObjectIdsAdmin(admin.ModelAdmin):
 
 
 @admin.register(IndividualObjects)
-class IndividualObjectsAdmin(admin.ModelAdmin):
+class IndividualObjectsAdmin(CompactM2MMedia, admin.ModelAdmin):
     list_display = ['site', 'accession_number']
     list_per_page = 50
     search_fields = ['site__name', 'id_national_database__art_id',
                      'form__name', 'variant__name', 'period__name', 'start_date', 'end_date']
     list_filter = [SiteFilter]
     ordering = ['site']
-    filter_horizontal = ['material', 'period']
-    autocomplete_fields = ['site', 'accession_number',
-                           'object_type', 'form', 'variant', 'museum', 'context']
+    filter_horizontal = ['material']
+    autocomplete_fields = ['site', 'accession_number', 'object_type', 'form',
+                           'variant', 'museum', 'context', 'period']
 
     def get_queryset(self, request):
         return super().get_queryset(request).select_related(
