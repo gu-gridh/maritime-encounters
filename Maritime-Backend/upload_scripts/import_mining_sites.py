@@ -1,4 +1,5 @@
 import argparse
+import glob
 import os
 import sys
 
@@ -20,10 +21,11 @@ from apps.geography.models import ADM0, ADM1, ADM2, ADM3, ADM4, Parish, Province
 from apps.resources.models import Site, SiteType
 
 
-DEFAULT_FILE = os.path.join(
+# Bare filenames and globs on the command line are resolved against this
+# directory, so the mining tables can be named without a full path.
+RESOURCES_DIR = os.path.join(
 	os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))),
 	"resources",
-	"Bronze_Age_Mining_Sites_240826.xlsx",
 )
 
 # Every row in these tables is a mining site. The SiteType is created by the
@@ -264,17 +266,66 @@ def report(data):
 			print(f"    {column}: {int(data[column].notna().sum())} non-empty rows")
 
 
+def is_glob(pattern):
+	return any(char in pattern for char in "*?[")
+
+
+def resolve_files(patterns):
+	"""Expand the command-line arguments into a list of .xlsx paths.
+
+	Each argument may be a full path, a bare filename that lives in resources/,
+	or a glob ("*Mining_Sites*.xlsx"). Globs are expanded here as well as by the
+	shell so quoted patterns still work.
+	"""
+	files = []
+	missing = []
+
+	for pattern in patterns:
+		candidates = [pattern]
+		# A bare filename is looked for in resources/ too.
+		if not os.path.isabs(pattern) and os.path.dirname(pattern) == "":
+			candidates.append(os.path.join(RESOURCES_DIR, pattern))
+
+		matches = []
+		for candidate in candidates:
+			if is_glob(candidate):
+				matches.extend(glob.glob(candidate))
+			elif os.path.exists(candidate):
+				matches.append(candidate)
+
+		if not matches:
+			missing.append(pattern)
+			continue
+
+		for match in sorted(set(os.path.abspath(m) for m in matches)):
+			if match not in files:
+				files.append(match)
+
+	return files, missing
+
+
 def main():
 	parser = argparse.ArgumentParser(
-		description="Import mining sites from XLSX into the Site model"
+		description="Import mining sites from XLSX into the Site model",
+		epilog=(
+			"Files may be given as a path, as a bare filename found in "
+			"resources/, or as a glob."
+		),
+	)
+	parser.add_argument(
+		"files",
+		nargs="*",
+		metavar="FILE",
+		help="One or more .xlsx files (path, bare filename, or glob)",
 	)
 	parser.add_argument(
 		"--file",
 		"--files",
-		dest="files",
+		dest="file_flag",
 		nargs="*",
+		default=[],
 		type=str,
-		help="One or more .xlsx files",
+		help="Same as passing files positionally",
 	)
 	parser.add_argument(
 		"--site-type",
@@ -289,12 +340,22 @@ def main():
 	)
 	args = parser.parse_args()
 
-	files = args.files or [DEFAULT_FILE]
-	for file in files:
-		if not os.path.exists(file):
-			print(f"File not found: {file}")
-			continue
+	patterns = list(args.files) + list(args.file_flag)
+	if not patterns:
+		parser.error(
+			"no input file given. Pass a path, a bare filename from resources/, "
+			"or a glob - for example:\n"
+			"  import_mining_sites.py Bronze_Age_Mining_Sites_240826.xlsx\n"
+			"  import_mining_sites.py '*Mining_Sites*.xlsx'"
+		)
 
+	files, missing = resolve_files(patterns)
+	for pattern in missing:
+		print(f"No file matched: {pattern}")
+	if not files:
+		sys.exit(1)
+
+	for file in files:
 		workbook = pd.ExcelFile(file)
 		for sheet in workbook.sheet_names:
 			print(f"Importing {os.path.basename(file)} :: {sheet}")
