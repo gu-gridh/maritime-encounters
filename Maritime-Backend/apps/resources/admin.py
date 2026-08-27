@@ -220,8 +220,8 @@ class DatingMethodAdmin(admin.ModelAdmin):
 @admin.register(Site)
 class SiteAdmin(admin.ModelAdmin):
     list_display = ['name', 'ADM0', 'placename']
-    search_fields = ['name', 'placename', 'ADM0__name', 'ADM1__name']
-    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish']
+    search_fields = ['name', 'placename', 'ADM0__name', 'ADM1__name', 'site_type__text']
+    autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish', 'site_type']
     list_per_page = 50
     formfield_overrides = {
         models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}

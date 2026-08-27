@@ -417,6 +417,8 @@ class Site(abstract.AbstractBaseModel):
     # This feld can leave empty if the site name is not known
     name = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
         "sitename"), help_text=_("Free-form, non-indexed site name of the site."))
+    site_type = models.ManyToManyField('SiteType', blank=True, verbose_name=_(
+        "Site Type"), help_text=_("The type of the archaeological site."))
     # Location
     coordinates = models.PointField(null=True, blank=True, verbose_name=_(
         "Coordinates"), help_text=_("Mid-point coordinates of the site."))
