@@ -2,8 +2,8 @@
 Import the Iberlid lead isotope dataset (Spain ore iberlid_WIP_AG_180926.xlsx).
 
 For every row:
-  1. Look for the site in the database (by name, and by proximity when coordinates are valid).
-     If it is not found a new Site is created (ADM levels resolved from the coordinates).
+  1. Look for the site in the database by SiteName (and by proximity when coordinates are valid).
+     If it is not found the row is skipped: this script never creates sites.
   2. A MetalAnalysis is created/updated for the sample (keyed on sample number + site).
   3. The five lead isotope ratios are stored as MetalIsotop records.
 
@@ -28,7 +28,7 @@ os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maritime.settings')
 django.setup()
 
 from apps.resources.models import Site, MetalAnalysis, MetalIsotop, LeadIsotope, AccessionNum
-from import_metal_isotops import get_adm_from_point, to_float
+from import_metal_isotops import to_float
 
 LEAD_ISOTOPE_COLS = ['208Pb/206Pb', '207Pb/206Pb', '206Pb/204Pb', '207Pb/204Pb', '208Pb/204Pb']
 
@@ -65,45 +65,30 @@ def find_site(name, point):
     return candidates.filter(Q(coordinates__isnull=True)).first()
 
 
-def get_or_create_site(name, point, dry_run):
-    site = find_site(name, point)
-    if site:
-        return site, False
-    if dry_run:
-        return None, True
-    adm0, adm1, adm2, adm3, adm4, province, parish = get_adm_from_point(point)
-    site = Site.objects.create(
-        name=name, coordinates=point,
-        ADM0=adm0, ADM1=adm1, ADM2=adm2, ADM3=adm3, ADM4=adm4,
-        Province=province, Parish=parish,
-    )
-    return site, True
-
-
 def import_iberlid(df, dry_run=False):
-    stats = {'sites_created': 0, 'sites_existing': 0, 'created': 0, 'updated': 0, 'skipped': 0}
+    stats = {'matched': 0, 'created': 0, 'updated': 0, 'skipped_no_name': 0, 'skipped_site_not_in_db': 0}
     site_cache = {}
+    skipped_sites = set()
 
     for index, row in df.iterrows():
         sample = clean(row.get('Sample'))
-        site_name = clean(row.get('SiteName')) or clean(row.get('Outcrop'))
+        site_name = clean(row.get('SiteName'))
         if not site_name:
-            print(f"Row {index}: no site name, skipping")
-            stats['skipped'] += 1
+            print(f"Row {index}: no SiteName, skipping")
+            stats['skipped_no_name'] += 1
             continue
 
         point = make_point(row.get('latitude'), row.get('longitude'))
-        if point is None:
-            print(f"Row {index}: no valid coordinates for '{site_name}'")
 
         cache_key = (site_name.lower(), (round(point.x, 4), round(point.y, 4)) if point else None)
-        if cache_key in site_cache:
-            site, created = site_cache[cache_key], False
-        else:
-            site, created = get_or_create_site(site_name, point, dry_run)
-            site_cache[cache_key] = site
-            stats['sites_created' if created else 'sites_existing'] += 1
-            print(f"Row {index}: site '{site_name}' {'CREATED' if created else 'already in db'}")
+        if cache_key not in site_cache:
+            site_cache[cache_key] = find_site(site_name, point)
+        site = site_cache[cache_key]
+        if site is None:
+            stats['skipped_site_not_in_db'] += 1
+            skipped_sites.add(site_name)
+            continue
+        stats['matched'] += 1
 
         ratios = {col: to_float(row.get(col)) for col in LEAD_ISOTOPE_COLS}
         ratios = {k: v for k, v in ratios.items() if v is not None}
@@ -129,14 +114,15 @@ def import_iberlid(df, dry_run=False):
                 defaults={'lead_isotope_ratio': value},
             )
 
-    print(f"\nDone: {stats}")
+    print(f"\nSites not found in the database ({len(skipped_sites)}): {sorted(skipped_sites)}")
+    print(f"\nDone{' (dry run, nothing written)' if dry_run else ''}: {stats}")
 
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Import Iberlid lead isotope data from xlsx')
     parser.add_argument('--files', nargs='+', required=True, help='Path(s) to xlsx file(s)')
     parser.add_argument('--sheet', default=0, help='Sheet name or index (default: first sheet)')
-    parser.add_argument('--dry-run', action='store_true', help='Only report which sites exist, write nothing')
+    parser.add_argument('--dry-run', action='store_true', help='Only report which rows match an existing site, write nothing')
     args = parser.parse_args()
 
     for file in args.files:
