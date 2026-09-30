@@ -795,7 +795,11 @@ class MetalAnalysis(abstract.AbstractBaseModel):
     LIconsistency = models.ManyToManyField(LISource, blank=True, verbose_name=_("LI Consistent - Region"),help_text=_("Region or location the Lead Isotopes are consistent with wthin 1 analytical error."))
     LIoriginal = models.TextField(null=True, blank=True, verbose_name=_(
         "LI Consistency - Text"), help_text=_("The original text in 'LI consistent with - within 1 analytical error' field used for geocoding."))
-    
+    geology = models.CharField(max_length=256, null=True, blank=True, verbose_name=_(
+        "geology"), help_text=_("The geological zone the sample comes from."))
+    reference = models.TextField(null=True, blank=True, verbose_name=_(
+        "reference"), help_text=_("The reference(s) for the metal analysis."))
+
     
     def __str__(self) -> str:
         name_str = ""
