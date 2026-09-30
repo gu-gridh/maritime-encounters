@@ -685,13 +685,14 @@ class NewSamples(abstract.AbstractBaseModel):
         "note"), help_text=_("The note of the metal."))
 
     def __str__(self) -> str:
-        if self.metal and self.sampler:
-            name_str = f" {self.metal.name} - {self.sampler.name}"
+        parts = []
+        if self.note and self.note.startswith("Sample:"):
+            parts.append(self.note)
         if self.metal:
-            name_str = f" {self.metal.name}"
+            parts.append(self.metal.name or "")
         if self.sampler:
-            name_str = f" {self.sampler.name}"
-        return name_str
+            parts.append(self.sampler.name or "")
+        return " - ".join(p for p in parts if p).strip() or f"Sample {self.pk}"
 
     class Meta:
         verbose_name = _("New Sample")
