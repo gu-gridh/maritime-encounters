@@ -12,6 +12,7 @@ Usage:
 '''
 
 import os
+import re
 import sys
 import argparse
 import django
@@ -27,10 +28,13 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'maritime.settings')
 django.setup()
 
-from apps.resources.models import Site, MetalAnalysis, MetalIsotop, LeadIsotope, AccessionNum
+from apps.resources.models import Site, MetalAnalysis, MetalIsotop, LeadIsotope, NewSamples, Element
 from import_metal_isotops import to_float
 
 LEAD_ISOTOPE_COLS = ['208Pb/206Pb', '207Pb/206Pb', '206Pb/204Pb', '207Pb/204Pb', '208Pb/204Pb']
+
+# 'Analysed material' sometimes holds object codes (e.g. PA29130) instead of a material: not a metal
+CODE_RE = re.compile(r'[A-Za-z]{1,3}\d+')
 
 # A site with the same name closer than this is considered the same site
 MATCH_RADIUS_KM = 5
@@ -96,15 +100,29 @@ def import_iberlid(df, dry_run=False):
         if dry_run:
             continue
 
-        accession = None
-        if sample:
-            accession = AccessionNum.objects.filter(accession_number=sample).first() \
-                or AccessionNum.objects.create(accession_number=sample)
+        # Analysed material -> Sample > Metal (Element), first letter capitalised
+        material = clean(row.get('Analysed material'))
+        metal = None
+        if material and not CODE_RE.fullmatch(material):
+            material = material[0].upper() + material[1:]
+            metal = Element.objects.filter(name__iexact=material).first() \
+                or Element.objects.create(name=material)
 
+        # The sample number goes on the Sample record (NewSamples has no id field, so it is kept in note)
+        sample_obj = None
+        if sample or metal:
+            note = f"Sample: {sample}" if sample else None
+            sample_obj = NewSamples.objects.filter(site=site, note=note).first() \
+                or NewSamples.objects.create(site=site, note=note)
+            if sample_obj.metal_id != (metal.pk if metal else None):
+                sample_obj.metal = metal
+                sample_obj.save()
+
+        extra = {'geology': clean(row.get('geol.zone')), 'reference': clean(row.get('Reference'))}
         analysis, was_created = MetalAnalysis.objects.update_or_create(
-            museum_entry=accession, site=site,
-            defaults={},
-        ) if accession else (MetalAnalysis.objects.create(site=site), True)
+            sample=sample_obj, site=site,
+            defaults=extra,
+        ) if sample_obj else (MetalAnalysis.objects.create(site=site, **extra), True)
         stats['created' if was_created else 'updated'] += 1
 
         for name, value in ratios.items():
