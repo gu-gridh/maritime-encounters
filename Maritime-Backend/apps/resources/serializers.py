@@ -5,7 +5,6 @@ from . import models
 from maritime.utils import get_fields, DEFAULT_FIELDS
 from .models import *
 from apps.geography.models import *
-from .site_data_types import DATA_TYPE_NAMES
 import math
 
 # ADMs serializers: We need to exclude PolygonField from the serializer to make it faster
@@ -57,41 +56,30 @@ class SiteSerializer(DynamicDepthSerializer):
         fields = ['id']+get_fields(Site, exclude=DEFAULT_FIELDS)
 
 
-class DataTypesMixin(serializers_module.Serializer):
-    """Adds `data_types`: the names of the kinds of data a site has (Radiocarbon,
-    Findspot, ...), i.e. its site types minus the archaeological ones.
-
-    Reads Site.site_type, so the queryset should prefetch_related('site_type')."""
-    data_types = serializers_module.SerializerMethodField()
-
-    def get_data_types(self, obj):
-        return sorted(t.text for t in obj.site_type.all() if t.text in DATA_TYPE_NAMES)
-
-
-class SiteGeoSerializer(DataTypesMixin, GeoFeatureModelSerializer):
+class SiteGeoSerializer(GeoFeatureModelSerializer):
 
     class Meta:
         model = Site
         fields = ['id'] + \
-            get_fields(Site, exclude=DEFAULT_FIELDS+['coordinates']) + ['data_types']
+            get_fields(Site, exclude=DEFAULT_FIELDS+['coordinates'])
         geo_field = 'coordinates'
 
 
-class SiteCoordinatesSerializer(DataTypesMixin, GeoFeatureModelSerializer):
+class SiteCoordinatesSerializer(GeoFeatureModelSerializer):
     class Meta:
         model = Site
-        fields = ['id', 'name', 'data_types']
+        fields = ['id', 'name']
         geo_field = 'coordinates'
         # depth = 1
 
 
-class CommonSiteSerializer(DataTypesMixin, GeoFeatureModelSerializer):
+class CommonSiteSerializer(GeoFeatureModelSerializer):
     """Serializer for common sites endpoint - includes resource type counts."""
     resource_counts = serializers_module.SerializerMethodField()
 
     class Meta:
         model = Site
-        fields = ['id', 'name', 'resource_counts', 'data_types']
+        fields = ['id', 'name', 'resource_counts']
         geo_field = 'coordinates'
 
     def get_resource_counts(self, obj):
