@@ -138,7 +138,7 @@ class SiteViewSet(DynamicDepthViewSet):
     serializer_class = serializers.SiteGeoSerializer
     queryset = models.Site.objects.select_related(
         'ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish'
-    ).all()
+    ).prefetch_related('site_type').all()
 
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
@@ -150,7 +150,7 @@ class SiteViewSet(DynamicDepthViewSet):
 
 class SiteCoordinatesViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
-    queryset = models.Site.objects.all().order_by('id')
+    queryset = models.Site.objects.prefetch_related('site_type').order_by('id')
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
     bbox_filter_field = 'coordinates'
@@ -163,7 +163,7 @@ class SiteGeoViewSet(GeoViewSet):
     serializer_class = serializers.SiteGeoSerializer
     queryset = models.Site.objects.select_related(
         'ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish'
-    ).all()
+    ).prefetch_related('site_type').all()
 
     filterset_fields = get_fields(
         models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
@@ -352,7 +352,7 @@ class ResourcesFilteringViewSet(GeoViewSet):
     permission_classes = [IsAuthenticated]
 
     def get_queryset(self):
-        sites = models.Site.objects.all()
+        sites = models.Site.objects.prefetch_related('site_type')
 
         resource_type = self.request.query_params.get('type')
         min_year = self.request.query_params.get('min_year')
@@ -699,14 +699,17 @@ class CommonSitesViewSet(GeoViewSet):
 
         logger.info("CommonSites: selected models = %s", [m.__name__ for m in selected_models])
 
-        # Site must have ALL of the selected resource types (common sites)
-        sites = models.Site.objects.all()
+        # Return sites that have ANY of the selected resource types
+        # Frontend distinguishes common sites (2+ types) from single-resource sites
+        sites = models.Site.objects.prefetch_related('site_type')
+        site_filter = Q()
         for model in selected_models:
             field_name = self.FIELD_MAPPING.get(model.__name__)
             if not field_name:
                 continue
             subquery = model.objects.filter(site=OuterRef('pk'))
-            sites = sites.filter(Exists(subquery))
+            site_filter |= Exists(subquery)
+        sites = sites.filter(site_filter)
 
         # Annotate with resource counts for each selected type
         from django.db.models import Count
