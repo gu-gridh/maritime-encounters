@@ -8,7 +8,8 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework import status
 from . import models, serializers
-from django.db.models import Q, Exists, OuterRef
+from django.db.models import Q, Exists, OuterRef, ForeignKey
+from django_filters.rest_framework import FilterSet, NumberFilter
 from maritime.abstract.views import DynamicDepthViewSet, GeoViewSet
 from maritime.abstract.models import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
 
@@ -134,14 +135,25 @@ SITE_SELECT_RELATED = [
     'site__ADM3', 'site__ADM4', 'site__Province', 'site__Parish',
 ]
 
+class SiteFilterSet(FilterSet):
+    # Filter geography relations by id. The default ModelChoiceFilter loads every
+    # ADM row (with its polygon) to build a dropdown in the browsable API.
+    class Meta:
+        model = models.Site
+        fields = get_fields(
+            models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
+        filter_overrides = {
+            ForeignKey: {'filter_class': NumberFilter},
+        }
+
+
 class SiteViewSet(DynamicDepthViewSet):
     serializer_class = serializers.SiteGeoSerializer
-    queryset = models.Site.objects.select_related(
-        'ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish'
-    ).all()
+    # No select_related on the geography relations: the serializer only outputs
+    # their ids, and joining them would fetch the polygons for every site.
+    queryset = models.Site.objects.prefetch_related('site_type').order_by('id')
 
-    filterset_fields = get_fields(
-        models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
+    filterset_class = SiteFilterSet
     search_fields = ['placename']
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
@@ -150,9 +162,8 @@ class SiteViewSet(DynamicDepthViewSet):
 
 class SiteCoordinatesViewSet(GeoViewSet):
     serializer_class = serializers.SiteCoordinatesSerializer
-    queryset = models.Site.objects.all().order_by('id')
-    filterset_fields = get_fields(
-        models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
+    queryset = models.Site.objects.only('id', 'name', 'coordinates').order_by('id')
+    filterset_class = SiteFilterSet
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
@@ -161,12 +172,9 @@ class SiteCoordinatesViewSet(GeoViewSet):
 class SiteGeoViewSet(GeoViewSet):
 
     serializer_class = serializers.SiteGeoSerializer
-    queryset = models.Site.objects.select_related(
-        'ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish'
-    ).all()
+    queryset = models.Site.objects.prefetch_related('site_type').order_by('id')
 
-    filterset_fields = get_fields(
-        models.Site, exclude=DEFAULT_FIELDS + ['coordinates'])
+    filterset_class = SiteFilterSet
     search_fields = ['placename', 'name']
     bbox_filter_field = 'coordinates'
     bbox_filter_include_overlapping = True

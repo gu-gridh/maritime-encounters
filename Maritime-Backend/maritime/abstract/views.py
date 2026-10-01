@@ -29,6 +29,7 @@ class GenericPagination(pagination.LimitOffsetPagination):
     The pagination of choice is limit-offset pagination.
     """
     default_limit = 25
+    max_limit = 1000
 
 class GeoJsonPagePagination(GeoJsonPagination):
     page_size = 20
