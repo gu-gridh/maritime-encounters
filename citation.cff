@@ -1,0 +1,18 @@
+cff-version: 1.2.0
+message: >-
+  If you use this software, please cite it using the metadata from this file.  The SHFA archive should be cited separately.
+title:  >-
+  Maritime Encounters Backend
+abstract: A database coordination solution, an interface for data input, and a service for making data accessible through generated REST APIs for Maritime Encounters (RJ Program, M21-0018, PI Johan Ling). It has been created and is supported by Gothenburg Research Infrastructure in Digital Humanities (GRIDH).
+type: software
+version: 1.0
+url: https://github.com/gu-gridh/maritime-encounters
+authors: 
+  - family-names: Karimi
+    given-names: Aram
+  - family-names: Green
+    given-names: Ashely
+  - family-names: Tomasini
+    given-names: Matteo
+date-released: 2025
+key: MEBackend25
