@@ -1,9 +1,10 @@
 from .models import *
 from django.contrib.gis import admin
+from django.contrib.admin import SimpleListFilter
 from django.utils.translation import gettext_lazy as _
 from admin_auto_filters.filters import AutocompleteFilter
 import mapwidgets
-from django.db.models import Case, When, IntegerField, Q
+from django.db.models import Case, When, IntegerField, Q, Exists, OuterRef
 
 
 class CompactM2MMedia:
@@ -217,18 +218,110 @@ class DatingMethodAdmin(admin.ModelAdmin):
     list_filter = ['text']
     ordering = ['text']
 
+class CountryFilter(AutocompleteFilter):
+    title = _('Country (ADM0)')
+    field_name = 'ADM0'
+
+
+class RegionFilter(AutocompleteFilter):
+    title = _('Region (ADM1)')
+    field_name = 'ADM1'
+
+
+class ProvinceFilter(AutocompleteFilter):
+    title = _('Province')
+    field_name = 'Province'
+
+
+class ParishFilter(AutocompleteFilter):
+    title = _('Parish')
+    field_name = 'Parish'
+
+
+class SiteTypeFilter(AutocompleteFilter):
+    title = _('Site type')
+    field_name = 'site_type'
+
+
+class HasSiteTypeFilter(SimpleListFilter):
+    title = _('has site type')
+    parameter_name = 'has_site_type'
+
+    def lookups(self, request, model_admin):
+        return [('yes', _('Yes')), ('no', _('No'))]
+
+    def queryset(self, request, queryset):
+        # EXISTS rather than a join, so a site with several types is listed once.
+        tagged = Exists(Site.site_type.through.objects.filter(site_id=OuterRef('pk')))
+        if self.value() == 'yes':
+            return queryset.filter(tagged)
+        if self.value() == 'no':
+            return queryset.exclude(tagged)
+        return queryset
+
+
+class HasCoordinatesFilter(SimpleListFilter):
+    title = _('has coordinates')
+    parameter_name = 'has_coordinates'
+
+    def lookups(self, request, model_admin):
+        return [('yes', _('Yes')), ('no', _('No'))]
+
+    def queryset(self, request, queryset):
+        if self.value() == 'yes':
+            return queryset.filter(coordinates__isnull=False)
+        if self.value() == 'no':
+            return queryset.filter(coordinates__isnull=True)
+        return queryset
+
+
+class HasNameFilter(SimpleListFilter):
+    title = _('has site name')
+    parameter_name = 'has_name'
+
+    def lookups(self, request, model_admin):
+        return [('yes', _('Yes')), ('no', _('No'))]
+
+    def queryset(self, request, queryset):
+        blank = Q(name__isnull=True) | Q(name='')
+        if self.value() == 'yes':
+            return queryset.exclude(blank)
+        if self.value() == 'no':
+            return queryset.filter(blank)
+        return queryset
+
+
 @admin.register(Site)
 class SiteAdmin(admin.ModelAdmin):
-    list_display = ['name', 'ADM0', 'placename']
-    search_fields = ['name', 'placename', 'ADM0__name', 'ADM1__name', 'site_type__text']
+    list_display = ['name', 'placename', 'ADM0', 'ADM1', 'site_types']
+    list_filter = [
+        CountryFilter, RegionFilter, ProvinceFilter, ParishFilter, SiteTypeFilter,
+        HasSiteTypeFilter, HasCoordinatesFilter, HasNameFilter,
+    ]
+    search_fields = [
+        'name', 'placename', 'ADM0__name', 'ADM1__name', 'ADM2__name',
+        'Province__name', 'Parish__name', 'site_type__text',
+    ]
     autocomplete_fields = ['ADM0', 'ADM1', 'ADM2', 'ADM3', 'ADM4', 'Province', 'Parish', 'site_type']
     list_per_page = 50
     formfield_overrides = {
         models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}
     }
 
+    @admin.display(description=_('Site types'))
+    def site_types(self, obj):
+        return ', '.join(t.text for t in obj.site_type.all())
+
     def get_queryset(self, request):
-        qs = super().get_queryset(request)
+        # The list shows country and region names (a region's name includes its
+        # country); defer their polygons so the join does not pull every
+        # boundary geometry along with each site.
+        qs = (
+            super().get_queryset(request)
+            .select_related('ADM0', 'ADM1__ADM0')
+            .defer('ADM0__geometry', 'ADM1__geometry', 'ADM1__ADM0__geometry')
+            .prefetch_related('site_type')
+        )
         # Annotate: 1 if both name and placename are empty/null, else 0
         return qs.annotate(
             empty_name=Case(
