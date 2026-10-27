@@ -170,6 +170,16 @@ class SiteCoordinatesViewSet(GeoViewSet):
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
 
+def map_sites():
+    """Sites the map shows: located and tagged with at least one site type.
+    A site type is enough on its own - mining sites, for one, are tagged by
+    hand and have no rows in any resource table."""
+    has_type = Exists(models.Site.site_type.through.objects.filter(site_id=OuterRef('pk')))
+    # EXISTS rather than a join + DISTINCT: DISTINCT over the geometry column is
+    # slow and compares points loosely in PostGIS.
+    return models.Site.objects.filter(has_type, coordinates__isnull=False)
+
+
 class SiteMapPagination(GeoJsonPagePagination):
     # Features are only id, name, point and type names, so the map can pull
     # every site in a handful of requests.
@@ -178,7 +188,7 @@ class SiteMapPagination(GeoJsonPagePagination):
 
 
 class SiteMapViewSet(GeoViewSet):
-    """Every located site with its site types, for the map.
+    """Every site the map shows (see map_sites) with its site types.
 
     The map fetches this once and filters by site type on the client, so it
     never has to search the resource tables. `site_type` (comma-separated
@@ -194,12 +204,9 @@ class SiteMapViewSet(GeoViewSet):
     filterset_fields = []
 
     def get_queryset(self):
-        # EXISTS rather than a join + DISTINCT: DISTINCT over the geometry
-        # column is slow and compares points loosely in PostGIS.
         site_types = models.Site.site_type.through.objects.filter(site_id=OuterRef('pk'))
         sites = (
-            models.Site.objects
-            .filter(Exists(site_types), coordinates__isnull=False)
+            map_sites()
             .only('id', 'name', 'coordinates')
             .prefetch_related(Prefetch('site_type', queryset=models.SiteType.objects.only('id', 'text')))
             .order_by('id')
@@ -216,8 +223,8 @@ class SiteMapViewSet(GeoViewSet):
 
 
 class SiteTypeCountsView(APIView):
-    """Site types that are on at least one located site, with how many sites
-    carry each. `is_data_type` marks the "which resources does it have" tags
+    """Site types that are on at least one site the map shows, with how many
+    of those sites carry each. `is_data_type` marks the "which resources does it have" tags
     (see site_data_types.py) apart from archaeological site types."""
     authentication_classes = [SessionAuthentication, TokenAuthentication]
     permission_classes = [IsAuthenticated]
@@ -225,7 +232,7 @@ class SiteTypeCountsView(APIView):
     def get(self, request):
         types = (
             models.SiteType.objects
-            .filter(site__coordinates__isnull=False)
+            .filter(site__in=map_sites())
             .annotate(count=Count('site', distinct=True))
             .order_by('-count', 'text')
             .values('id', 'text', 'count')
