@@ -73,6 +73,18 @@ class SiteCoordinatesSerializer(GeoFeatureModelSerializer):
         # depth = 1
 
 
+class SiteMapSerializer(GeoFeatureModelSerializer):
+    """Lightweight site feature for the map: the site type names are all the
+    frontend needs to filter and colour markers without querying resources."""
+    site_types = serializers_module.SlugRelatedField(
+        source='site_type', many=True, read_only=True, slug_field='text')
+
+    class Meta:
+        model = Site
+        fields = ['id', 'name', 'site_types']
+        geo_field = 'coordinates'
+
+
 class CommonSiteSerializer(GeoFeatureModelSerializer):
     """Serializer for common sites endpoint - includes resource type counts."""
     resource_counts = serializers_module.SerializerMethodField()

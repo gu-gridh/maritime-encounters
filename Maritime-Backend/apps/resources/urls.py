@@ -11,6 +11,7 @@ documentation = utils.build_app_api_documentation("resources", endpoint)
 router.register(rf'{endpoint}/site', views.SiteViewSet, basename='site')
 router.register(rf'{endpoint}/geojson/site', views.SiteGeoViewSet, basename='site as geojson')
 router.register(rf'{endpoint}/site_coordinates', views.SiteCoordinatesViewSet, basename='sites coordinates')
+router.register(rf'{endpoint}/map_sites', views.SiteMapViewSet, basename='sites with their site types for the map')
 router.register(rf'{endpoint}/metal_analysis', views.MetalAnalysisViewSet, basename='metal analsyis')
 router.register(rf'{endpoint}/metalwork', views.MetalworkViewSet, basename='metalwork')
 router.register(rf'{endpoint}/landing_points', views.LandingPointsViewSet, basename='landing points')
@@ -34,6 +35,7 @@ urlpatterns = [
     path('session-to-token/', views.SessionToTokenView.as_view(), name='session-to-token'),
     path('auth-bridge/', views.auth_bridge_view, name='auth-bridge'),
     path('csrf-token/', views.csrf_token_view, name='csrf-token'),
+    path(f'{endpoint}/site_types/', views.SiteTypeCountsView.as_view(), name='site-type-counts'),
     path('', include(router.urls)),
 
     # Automatically generated views

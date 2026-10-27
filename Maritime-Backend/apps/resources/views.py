@@ -8,9 +8,10 @@ from rest_framework.response import Response
 from rest_framework import viewsets
 from rest_framework import status
 from . import models, serializers
-from django.db.models import Q, Exists, OuterRef, ForeignKey
+from django.db.models import Q, Count, Exists, OuterRef, ForeignKey, Prefetch
 from django_filters.rest_framework import FilterSet, NumberFilter
-from maritime.abstract.views import DynamicDepthViewSet, GeoViewSet
+from maritime.abstract.views import DynamicDepthViewSet, GeoViewSet, GeoJsonPagePagination
+from .site_data_types import DATA_TYPE_NAMES
 from maritime.abstract.models import get_fields, DEFAULT_FIELDS, DEFAULT_EXCLUDE
 
 from rest_framework.response import Response
@@ -168,6 +169,69 @@ class SiteCoordinatesViewSet(GeoViewSet):
     bbox_filter_include_overlapping = True
     authentication_classes = [SessionAuthentication, TokenAuthentication]  
     permission_classes = [IsAuthenticated]  # Explicitly require authentication
+
+class SiteMapPagination(GeoJsonPagePagination):
+    # Features are only id, name, point and type names, so the map can pull
+    # every site in a handful of requests.
+    page_size = 5000
+    max_page_size = 10000
+
+
+class SiteMapViewSet(GeoViewSet):
+    """Every located site with its site types, for the map.
+
+    The map fetches this once and filters by site type on the client, so it
+    never has to search the resource tables. `site_type` (comma-separated
+    SiteType texts) narrows it server side; `site_type_mode=all` requires every
+    listed type instead of any of them.
+    """
+    serializer_class = serializers.SiteMapSerializer
+    pagination_class = SiteMapPagination
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+    bbox_filter_field = 'coordinates'
+    bbox_filter_include_overlapping = True
+    filterset_fields = []
+
+    def get_queryset(self):
+        # EXISTS rather than a join + DISTINCT: DISTINCT over the geometry
+        # column is slow and compares points loosely in PostGIS.
+        site_types = models.Site.site_type.through.objects.filter(site_id=OuterRef('pk'))
+        sites = (
+            models.Site.objects
+            .filter(Exists(site_types), coordinates__isnull=False)
+            .only('id', 'name', 'coordinates')
+            .prefetch_related(Prefetch('site_type', queryset=models.SiteType.objects.only('id', 'text')))
+            .order_by('id')
+        )
+
+        wanted = [t.strip() for t in self.request.query_params.get('site_type', '').split(',') if t.strip()]
+        if wanted:
+            if self.request.query_params.get('site_type_mode') == 'all':
+                for text in wanted:
+                    sites = sites.filter(Exists(site_types.filter(sitetype__text=text)))
+            else:
+                sites = sites.filter(Exists(site_types.filter(sitetype__text__in=wanted)))
+        return sites
+
+
+class SiteTypeCountsView(APIView):
+    """Site types that are on at least one located site, with how many sites
+    carry each. `is_data_type` marks the "which resources does it have" tags
+    (see site_data_types.py) apart from archaeological site types."""
+    authentication_classes = [SessionAuthentication, TokenAuthentication]
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request):
+        types = (
+            models.SiteType.objects
+            .filter(site__coordinates__isnull=False)
+            .annotate(count=Count('site', distinct=True))
+            .order_by('-count', 'text')
+            .values('id', 'text', 'count')
+        )
+        return Response([{**t, 'is_data_type': t['text'] in DATA_TYPE_NAMES} for t in types])
+
 
 class SiteGeoViewSet(GeoViewSet):
 
